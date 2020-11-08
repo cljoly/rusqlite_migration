@@ -16,7 +16,7 @@ limitations under the License.
 
 use std::result;
 
-use log::{debug, info, warn};
+use log::{debug, info, trace, warn};
 use rusqlite::Connection;
 use rusqlite::NO_PARAMS;
 
@@ -257,6 +257,7 @@ impl<'m> Migrations<'m> {
         debug_assert!(current_version <= target_version);
         debug_assert!(target_version <= self.ms.len());
 
+        trace!("start migration transaction");
         let tx = conn.transaction()?;
         for v in current_version..target_version {
             let m = &self.ms[v];
@@ -275,6 +276,8 @@ impl<'m> Migrations<'m> {
         }
         set_user_version(&tx, target_version)?;
         tx.commit()?;
+        trace!("commited migration transaction");
+
         return Ok(target_version - current_version - 1);
     }
 
@@ -349,6 +352,7 @@ fn user_version(conn: &Connection) -> Result<usize, rusqlite::Error> {
 
 // Set user version field from the SQLite db
 fn set_user_version(conn: &Connection, v: usize) -> Result<()> {
+    trace!("set user version to: {}", v);
     let v = v as u32;
     conn.pragma_update(None, "user_version", &v)
         .map_err(|e| Error::RusqliteError {
