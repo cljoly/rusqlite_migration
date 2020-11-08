@@ -1,7 +1,10 @@
+use env_logger;
 use rusqlite::{params, Connection};
 use rusqlite_migration::{Migrations, M};
 
 pub fn main() {
+    env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("trace")).init();
+
     let mut conn = Connection::open("./my_db.db3").unwrap();
     // Define migrations
     let migrations = Migrations::new(vec![

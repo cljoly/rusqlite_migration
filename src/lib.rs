@@ -16,6 +16,7 @@ limitations under the License.
 
 use std::result;
 
+use log::{debug, info, warn};
 use rusqlite::Connection;
 use rusqlite::NO_PARAMS;
 
@@ -62,9 +63,6 @@ mod tests {
     fn empty_migrations_test() {
         let _ = Migrations::new(vec![]);
     }
-    // TODO
-    // Error in the middle of  a migration (right version number + proper errro)
-    // Test function for SQL statements that panics & don’t panic
 
     #[test]
     fn user_version_convert_test() {
@@ -262,6 +260,7 @@ impl<'m> Migrations<'m> {
         let tx = conn.transaction()?;
         for v in current_version..target_version {
             let m = &self.ms[v];
+            debug!("Running: {}", m.up);
             let () = tx
                 .prepare(m.up)
                 .and_then(|mut stmt| {
@@ -290,14 +289,22 @@ impl<'m> Migrations<'m> {
     fn goto(&self, conn: &mut Connection, target_db_version: usize) -> Result<()> {
         let current_version = user_version(conn)?;
         if target_db_version == current_version {
+            info!("no migration to run, db already up to date");
             return Ok(());
         }
         if target_db_version > current_version {
+            info!(
+                "some migrations to run, target_db_version: {}, current_version: {}",
+                target_db_version, current_version
+            );
             return self
                 .goto_up(conn, current_version, target_db_version)
                 .map(|_| ());
         }
-        // db_version < current_version
+        warn!(
+            "db more recent than available migrations, target_db_version: {}, current_version: {}",
+            target_db_version, current_version
+        );
         return self.goto_down();
     }
 
@@ -315,8 +322,14 @@ impl<'m> Migrations<'m> {
     pub fn latest(&self, conn: &mut Connection) -> Result<()> {
         let v_max = self.max_schema_version();
         match v_max {
-            SchemaVersion::NoneSet => Ok(()),
-            SchemaVersion::Inside(_) => self.goto(conn, v_max.into()),
+            SchemaVersion::NoneSet => {
+                warn!("no migration defined");
+                Ok(())
+            }
+            SchemaVersion::Inside(_) => {
+                info!("some migrations defined, try to migrate");
+                self.goto(conn, v_max.into())
+            }
             SchemaVersion::Outside(_) => unreachable!(),
         }
     }
