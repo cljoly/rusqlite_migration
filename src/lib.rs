@@ -67,18 +67,45 @@ mod tests {
     // Test function for SQL statements that panics & don’t panic
 
     #[test]
+    fn user_version_convert_test() {
+        let mut conn = Connection::open_in_memory().unwrap();
+        let migrations = Migrations::new(vec![m_valid10()]);
+        assert_eq!(Ok(()), migrations.latest(&mut conn));
+        assert_eq!(Ok(1), user_version(&conn));
+        assert_eq!(
+            Ok(SchemaVersion::Inside(0)),
+            migrations.current_version(&conn)
+        );
+        assert_eq!(1usize, migrations.current_version(&conn).unwrap().into());
+    }
+
+    #[test]
+    fn user_version_migrate_test() {
+        let mut conn = Connection::open_in_memory().unwrap();
+        let migrations = Migrations::new(vec![m_valid10()]);
+
+        assert_eq!(Ok(0), user_version(&conn));
+
+        assert_eq!(Ok(()), migrations.latest(&mut conn));
+        assert_eq!(Ok(1), user_version(&conn));
+        assert_eq!(
+            Ok(SchemaVersion::Inside(0)),
+            migrations.current_version(&conn)
+        );
+
+        let migrations = Migrations::new(vec![m_valid10(), m_valid11()]);
+        assert_eq!(Ok(()), migrations.latest(&mut conn));
+        assert_eq!(Ok(2), user_version(&conn));
+        assert_eq!(
+            Ok(SchemaVersion::Inside(1)),
+            migrations.current_version(&conn)
+        );
+    }
+
+    #[test]
     fn user_version_start_0_test() {
         let conn = Connection::open_in_memory().unwrap();
-
-        {
-            let migrations = Migrations::new(vec![]);
-            assert_eq!(Ok(0), migrations.user_version(&conn))
-        }
-
-        {
-            let migrations = Migrations::new(vec![M::up("something valid")]);
-            assert_eq!(Ok(0), migrations.user_version(&conn))
-        }
+        assert_eq!(Ok(0), user_version(&conn))
     }
 
     #[test]
@@ -90,10 +117,12 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
     fn invalid_migration_multiple_statement_test() {
         let migrations = Migrations::new(vec![m_valid0(), m_invalid1()]);
-        migrations.validate().unwrap()
+        assert!(match dbg!(migrations.validate()) {
+            Err(Error::RusqliteError { query: _, err: _ }) => true,
+            _ => false,
+        })
     }
 
     #[test]
@@ -115,20 +144,32 @@ mod tests {
 #[allow(clippy::enum_variant_names)]
 #[non_exhaustive]
 pub enum Error {
-    /// Rusqlite error
-    RusqliteError(rusqlite::Error),
+    /// Rusqlite error, query may indicate the attempted SQL query
+    RusqliteError { query: String, err: rusqlite::Error },
     /// Error with the specified schema version
-    SchemaVersion(SchemaVersionError),
+    SpecifiedSchemaVersion(SchemaVersionError),
+}
+
+impl Error {
+    fn with_sql(e: rusqlite::Error, sql: &str) -> Error {
+        Error::RusqliteError {
+            query: String::from(sql),
+            err: e,
+        }
+    }
 }
 
 impl From<rusqlite::Error> for Error {
     fn from(e: rusqlite::Error) -> Error {
-        Error::RusqliteError(e)
+        Error::RusqliteError {
+            query: String::new(),
+            err: e,
+        }
     }
 }
 
 /// Errors related to schema versions
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 #[allow(clippy::enum_variant_names)]
 #[non_exhaustive]
 pub enum SchemaVersionError {
@@ -152,6 +193,28 @@ impl<'u> M<'u> {
     }
 }
 
+/// Schema version, in the context of Migrations
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum SchemaVersion {
+    /// No schema version set
+    NoneSet,
+    /// The current version in the database is outside any migration defined
+    Outside(usize),
+    /// The current version in the database is inside the range of defined
+    /// migrations
+    Inside(usize),
+}
+
+impl From<SchemaVersion> for usize {
+    /// Translate schema version to db version
+    fn from(schema_version: SchemaVersion) -> usize {
+        match schema_version {
+            SchemaVersion::NoneSet => 0,
+            SchemaVersion::Inside(v) | SchemaVersion::Outside(v) => v + 1,
+        }
+    }
+}
+
 /// Set of migrations
 #[derive(Debug, PartialEq, Clone)]
 pub struct Migrations<'m> {
@@ -169,79 +232,93 @@ impl<'m> Migrations<'m> {
         Self::new(Vec::from_iter(ms))
     }
 
-    // Read user version field from the SQLite db
-    fn user_version(&self, conn: &Connection) -> Result<usize, rusqlite::Error> {
-        conn.query_row("PRAGMA user_version", NO_PARAMS, |row| row.get(0))
-            .map(|v: i64| v as usize)
-    }
-
-    // Set user version field from the SQLite db
-    fn set_user_version(&self, conn: &Connection, v: usize) -> Result<()> {
-        let v = v as u32;
-        conn.pragma_update(None, "user_version", &v)?;
-        Ok(())
+    fn db_version_to_schema(&self, db_version: usize) -> SchemaVersion {
+        match db_version {
+            0 => SchemaVersion::NoneSet,
+            v if v > 0 && v <= self.ms.len() => SchemaVersion::Inside(v - 1),
+            v => SchemaVersion::Outside(v - 1),
+        }
     }
 
     /// Get current schema version
-    pub fn current_version(&self, conn: &Connection) -> Result<usize> {
-        self.user_version(conn).map_err(|e| e.into())
+    pub fn current_version(&self, conn: &Connection) -> Result<SchemaVersion> {
+        user_version(conn)
+            .map(|v| self.db_version_to_schema(v))
+            .map_err(|e| e.into())
     }
 
     /// Migrate upward methods. This is rolled back on error.
     /// On success, returns the number of update performed
+    /// All versions are db versions
     fn goto_up(
         &self,
         conn: &mut Connection,
         current_version: usize,
         target_version: usize,
     ) -> Result<usize> {
-        debug_assert!(current_version < target_version);
+        debug_assert!(current_version <= target_version);
         debug_assert!(target_version <= self.ms.len());
-        debug_assert!(0 < target_version);
 
-        let ms_to_apply = &self.ms[current_version..target_version];
         let tx = conn.transaction()?;
-        for v in ms_to_apply {
-            let mut stmt = tx.prepare(v.up)?;
-            let mut row = stmt.query(NO_PARAMS)?;
-            // XXX Forces execution of the statement. We can’t use execute, as
-            // this requires no row to be returned and some pragma do.
-            let _ = row.next();
+        for v in current_version..target_version {
+            let m = &self.ms[v];
+            let () = tx
+                .prepare(m.up)
+                .and_then(|mut stmt| {
+                    let mut row = stmt.query(NO_PARAMS)?;
+                    // XXX Forces execution of the statement. We can’t use
+                    // execute, as this requires no row to be returned and some
+                    // pragmas do.
+                    let _ = row.next();
+                    Ok(())
+                })
+                .map_err(|e| Error::with_sql(e, m.up))?;
         }
-        self.set_user_version(&tx, target_version)?;
+        set_user_version(&tx, target_version)?;
         tx.commit()?;
-        return Ok(ms_to_apply.len());
+        return Ok(target_version - current_version - 1);
     }
 
     /// Migrate downward methods (not implemented at the moment)
     fn goto_down(&self) -> Result<()> {
-        Err(Error::SchemaVersion(
+        Err(Error::SpecifiedSchemaVersion(
             SchemaVersionError::MigrateToLowerNotSupported,
         ))
     }
 
-    /// Go to a given schema version
-    pub fn goto(&self, conn: &mut Connection, version: usize) -> Result<()> {
-        let current_version = self.current_version(conn)?;
-        if version == current_version {
+    /// Go to a given db version
+    fn goto(&self, conn: &mut Connection, target_db_version: usize) -> Result<()> {
+        let current_version = user_version(conn)?;
+        if target_db_version == current_version {
             return Ok(());
         }
-        if version > current_version {
-            return self.goto_up(conn, current_version, version).map(|_| ());
+        if target_db_version > current_version {
+            return self
+                .goto_up(conn, current_version, target_db_version)
+                .map(|_| ());
         }
-        // version < current_version
+        // db_version < current_version
         return self.goto_down();
     }
 
     /// Maximum version defined in the migration set
-    pub fn max_schema_version(&self) -> usize {
-        return self.ms.len();
+    fn max_schema_version(&self) -> SchemaVersion {
+        let len = self.ms.len();
+        if len == 0 {
+            SchemaVersion::NoneSet
+        } else {
+            SchemaVersion::Inside(len - 1)
+        }
     }
 
     /// Migrate the database to latest schema version.
     pub fn latest(&self, conn: &mut Connection) -> Result<()> {
-        let max_schema_version = self.max_schema_version();
-        self.goto(conn, max_schema_version)
+        let v_max = self.max_schema_version();
+        match v_max {
+            SchemaVersion::NoneSet => Ok(()),
+            SchemaVersion::Inside(_) => self.goto(conn, v_max.into()),
+            SchemaVersion::Outside(_) => unreachable!(),
+        }
     }
 
     /// Run migrations from first to last, one by one. Convenience method for testing.
@@ -249,4 +326,20 @@ impl<'m> Migrations<'m> {
         let mut conn = Connection::open_in_memory()?;
         self.latest(&mut conn)
     }
+}
+
+// Read user version field from the SQLite db
+fn user_version(conn: &Connection) -> Result<usize, rusqlite::Error> {
+    conn.query_row("PRAGMA user_version", NO_PARAMS, |row| row.get(0))
+        .map(|v: i64| v as usize)
+}
+
+// Set user version field from the SQLite db
+fn set_user_version(conn: &Connection, v: usize) -> Result<()> {
+    let v = v as u32;
+    conn.pragma_update(None, "user_version", &v)
+        .map_err(|e| Error::RusqliteError {
+            query: format!("PRAGMA user_version = {}; -- Approximate query", v),
+            err: e,
+        })
 }
