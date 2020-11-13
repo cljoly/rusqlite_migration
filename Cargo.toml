@@ -4,6 +4,11 @@ version = "0.1.0"
 authors = ["Clément Joly <l@131719.xyz>"]
 edition = "2018"
 license = "Apache-2.0"
+description = "Simple schema migration tool for rusqlite using user_version instead of an SQL table to maintain the current schema version."
+keywords = ["rusqlite", "sqlite", "user_version", "database", "migration"]
+categories = ["database"]
+readme = "README.md"
+homepage = "https://github.com/cljoly/rusqlite_migrate"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
