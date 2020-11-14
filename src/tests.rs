@@ -1,4 +1,3 @@
-
 use super::*;
 
 fn m_valid0() -> M<'static> {
