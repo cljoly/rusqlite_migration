@@ -18,7 +18,7 @@ log = "0.4"
 [dependencies.rusqlite]
 version = "0.24"
 default-features = false
-features = []
+features = ["bundled"]
 
 [dev-dependencies]
 env_logger = "0.8"
