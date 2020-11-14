@@ -304,7 +304,7 @@ impl<'m> Migrations<'m> {
         tx.commit()?;
         trace!("commited migration transaction");
 
-        return Ok(target_version - current_version - 1);
+        Ok(target_version - current_version - 1)
     }
 
     /// Migrate downward methods (not implemented at the moment)
@@ -334,7 +334,7 @@ impl<'m> Migrations<'m> {
             "db more recent than available migrations, target_db_version: {}, current_version: {}",
             target_db_version, current_version
         );
-        return self.goto_down();
+        self.goto_down()
     }
 
     /// Maximum version defined in the migration set
