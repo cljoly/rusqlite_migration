@@ -1,6 +1,6 @@
 on: [push]
 
-name: build
+name: Tarpaulin Code Coverage
 
 jobs:
   check:
