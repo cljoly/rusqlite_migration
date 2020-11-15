@@ -22,3 +22,5 @@ features = []
 
 [dev-dependencies]
 env_logger = "0.8"
+anyhow = "1"
+lazy_static = "1.4.0"

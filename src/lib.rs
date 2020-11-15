@@ -14,6 +14,7 @@ limitations under the License.
 
 */
 
+use std::fmt;
 use std::result;
 
 use log::{debug, info, trace, warn};
@@ -157,6 +158,22 @@ impl Error {
     }
 }
 
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // TODO Format the error with fmt instead of debug
+        write!(f, "rusqlite_migrate error: {:?}", self)
+    }
+}
+
+impl std::error::Error for Error {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            Error::RusqliteError { query: _, err } => Some(err),
+            Error::SpecifiedSchemaVersion(e) => Some(e),
+        }
+    }
+}
+
 impl From<rusqlite::Error> for Error {
     fn from(e: rusqlite::Error) -> Error {
         Error::RusqliteError {
@@ -175,6 +192,15 @@ pub enum SchemaVersionError {
     /// the database. This is currently not supported
     MigrateToLowerNotSupported,
 }
+
+impl fmt::Display for SchemaVersionError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Attempts to migrate to a version lower than the version currently in the database. This is currently not supported.")
+    }
+}
+
+impl std::error::Error for SchemaVersionError {}
+
 /// A typedef of the result returned by many methods.
 pub type Result<T, E = Error> = result::Result<T, E>;
 
