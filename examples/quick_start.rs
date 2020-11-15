@@ -17,7 +17,7 @@ mod tests {
 
 // Define migrations
 lazy_static! {
-    static ref MIGRATIONS: Migrations<'static> = {
+    static ref MIGRATIONS: Migrations<'static> =
         Migrations::new(vec![
             M::up(include_str!("friend_car.sql")),
             M::up("ALTER TABLE friend ADD COLUMN birthday TEXT;"),
@@ -25,15 +25,14 @@ lazy_static! {
             // migrations here, like so:
             // M::up("CREATE INDEX UX_friend_email ON friend(email);"),
             // M::up("CREATE INDEX UX_friend_name ON friend(name);"),
-        ])
-    };
+        ]);
 }
 
 pub fn init_db() -> Result<Connection> {
     let mut conn = Connection::open("./my_db.db3")?;
 
     // Update the database schema
-    (*MIGRATIONS).latest(&mut conn)?;
+    MIGRATIONS.latest(&mut conn)?;
 
     Ok(conn)
 }
