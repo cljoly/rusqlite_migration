@@ -4,7 +4,7 @@ name: Code Coverage
 
 jobs:
   lint:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
       - uses: actions-rs/toolchain@v1
