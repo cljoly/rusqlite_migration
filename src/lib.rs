@@ -21,7 +21,6 @@ use log::{debug, info, trace, warn};
 use rusqlite::Connection;
 use rusqlite::NO_PARAMS;
 
-#[cfg(test)]
 mod tests;
 
 /// Enum listing possible errors.
@@ -97,7 +96,19 @@ pub struct M<'u> {
 }
 
 impl<'u> M<'u> {
-    /// Create a schema update. The SQL command must end with a “;”
+    /// Create a schema update.
+    ///
+    /// # Please note
+    ///
+    /// * PRAGMA statements are discouraged here. They are often better applied outside of
+    /// migrations, because:
+    ///   * Some PRAGMA need to be executed for each connection (like `foreign_keys`).
+    ///   * Some PRAGMA are no-op when executed inside transactions (that will be the case for the
+    ///   SQL written in `up`) (like `journal_mode`).
+    ///   * Multiple SQL commands contaning `PRAGMA` are [known not to
+    ///   work](https://github.com/rusqlite/rusqlite/pull/794) with the `extra_check` feature of
+    ///   rusqlite.
+    /// * SQL commands should end with a “;”.
     pub fn up(sql: &'u str) -> Self {
         Self { up: sql }
     }
@@ -132,11 +143,12 @@ pub struct Migrations<'m> {
 }
 
 impl<'m> Migrations<'m> {
+    /// Create a set of migrations.
     pub fn new(ms: Vec<M<'m>>) -> Self {
         Self { ms }
     }
 
-    /// Performs allocations transparently
+    /// Performs allocations transparently.
     pub fn new_iter<I: IntoIterator<Item = M<'m>>>(ms: I) -> Self {
         use std::iter::FromIterator;
         Self::new(Vec::from_iter(ms))
@@ -174,16 +186,8 @@ impl<'m> Migrations<'m> {
         for v in current_version..target_version {
             let m = &self.ms[v];
             debug!("Running: {}", m.up);
-            let () = tx
-                .prepare(m.up)
-                .and_then(|mut stmt| {
-                    let mut row = stmt.query(NO_PARAMS)?;
-                    // XXX Forces execution of the statement. We can’t use
-                    // execute, as this requires no row to be returned and some
-                    // pragmas do.
-                    let _ = row.next();
-                    Ok(())
-                })
+
+            tx.execute_batch(m.up)
                 .map_err(|e| Error::with_sql(e, m.up))?;
         }
         set_user_version(&tx, target_version)?;
@@ -233,7 +237,7 @@ impl<'m> Migrations<'m> {
         }
     }
 
-    /// Migrate the database to latest schema version.
+    /// Migrate the database to latest schema version. The migrations are applied atomically.
     pub fn latest(&self, conn: &mut Connection) -> Result<()> {
         let v_max = self.max_schema_version();
         match v_max {

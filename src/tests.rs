@@ -1,7 +1,7 @@
 use super::*;
 
 fn m_valid0() -> M<'static> {
-    M::up("PRAGMA journal_mode = WAL")
+    M::up("CREATE TABLE m1(a, b); CREATE TABLE m2(a, b, c);")
 }
 fn m_valid10() -> M<'static> {
     M::up("CREATE TABLE t1(a, b);")
