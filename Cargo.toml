@@ -16,7 +16,7 @@ homepage = "https://github.com/cljoly/rusqlite_migrate"
 log = "0.4"
 
 [dependencies.rusqlite]
-version = "0.24"
+version = ">=0.17"
 default-features = false
 features = []
 
