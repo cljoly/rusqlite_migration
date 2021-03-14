@@ -21,6 +21,7 @@ use log::{debug, info, trace, warn};
 use rusqlite::Connection;
 use rusqlite::NO_PARAMS;
 
+#[cfg(test)]
 mod tests;
 
 /// Enum listing possible errors.
