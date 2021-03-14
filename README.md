@@ -8,8 +8,6 @@
 
 Simple schema migration tool for [rusqlite](https://lib.rs/crates/rusqlite) using [user_version](https://sqlite.org/pragma.html#pragma_user_version) instead of an SQL table to maintain the current schema version.
 
-**2021-03-13: multiline migrations may quietly fail, due to [#2](https://github.com/cljoly/rusqlite_migrate/issues/2). This is being worked on.**
-
 ## Benefit
 
 ### Simplicity 
