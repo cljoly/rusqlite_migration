@@ -3,6 +3,8 @@ use rusqlite_migration::{Migrations, SchemaVersion, M};
 
 #[test]
 fn main_test() {
+    simple_logging::log_to_stderr(log::LevelFilter::Trace);
+
     let db_file = mktemp::Temp::new_file().unwrap();
     // Define a multiline migrations
     let mut ms = vec![M::up(
