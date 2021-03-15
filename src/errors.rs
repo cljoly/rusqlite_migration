@@ -14,6 +14,8 @@ pub enum Error {
     RusqliteError { query: String, err: rusqlite::Error },
     /// Error with the specified schema version
     SpecifiedSchemaVersion(SchemaVersionError),
+    /// Something wrong with migration definitions
+    MigrationDefinition(MigrationDefinitionError),
 }
 
 impl Error {
@@ -37,6 +39,7 @@ impl std::error::Error for Error {
         match self {
             Error::RusqliteError { query: _, err } => Some(err),
             Error::SpecifiedSchemaVersion(e) => Some(e),
+            Error::MigrationDefinition(e) => Some(e),
         }
     }
 }
@@ -56,14 +59,47 @@ impl From<rusqlite::Error> for Error {
 #[non_exhaustive]
 pub enum SchemaVersionError {
     /// Attempts to migrate to a version lower than the version currently in
-    /// the database. This is currently not supported
+    /// the database. This was historically not supported
+    #[deprecated]
+    #[doc(hidden)]
     MigrateToLowerNotSupported,
+    /// Attempt to migrate to a version out of range for the supplied migrations
+    TargetVersionOutOfRange { specified: usize, highest: usize },
 }
 
 impl fmt::Display for SchemaVersionError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Attempts to migrate to a version lower than the version currently in the database. This is currently not supported.")
+        match self {
+            #[allow(deprecated)]
+            SchemaVersionError::MigrateToLowerNotSupported => {
+                write!(f, "Attempt to migrate to a version lower than the version currently in the database. This was historically not supported.")
+            }
+            SchemaVersionError::TargetVersionOutOfRange { specified, highest } => {
+                write!(f, "Attempt to migrate to version {}, which is higher than the highest version currently supported, {}.", specified, highest)
+            }
+        }
     }
 }
 
 impl std::error::Error for SchemaVersionError {}
+
+/// Errors related to schema versions
+#[derive(Debug, PartialEq, Clone, Copy)]
+#[allow(clippy::enum_variant_names)]
+#[non_exhaustive]
+pub enum MigrationDefinitionError {
+    /// Migration has no down version
+    DownNotDefined { to_version: usize },
+}
+
+impl fmt::Display for MigrationDefinitionError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            MigrationDefinitionError::DownNotDefined { to_version } => {
+                write!(f, "Migration to version {} cannot be reversed, downward direction is not defined.", to_version)
+            }
+        }
+    }
+}
+
+impl std::error::Error for MigrationDefinitionError {}
