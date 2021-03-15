@@ -1,5 +1,6 @@
 /target
 Cargo.lock
+.idea/
 
 # Output of some examples
 my_db.db3
