@@ -5,7 +5,6 @@ use rusqlite_migration::{Migrations, SchemaVersion, M};
 fn main_test() {
     simple_logging::log_to_stderr(log::LevelFilter::Trace);
 
-    let db_file = mktemp::Temp::new_file().unwrap();
     // Define a multiline migrations
     let ms = vec![
         // 0
@@ -24,7 +23,7 @@ fn main_test() {
     ];
 
     {
-        let mut conn = Connection::open(&db_file).unwrap();
+        let mut conn = Connection::open_in_memory().unwrap();
 
         let migrations = Migrations::new(ms.clone());
 
@@ -37,6 +36,11 @@ fn main_test() {
 
         conn.execute("INSERT INTO animals (name) VALUES (?1)", params!["Dog"])
             .unwrap();
+
+        assert_eq!(
+            Ok(SchemaVersion::Inside(0 /* this is off by one */)),
+            migrations.current_version(&conn)
+        );
 
         // go back
         migrations.to_version(&mut conn, 0).unwrap();
@@ -54,7 +58,7 @@ fn main_test() {
 
     // Multiple steps
     {
-        let mut conn = Connection::open(&db_file).unwrap();
+        let mut conn = Connection::open_in_memory().unwrap();
 
         let migrations = Migrations::new(ms.clone());
 
@@ -104,5 +108,50 @@ fn main_test() {
             params!["Mouse", 0],
         )
         .unwrap();
+    }
+}
+
+#[test]
+fn test_errors() {
+    simple_logging::log_to_stderr(log::LevelFilter::Trace);
+
+    // Define a multiline migrations
+    let ms = vec![
+        // 0
+        M::up("CREATE TABLE animals (id INTEGER, name TEXT);").down("DROP TABLE animals;"),
+        // 1
+        M::up("CREATE TABLE food (id INTEGER, name TEXT);"), // no down!!!
+        // 2
+        M::up("ALTER TABLE animals ADD COLUMN food_id INTEGER;")
+            .down("ALTER TABLE animals DROP COLUMN food_id;"),
+        // 3
+    ];
+
+    {
+        let mut conn = Connection::open_in_memory().unwrap();
+
+        let migrations = Migrations::new(ms.clone());
+
+        migrations.latest(&mut conn).unwrap();
+
+        conn.execute("INSERT INTO animals (name) VALUES (?1)", params!["Dog"])
+            .unwrap();
+
+        // go back
+        assert!(migrations.to_version(&mut conn, 0)
+            .is_err()); // oops
+
+        assert_eq!(
+            Ok(SchemaVersion::Inside(2 /* off by one */)),
+            migrations.current_version(&conn)
+        );
+
+        // one is fine
+        assert!(migrations.to_version(&mut conn, 2)
+            .is_ok());
+
+        // boom
+        assert!(migrations.to_version(&mut conn, 1)
+            .is_err()); // oops
     }
 }
