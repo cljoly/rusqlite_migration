@@ -123,7 +123,7 @@ impl<'m> Migrations<'m> {
         conn: &mut Connection,
         current_version: usize,
         target_version: usize,
-    ) -> Result<usize> {
+    ) -> Result<()> {
         debug_assert!(current_version <= target_version);
         debug_assert!(target_version <= self.ms.len());
 
@@ -140,7 +140,7 @@ impl<'m> Migrations<'m> {
         tx.commit()?;
         trace!("commited migration transaction");
 
-        Ok(target_version - current_version - 1)
+        Ok(())
     }
 
     /// Migrate downward. This is rolled back on error.
@@ -194,24 +194,26 @@ impl<'m> Migrations<'m> {
     /// Go to a given db version
     fn goto(&self, conn: &mut Connection, target_db_version: usize) -> Result<()> {
         let current_version = user_version(conn)?;
-        if target_db_version == current_version {
-            info!("no migration to run, db already up to date");
-            return Ok(());
-        }
-        if target_db_version > current_version {
-            info!(
+        let res = if target_db_version == current_version {
+            debug!("no migration to run, db already up to date");
+            return Ok(()); // return directly, so the migration message is not printed
+        } else if target_db_version > current_version {
+            debug!(
                 "some migrations to run, target_db_version: {}, current_version: {}",
                 target_db_version, current_version
             );
-            return self
-                .goto_up(conn, current_version, target_db_version)
-                .map(|_| ());
+            self.goto_up(conn, current_version, target_db_version)
+        } else {
+            debug!(
+                "rollback to older version requested, target_db_version: {}, current_version: {}",
+                target_db_version, current_version
+            );
+            self.goto_down(conn, current_version, target_db_version)
+        };
+        if res.is_ok() {
+            info!("Database migrated to version {}", target_db_version);
         }
-        debug!(
-            "rollback to older version requested, target_db_version: {}, current_version: {}",
-            target_db_version, current_version
-        );
-        self.goto_down(conn, current_version, target_db_version)
+        res
     }
 
     /// Maximum version defined in the migration set
@@ -233,7 +235,7 @@ impl<'m> Migrations<'m> {
                 Ok(())
             }
             SchemaVersion::Inside(_) => {
-                info!("some migrations defined, try to migrate");
+                debug!("some migrations defined, try to migrate");
                 self.goto(conn, v_max.into())
             }
             SchemaVersion::Outside(_) => unreachable!(),
