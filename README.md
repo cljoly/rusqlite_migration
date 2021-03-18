@@ -8,7 +8,7 @@
 
 Simple schema migration tool for [rusqlite](https://lib.rs/crates/rusqlite) using [user_version](https://sqlite.org/pragma.html#pragma_user_version) instead of an SQL table to maintain the current schema version.
 
-## Benefit
+## Benefits
 
 ### Simplicity 
 
