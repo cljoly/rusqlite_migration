@@ -6,7 +6,7 @@ fn main_test() {
     simple_logging::log_to_stderr(log::LevelFilter::Trace);
 
     let db_file = mktemp::Temp::new_file().unwrap();
-    // Define a multiline migrations
+    // Define a multiline migration
     let mut ms = vec![M::up(
         r#"
               CREATE TABLE friend (name TEXT PRIMARY KEY, email TEXT) WITHOUT ROWID;

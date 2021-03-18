@@ -89,14 +89,23 @@ impl std::error::Error for SchemaVersionError {}
 #[non_exhaustive]
 pub enum MigrationDefinitionError {
     /// Migration has no down version
-    DownNotDefined { to_version: usize },
+    DownNotDefined {
+        /// Index of the migration that caused the error
+        migration_index: usize,
+    },
 }
 
 impl fmt::Display for MigrationDefinitionError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            MigrationDefinitionError::DownNotDefined { to_version } => {
-                write!(f, "Migration to version {} cannot be reversed, downward direction is not defined.", to_version)
+            MigrationDefinitionError::DownNotDefined { migration_index } => {
+                write!(
+                    f,
+                    "Migration {} (version {} -> {}) cannot be reverted.",
+                    migration_index,
+                    migration_index,
+                    migration_index + 1
+                )
             }
         }
     }

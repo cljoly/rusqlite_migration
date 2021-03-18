@@ -23,6 +23,7 @@ mod errors;
 #[cfg(test)]
 mod tests;
 pub use errors::{Error, MigrationDefinitionError, Result, SchemaVersionError};
+use std::cmp::Ordering;
 
 /// One migration
 #[derive(Debug, PartialEq, Clone)]
@@ -163,13 +164,9 @@ impl<'m> Migrations<'m> {
             .take(current_version - target_version)
             .find(|(_, m)| m.down.is_none())
         {
-            warn!(
-                "Migration to version {} has no down variant: {:?}",
-                i + 1,
-                bad_m
-            );
+            warn!("Cannot revert: {:?}", bad_m);
             return Err(Error::MigrationDefinition(
-                MigrationDefinitionError::DownNotDefined { to_version: i + 1 },
+                MigrationDefinitionError::DownNotDefined { migration_index: i },
             ));
         }
 
@@ -194,22 +191,28 @@ impl<'m> Migrations<'m> {
     /// Go to a given db version
     fn goto(&self, conn: &mut Connection, target_db_version: usize) -> Result<()> {
         let current_version = user_version(conn)?;
-        let res = if target_db_version == current_version {
-            debug!("no migration to run, db already up to date");
-            return Ok(()); // return directly, so the migration message is not printed
-        } else if target_db_version > current_version {
-            debug!(
-                "some migrations to run, target_db_version: {}, current_version: {}",
-                target_db_version, current_version
-            );
-            self.goto_up(conn, current_version, target_db_version)
-        } else {
-            debug!(
-                "rollback to older version requested, target_db_version: {}, current_version: {}",
-                target_db_version, current_version
-            );
-            self.goto_down(conn, current_version, target_db_version)
+
+        let res = match target_db_version.cmp(&current_version) {
+            Ordering::Less => {
+                debug!(
+                    "rollback to older version requested, target_db_version: {}, current_version: {}",
+                    target_db_version, current_version
+                );
+                self.goto_down(conn, current_version, target_db_version)
+            }
+            Ordering::Equal => {
+                debug!("no migration to run, db already up to date");
+                return Ok(()); // return directly, so the migration message is not printed
+            }
+            Ordering::Greater => {
+                debug!(
+                    "some migrations to run, target_db_version: {}, current_version: {}",
+                    target_db_version, current_version
+                );
+                self.goto_up(conn, current_version, target_db_version)
+            }
         };
+
         if res.is_ok() {
             info!("Database migrated to version {}", target_db_version);
         }

@@ -1,11 +1,10 @@
 use rusqlite::{params, Connection};
-use rusqlite_migration::{Migrations, SchemaVersion, M};
+use rusqlite_migration::{MigrationDefinitionError, Migrations, SchemaVersion, M};
 
 #[test]
 fn main_test() {
     simple_logging::log_to_stderr(log::LevelFilter::Trace);
 
-    // Define a multiline migrations
     let ms = vec![
         // 0
         M::up("CREATE TABLE animals (id INTEGER, name TEXT);").down("DROP TABLE animals;"),
@@ -115,7 +114,6 @@ fn main_test() {
 fn test_errors() {
     simple_logging::log_to_stderr(log::LevelFilter::Trace);
 
-    // Define a multiline migrations
     let ms = vec![
         // 0
         M::up("CREATE TABLE animals (id INTEGER, name TEXT);").down("DROP TABLE animals;"),
@@ -138,8 +136,7 @@ fn test_errors() {
             .unwrap();
 
         // go back
-        assert!(migrations.to_version(&mut conn, 0)
-            .is_err()); // oops
+        assert!(migrations.to_version(&mut conn, 0).is_err()); // oops
 
         assert_eq!(
             Ok(SchemaVersion::Inside(2 /* off by one */)),
@@ -147,11 +144,14 @@ fn test_errors() {
         );
 
         // one is fine
-        assert!(migrations.to_version(&mut conn, 2)
-            .is_ok());
+        assert!(migrations.to_version(&mut conn, 2).is_ok());
 
         // boom
-        assert!(migrations.to_version(&mut conn, 1)
-            .is_err()); // oops
+        assert_eq!(
+            Err(rusqlite_migration::Error::MigrationDefinition(
+                MigrationDefinitionError::DownNotDefined { migration_index: 1 }
+            )),
+            migrations.to_version(&mut conn, 1)
+        );
     }
 }
