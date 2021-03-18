@@ -21,3 +21,8 @@ No need to add a table to be parsed, the `user_version` field is at a fixed offs
 ## Example
 
 Please see `examples/quick_start.rs`.
+
+## Acknowledgments
+
+I would like to thank all the contributors, as well as the author of the
+dependancies this crate uses.
