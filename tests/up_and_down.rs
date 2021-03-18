@@ -7,17 +7,19 @@ fn main_test() {
 
     let ms = vec![
         // 0
-        M::up("CREATE TABLE animals (id INTEGER, name TEXT);").down("DROP TABLE animals;"),
+        M::up("CREATE TABLE animals (id INTEGER PRIMARY KEY, name TEXT);")
+            .down("DROP TABLE animals;"),
         // 1
-        M::up("CREATE TABLE food (id INTEGER, name TEXT);").down("DROP TABLE food;"),
+        M::up("CREATE TABLE food (id INTEGER PRIMARY KEY, name TEXT);").down("DROP TABLE food;"),
         // 2
-        M::up("ALTER TABLE animals ADD COLUMN food_id INTEGER;")
-            .down("ALTER TABLE animals DROP COLUMN food_id;"),
+        M::up("CREATE TABLE animal_food (animal_id INTEGER, food_id INTEGER);")
+            .down("DROP TABLE animal_food;"),
         // 3
-        M::up("CREATE TABLE habitats (id INTEGER, name TEXT);").down("DROP TABLE habitats;"),
+        M::up("CREATE TABLE habitats (id INTEGER PRIMARY KEY, name TEXT);")
+            .down("DROP TABLE habitats;"),
         // 4
-        M::up("ALTER TABLE animals ADD COLUMN habitat_id INTEGER;")
-            .down("ALTER TABLE animals DROP COLUMN habitat_id;"),
+        M::up("CREATE TABLE animal_habitat (animal_id INTEGER, habitat_id INTEGER);")
+            .down("DROP TABLE animal_habitat;"),
         // 5
     ];
 
@@ -83,8 +85,14 @@ fn main_test() {
         .unwrap();
 
         conn.execute(
-            "INSERT INTO animals (name, habitat_id) VALUES (?1, ?2)",
-            params!["Fox", 0],
+            "INSERT INTO animals (id, name) VALUES (?1, ?2)",
+            params![15, "Fox"],
+        )
+        .unwrap();
+
+        conn.execute(
+            "INSERT INTO animal_habitat (animal_id, habitat_id) VALUES (?1, ?2)",
+            params![15, 0],
         )
         .unwrap();
 
@@ -96,15 +104,15 @@ fn main_test() {
             .execute("INSERT INTO habitats (name) VALUES (?1)", params!["Beach"],)
             .is_err());
 
-        conn.execute(
-            "INSERT INTO food (id, name) VALUES (?1, ?2)",
-            params![0, "Cheese"],
-        )
-        .unwrap();
+        conn.execute("INSERT INTO food (name) VALUES (?1)", params!["Cheese"])
+            .unwrap();
+
+        conn.execute("INSERT INTO animals (name) VALUES (?1)", params!["Mouse"])
+            .unwrap();
 
         conn.execute(
-            "INSERT INTO animals (name, food_id) VALUES (?1, ?2)",
-            params!["Mouse", 0],
+            "INSERT INTO animal_food (animal_id, food_id) VALUES (?1, ?2)",
+            params![1, 0],
         )
         .unwrap();
     }
@@ -120,8 +128,8 @@ fn test_errors() {
         // 1
         M::up("CREATE TABLE food (id INTEGER, name TEXT);"), // no down!!!
         // 2
-        M::up("ALTER TABLE animals ADD COLUMN food_id INTEGER;")
-            .down("ALTER TABLE animals DROP COLUMN food_id;"),
+        M::up("CREATE TABLE animal_food (animal_id INTEGER, food_id INTEGER);")
+            .down("DROP TABLE animal_food;"),
         // 3
     ];
 
