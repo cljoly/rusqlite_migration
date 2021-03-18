@@ -3,3 +3,6 @@ Cargo.lock
 
 # Output of some examples
 my_db.db3
+
+# Local IDE & editor files
+.idea/

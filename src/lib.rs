@@ -14,86 +14,22 @@ limitations under the License.
 
 */
 
-use std::fmt;
-use std::result;
-
 use log::{debug, info, trace, warn};
 use rusqlite::Connection;
 use rusqlite::NO_PARAMS;
 
+mod errors;
+
 #[cfg(test)]
 mod tests;
-
-/// Enum listing possible errors.
-#[derive(Debug, PartialEq)]
-#[allow(clippy::enum_variant_names)]
-#[non_exhaustive]
-pub enum Error {
-    /// Rusqlite error, query may indicate the attempted SQL query
-    RusqliteError { query: String, err: rusqlite::Error },
-    /// Error with the specified schema version
-    SpecifiedSchemaVersion(SchemaVersionError),
-}
-
-impl Error {
-    fn with_sql(e: rusqlite::Error, sql: &str) -> Error {
-        Error::RusqliteError {
-            query: String::from(sql),
-            err: e,
-        }
-    }
-}
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        // TODO Format the error with fmt instead of debug
-        write!(f, "rusqlite_migrate error: {:?}", self)
-    }
-}
-
-impl std::error::Error for Error {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Error::RusqliteError { query: _, err } => Some(err),
-            Error::SpecifiedSchemaVersion(e) => Some(e),
-        }
-    }
-}
-
-impl From<rusqlite::Error> for Error {
-    fn from(e: rusqlite::Error) -> Error {
-        Error::RusqliteError {
-            query: String::new(),
-            err: e,
-        }
-    }
-}
-
-/// Errors related to schema versions
-#[derive(Debug, PartialEq, Clone, Copy)]
-#[allow(clippy::enum_variant_names)]
-#[non_exhaustive]
-pub enum SchemaVersionError {
-    /// Attempts to migrate to a version lower than the version currently in
-    /// the database. This is currently not supported
-    MigrateToLowerNotSupported,
-}
-
-impl fmt::Display for SchemaVersionError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Attempts to migrate to a version lower than the version currently in the database. This is currently not supported.")
-    }
-}
-
-impl std::error::Error for SchemaVersionError {}
-
-/// A typedef of the result returned by many methods.
-pub type Result<T, E = Error> = result::Result<T, E>;
+pub use errors::{Error, MigrationDefinitionError, Result, SchemaVersionError};
+use std::cmp::Ordering;
 
 /// One migration
 #[derive(Debug, PartialEq, Clone)]
 pub struct M<'u> {
     up: &'u str,
+    down: Option<&'u str>,
 }
 
 impl<'u> M<'u> {
@@ -111,7 +47,17 @@ impl<'u> M<'u> {
     ///   rusqlite.
     /// * SQL commands should end with a “;”.
     pub fn up(sql: &'u str) -> Self {
-        Self { up: sql }
+        Self {
+            up: sql,
+            down: None,
+        }
+    }
+
+    /// Define a down-migration. This SQL statement should exactly reverse the changes
+    /// performed in `up()`.
+    pub fn down(mut self, sql: &'u str) -> Self {
+        self.down = Some(sql);
+        self
     }
 }
 
@@ -178,7 +124,7 @@ impl<'m> Migrations<'m> {
         conn: &mut Connection,
         current_version: usize,
         target_version: usize,
-    ) -> Result<usize> {
+    ) -> Result<()> {
         debug_assert!(current_version <= target_version);
         debug_assert!(target_version <= self.ms.len());
 
@@ -195,37 +141,82 @@ impl<'m> Migrations<'m> {
         tx.commit()?;
         trace!("commited migration transaction");
 
-        Ok(target_version - current_version - 1)
+        Ok(())
     }
 
-    /// Migrate downward methods (not implemented at the moment)
-    fn goto_down(&self) -> Result<()> {
-        Err(Error::SpecifiedSchemaVersion(
-            SchemaVersionError::MigrateToLowerNotSupported,
-        ))
+    /// Migrate downward. This is rolled back on error.
+    /// All versions are db versions
+    fn goto_down(
+        &self,
+        conn: &mut Connection,
+        current_version: usize,
+        target_version: usize,
+    ) -> Result<()> {
+        debug_assert!(current_version >= target_version);
+        debug_assert!(target_version <= self.ms.len());
+
+        // First, check if all the migrations have a "down" version
+        if let Some((i, bad_m)) = self
+            .ms
+            .iter()
+            .enumerate()
+            .skip(target_version)
+            .take(current_version - target_version)
+            .find(|(_, m)| m.down.is_none())
+        {
+            warn!("Cannot revert: {:?}", bad_m);
+            return Err(Error::MigrationDefinition(
+                MigrationDefinitionError::DownNotDefined { migration_index: i },
+            ));
+        }
+
+        trace!("start migration transaction");
+        let tx = conn.transaction()?;
+        for v in (target_version..current_version).rev() {
+            let m = &self.ms[v];
+            if let Some(ref down) = m.down {
+                debug!("Running: {}", down);
+                tx.execute_batch(down)
+                    .map_err(|e| Error::with_sql(e, down))?;
+            } else {
+                unreachable!();
+            }
+        }
+        set_user_version(&tx, target_version)?;
+        tx.commit()?;
+        trace!("committed migration transaction");
+        Ok(())
     }
 
     /// Go to a given db version
     fn goto(&self, conn: &mut Connection, target_db_version: usize) -> Result<()> {
         let current_version = user_version(conn)?;
-        if target_db_version == current_version {
-            info!("no migration to run, db already up to date");
-            return Ok(());
+
+        let res = match target_db_version.cmp(&current_version) {
+            Ordering::Less => {
+                debug!(
+                    "rollback to older version requested, target_db_version: {}, current_version: {}",
+                    target_db_version, current_version
+                );
+                self.goto_down(conn, current_version, target_db_version)
+            }
+            Ordering::Equal => {
+                debug!("no migration to run, db already up to date");
+                return Ok(()); // return directly, so the migration message is not printed
+            }
+            Ordering::Greater => {
+                debug!(
+                    "some migrations to run, target_db_version: {}, current_version: {}",
+                    target_db_version, current_version
+                );
+                self.goto_up(conn, current_version, target_db_version)
+            }
+        };
+
+        if res.is_ok() {
+            info!("Database migrated to version {}", target_db_version);
         }
-        if target_db_version > current_version {
-            info!(
-                "some migrations to run, target_db_version: {}, current_version: {}",
-                target_db_version, current_version
-            );
-            return self
-                .goto_up(conn, current_version, target_db_version)
-                .map(|_| ());
-        }
-        warn!(
-            "db more recent than available migrations, target_db_version: {}, current_version: {}",
-            target_db_version, current_version
-        );
-        self.goto_down()
+        res
     }
 
     /// Maximum version defined in the migration set
@@ -247,14 +238,54 @@ impl<'m> Migrations<'m> {
                 Ok(())
             }
             SchemaVersion::Inside(_) => {
-                info!("some migrations defined, try to migrate");
+                debug!("some migrations defined, try to migrate");
                 self.goto(conn, v_max.into())
             }
             SchemaVersion::Outside(_) => unreachable!(),
         }
     }
 
-    /// Run migrations from first to last, one by one. Convenience method for testing.
+    /// Migrate the database to a given schema version. The migrations are applied atomically.
+    ///
+    /// # Version numbering
+    ///
+    /// - Empty database (no migrations run yet) has version `0`.
+    /// - The version increases after each migration, so after the first migration has run, the schema version is `1`.
+    /// - If there are 3 migrations, version 3 is after all migrations have run.
+    ///
+    /// # Errors
+    ///
+    /// Attempts to migrate to a higher version than is supported will result in an error.
+    ///
+    /// When migrating downwards, all the reversed migrations must have a `.down()` variant,
+    /// otherwise no migrations are run and the function returns an error.
+    pub fn to_version(&self, conn: &mut Connection, version: usize) -> Result<()> {
+        let v_max = self.max_schema_version();
+        match v_max {
+            SchemaVersion::NoneSet => {
+                warn!("no migrations defined");
+                Ok(())
+            }
+            SchemaVersion::Inside(_) => {
+                let max_version = v_max.into();
+                if version > max_version {
+                    warn!("specified version is higher than the max supported version");
+                    return Err(Error::SpecifiedSchemaVersion(
+                        SchemaVersionError::TargetVersionOutOfRange {
+                            specified: version,
+                            highest: max_version,
+                        },
+                    ));
+                }
+
+                self.goto(conn, version)
+            }
+            SchemaVersion::Outside(_) => unreachable!(),
+        }
+    }
+
+    /// Run migrations on a temporary in-memory database from first to last, one by one.
+    /// Convenience method for testing.
     pub fn validate(&self) -> Result<()> {
         let mut conn = Connection::open_in_memory()?;
         self.latest(&mut conn)
