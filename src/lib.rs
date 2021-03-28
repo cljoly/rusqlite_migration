@@ -14,6 +14,8 @@ limitations under the License.
 
 */
 
+#![forbid(unsafe_code)]
+
 use log::{debug, info, trace, warn};
 use rusqlite::Connection;
 use rusqlite::NO_PARAMS;
