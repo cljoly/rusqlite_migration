@@ -58,7 +58,7 @@ pub fn init_db() -> Result<Connection> {
     let mut conn = Connection::open("./my_db.db3")?;
 
     // Update the database schema, atomically
-    MIGRATIONS.latest(&mut conn)?;
+    MIGRATIONS.to_latest(&mut conn)?;
 
     Ok(conn)
 }
