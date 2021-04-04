@@ -66,7 +66,7 @@ limitations under the License.
 //!     let mut conn = Connection::open("./my_db.db3")?;
 //!
 //!     // Update the database schema, atomically
-//!     MIGRATIONS.latest(&mut conn)?;
+//!     MIGRATIONS.to_latest(&mut conn)?;
 //!
 //!     Ok(conn)
 //! }
@@ -105,6 +105,7 @@ limitations under the License.
 
 use log::{debug, info, trace, warn};
 use rusqlite::Connection;
+#[allow(deprecated)] // To keep compatibility with lower rusqlite versions
 use rusqlite::NO_PARAMS;
 
 mod errors;
@@ -318,8 +319,13 @@ impl<'m> Migrations<'m> {
         }
     }
 
-    /// Migrate the database to latest schema version. The migrations are applied atomically.
+    #[deprecated(since = "0.4", note = "This was renammed to to_latest")]
     pub fn latest(&self, conn: &mut Connection) -> Result<()> {
+        return self.to_latest(conn);
+    }
+
+    /// Migrate the database to latest schema version. The migrations are applied atomically.
+    pub fn to_latest(&self, conn: &mut Connection) -> Result<()> {
         let v_max = self.max_schema_version();
         match v_max {
             SchemaVersion::NoneSet => {
@@ -377,12 +383,13 @@ impl<'m> Migrations<'m> {
     /// Convenience method for testing.
     pub fn validate(&self) -> Result<()> {
         let mut conn = Connection::open_in_memory()?;
-        self.latest(&mut conn)
+        self.to_latest(&mut conn)
     }
 }
 
 // Read user version field from the SQLite db
 fn user_version(conn: &Connection) -> Result<usize, rusqlite::Error> {
+    #[allow(deprecated)] // To keep compatibility with lower rusqlite versions
     conn.query_row("PRAGMA user_version", NO_PARAMS, |row| row.get(0))
         .map(|v: i64| v as usize)
 }

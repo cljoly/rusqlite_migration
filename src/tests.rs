@@ -43,7 +43,7 @@ fn empty_migrations_test() {
 fn user_version_convert_test() {
     let mut conn = Connection::open_in_memory().unwrap();
     let migrations = Migrations::new(vec![m_valid10()]);
-    assert_eq!(Ok(()), migrations.latest(&mut conn));
+    assert_eq!(Ok(()), migrations.to_latest(&mut conn));
     assert_eq!(Ok(1), user_version(&conn));
     assert_eq!(
         Ok(SchemaVersion::Inside(0)),
@@ -59,7 +59,7 @@ fn user_version_migrate_test() {
 
     assert_eq!(Ok(0), user_version(&conn));
 
-    assert_eq!(Ok(()), migrations.latest(&mut conn));
+    assert_eq!(Ok(()), migrations.to_latest(&mut conn));
     assert_eq!(Ok(1), user_version(&conn));
     assert_eq!(
         Ok(SchemaVersion::Inside(0)),
@@ -67,7 +67,7 @@ fn user_version_migrate_test() {
     );
 
     let migrations = Migrations::new(vec![m_valid10(), m_valid11()]);
-    assert_eq!(Ok(()), migrations.latest(&mut conn));
+    assert_eq!(Ok(()), migrations.to_latest(&mut conn));
     assert_eq!(Ok(2), user_version(&conn));
     assert_eq!(
         Ok(SchemaVersion::Inside(1)),

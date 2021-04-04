@@ -20,7 +20,7 @@ fn main_test() {
         let mut conn = Connection::open(&db_file).unwrap();
 
         let migrations = Migrations::new(ms.clone());
-        migrations.latest(&mut conn).unwrap();
+        migrations.to_latest(&mut conn).unwrap();
 
         conn.pragma_update(None, "journal_mode", &"WAL").unwrap();
         conn.pragma_update(None, "foreign_keys", &"ON").unwrap();
@@ -86,7 +86,7 @@ fn main_test() {
         let mut conn = Connection::open(&db_file).unwrap();
 
         let migrations = Migrations::new(ms.clone());
-        migrations.latest(&mut conn).unwrap();
+        migrations.to_latest(&mut conn).unwrap();
 
         assert_eq!(
             Ok(SchemaVersion::Inside(2)),

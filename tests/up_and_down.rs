@@ -138,7 +138,7 @@ fn test_errors() {
 
         let migrations = Migrations::new(ms.clone());
 
-        migrations.latest(&mut conn).unwrap();
+        migrations.to_latest(&mut conn).unwrap();
 
         conn.execute("INSERT INTO animals (name) VALUES (?1)", params!["Dog"])
             .unwrap();

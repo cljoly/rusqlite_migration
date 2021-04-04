@@ -15,7 +15,7 @@ fn main_test() {
 
     {
         let migrations = Migrations::new(ms.clone());
-        migrations.latest(&mut conn).unwrap();
+        migrations.to_latest(&mut conn).unwrap();
 
         assert_eq!(
             Ok(SchemaVersion::Inside(2)),
@@ -35,7 +35,7 @@ fn main_test() {
 
     {
         let migrations = Migrations::new(ms.clone());
-        migrations.latest(&mut conn).unwrap();
+        migrations.to_latest(&mut conn).unwrap();
 
         assert_eq!(
             Ok(SchemaVersion::Inside(4)),
@@ -54,7 +54,7 @@ fn main_test() {
 
     {
         let migrations = Migrations::new(ms.clone());
-        migrations.latest(&mut conn).unwrap();
+        migrations.to_latest(&mut conn).unwrap();
 
         assert_eq!(
             Ok(SchemaVersion::Inside(5)),

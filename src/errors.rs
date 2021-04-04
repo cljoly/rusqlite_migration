@@ -60,7 +60,7 @@ impl From<rusqlite::Error> for Error {
 pub enum SchemaVersionError {
     /// Attempts to migrate to a version lower than the version currently in
     /// the database. This was historically not supported
-    #[deprecated]
+    #[deprecated(since = "0.4", note = "This error is not returned anymore")]
     #[doc(hidden)]
     MigrateToLowerNotSupported,
     /// Attempt to migrate to a version out of range for the supplied migrations
