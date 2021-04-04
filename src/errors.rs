@@ -13,7 +13,12 @@ pub type Result<T, E = Error> = std::result::Result<T, E>;
 #[non_exhaustive]
 pub enum Error {
     /// Rusqlite error, query may indicate the attempted SQL query
-    RusqliteError { query: String, err: rusqlite::Error },
+    RusqliteError { 
+        /// SQL query that caused the error
+        query: String, 
+        /// Error returned by rusqlite
+        err: rusqlite::Error 
+    },
     /// Error with the specified schema version
     SpecifiedSchemaVersion(SchemaVersionError),
     /// Something wrong with migration definitions
@@ -21,6 +26,7 @@ pub enum Error {
 }
 
 impl Error {
+    /// Associtate the SQL request that caused the error
     pub fn with_sql(e: rusqlite::Error, sql: &str) -> Error {
         Error::RusqliteError {
             query: String::from(sql),
@@ -66,7 +72,11 @@ pub enum SchemaVersionError {
     #[doc(hidden)]
     MigrateToLowerNotSupported,
     /// Attempt to migrate to a version out of range for the supplied migrations
-    TargetVersionOutOfRange { specified: SchemaVersion, highest: SchemaVersion },
+    TargetVersionOutOfRange { 
+        /// The attempt to migrate to this version caused the error
+        specified: SchemaVersion,
+        /// Highest version defined in the migration set
+        highest: SchemaVersion },
 }
 
 impl fmt::Display for SchemaVersionError {

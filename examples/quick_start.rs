@@ -25,6 +25,11 @@ lazy_static! {
                   ALTER TABLE friend ADD COLUMN birthday TEXT;
                   ALTER TABLE friend ADD COLUMN comment TEXT;
                   "#),
+
+            // This migration can be reverted
+            M::up("CREATE TABLE animal(name TEXT);")
+            .down("DROP TABLE animal;")
+
             // In the future, if the need to change the schema arises, put
             // migrations here, like so:
             // M::up("CREATE INDEX UX_friend_email ON friend(email);"),
@@ -44,7 +49,7 @@ pub fn init_db() -> Result<Connection> {
 pub fn main() {
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("trace")).init();
 
-    let conn = init_db().unwrap();
+    let mut conn = init_db().unwrap();
 
     // Apply some PRAGMA. These are often better applied outside of migrations, as some needs to be
     // executed for each connection (like `foreign_keys`) or to be executed outside transactions
@@ -59,5 +64,13 @@ pub fn main() {
     )
     .unwrap();
 
-    // Rest of the program
+    conn.execute("INSERT INTO animal (name) VALUES (?1)", params!["dog"])
+        .unwrap();
+
+    // If we want to revert the last migration
+    MIGRATIONS.to_version(&mut conn, Some(2)).unwrap();
+
+    // The table was removed
+    conn.execute("INSERT INTO animal (name) VALUES (?1)", params!["cat"])
+        .unwrap_err();
 }
