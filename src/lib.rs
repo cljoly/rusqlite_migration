@@ -15,92 +15,69 @@ limitations under the License.
 */
 
 #![forbid(unsafe_code)]
-
+#![warn(missing_docs)]
+#![allow(clippy::needless_doctest_main)]
 //! Rusqlite Migration is a simple schema migration tool for [rusqlite](https://lib.rs/crates/rusqlite) using [user_version](https://sqlite.org/pragma.html#pragma_user_version) instead of an SQL table to maintain the current schema version.
 //!
 //! It aims for:
-//! - **simplicity**: there is a set of SQL statements and you just append to it to change the schema,
+//! - **simplicity**: define a set of SQL statements. Just add more SQL statement to change the schema. No external CLI, no macro.
 //! - **performance**: no need to add a table to be parsed, the `user_version` field is at a fixed offset in the sqlite file format.
 //!
 //! ## Example
 //!
+//! Here, we define SQL statements to run with [Migrations::new](crate::Migrations::new) and run these (if necessary) with [.to_latest()](crate::Migrations::to_latest).
+//!
 //! ```
-//! use anyhow::Result;
-//! use env_logger;
 //! use lazy_static::lazy_static;
 //! use rusqlite::{params, Connection};
 //! use rusqlite_migration::{Migrations, M};
 //!
-//! // Define migrations. These are applied atomically.
+//! // 1️⃣ Define migrations
 //! lazy_static! {
 //!     static ref MIGRATIONS: Migrations<'static> =
 //!         Migrations::new(vec![
 //!             M::up(r#"
 //!                 CREATE TABLE friend(
-//!                     friend_id INTEGER PRIMARY KEY,
 //!                     name TEXT NOT NULL,
-//!                     email TEXT UNIQUE,
-//!                     phone TEXT UNIQUE,
-//!                     picture BLOB
-//!                 );
-//!    
-//!                 CREATE TABLE car(
-//!                     registration_plate TEXT PRIMARY KEY,
-//!                     cost REAL NOT NULL,
-//!                     bought_on TEXT NOT NULL
+//!                     email TEXT UNIQUE
 //!                 );
 //!             "#),
-//!             // PRAGMA are better applied outside of migrations, see below for details.
-//!             M::up(r#"
-//!                       ALTER TABLE friend ADD COLUMN birthday TEXT;
-//!                       ALTER TABLE friend ADD COLUMN comment TEXT;
-//!                   "#),
-//!             // In the future, if the need to change the schema arises, put
-//!             // migrations here, like so:
-//!             // M::up("CREATE INDEX UX_friend_email ON friend(email);"),
-//!             // M::up("CREATE INDEX UX_friend_name ON friend(name);"),
+//!             // In the future, add more migrations here:
+//!             //M::up("ALTER TABLE friend ADD COLUMN birthday TEXT;"),
 //!         ]);
 //! }
 //!
-//! pub fn init_db() -> Result<Connection> {
-//!     let mut conn = Connection::open("./my_db.db3")?;
-//!
-//!     // Update the database schema, atomically
-//!     MIGRATIONS.to_latest(&mut conn)?;
-//!
-//!     Ok(conn)
-//! }
-//!
-//! pub fn main() {
-//!     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("trace")).init();
-//!
-//!     let conn = init_db().unwrap();
-//!
-//!     // Apply some PRAGMA. These are often better applied outside of migrations, as some needs to be
-//!     // executed for each connection (like `foreign_keys`) or to be executed outside transactions
-//!     // (`journal_mode` is a noop in a transaction).
+//! fn main() {
+//!     let mut conn = Connection::open_in_memory().unwrap();
+//!     // Apply some PRAGMA, often better to do it outside of migrations
 //!     conn.pragma_update(None, "journal_mode", &"WAL").unwrap();
-//!     conn.pragma_update(None, "foreign_keys", &"ON").unwrap();
 //!
-//!     // Use the db 🥳
+//!     // 2️⃣ Update the database schema, atomically
+//!     MIGRATIONS.to_latest(&mut conn).unwrap();
+//!
+//!     // Use the database 🥳
 //!     conn.execute(
-//!         "INSERT INTO friend (name, birthday) VALUES (?1, ?2)",
-//!         params!["John", "1970-01-01"],
+//!         "INSERT INTO friend (name, email) \
+//!          VALUES (?1, ?2)",
+//!         params!["John", "john@example.org"],
 //!     )
 //!     .unwrap();
 //! }
 //! ```
 //!
-//! To test that the migrations are working, you can add this to your other tests:
+//! ### Built-in tests
+//!
+//! To test that the migrations are working, you can add this in your test module:
 //!
 //! ```
-//!     #[test]
-//!     fn migrations_test() {
-//!         assert!(MIGRATIONS.validate().is_ok());
-//!     }
+//! #[test]
+//! fn migrations_test() {
+//!     assert!(MIGRATIONS.validate().is_ok());
+//! }
 //! ```
 //!
-
+//! ### Migrations to previous versions, more detailed examples…
+//!
 //! Please see the [examples](https://github.com/cljoly/rusqlite_migrate/tree/master/examples) folder for more.
 
 use log::{debug, info, trace, warn};
@@ -140,6 +117,14 @@ impl<'u> M<'u> {
     ///   work](https://github.com/rusqlite/rusqlite/pull/794) with the `extra_check` feature of
     ///   rusqlite.
     /// * SQL commands should end with a “;”.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use rusqlite_migration::M;
+    ///
+    /// M::up("CREATE TABLE animals (name TEXT);");
+    /// ```
     pub fn up(sql: &'u str) -> Self {
         Self {
             up: sql,
@@ -149,6 +134,17 @@ impl<'u> M<'u> {
 
     /// Define a down-migration. This SQL statement should exactly reverse the changes
     /// performed in `up()`.
+    ///
+    /// A call to this method is **not** required.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use rusqlite_migration::M;
+    ///
+    /// M::up("CREATE TABLE animals (name TEXT);")
+    ///     .down("DROP TABLE animals;");
+    /// ```
     pub fn down(mut self, sql: &'u str) -> Self {
         self.down = Some(sql);
         self
@@ -210,6 +206,17 @@ pub struct Migrations<'m> {
 
 impl<'m> Migrations<'m> {
     /// Create a set of migrations.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use rusqlite_migration::{Migrations, M};
+    ///
+    /// let migrations = Migrations::new(vec![
+    ///     M::up("CREATE TABLE animals (name TEXT);"),
+    ///     M::up("CREATE TABLE food (name TEXT);"),
+    /// ]);
+    /// ```
     pub fn new(ms: Vec<M<'m>>) -> Self {
         Self { ms }
     }
@@ -232,7 +239,28 @@ impl<'m> Migrations<'m> {
         }
     }
 
-    /// Get current schema version
+    /// Get the current schema version
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use rusqlite_migration::{Migrations, M, SchemaVersion};
+    /// use std::num::NonZeroUsize;
+    ///
+    /// let mut conn = rusqlite::Connection::open_in_memory().unwrap();
+    ///
+    /// let migrations = Migrations::new(vec![
+    ///     M::up("CREATE TABLE animals (name TEXT);"),
+    ///     M::up("CREATE TABLE food (name TEXT);"),
+    /// ]);
+    ///
+    /// assert_eq!(SchemaVersion::NoneSet, migrations.current_version(&conn).unwrap());
+    ///
+    /// // Go to the latest version
+    /// migrations.to_latest(&mut conn).unwrap();
+    ///
+    /// assert_eq!(SchemaVersion::Inside(NonZeroUsize::new(2).unwrap()), migrations.current_version(&conn).unwrap());
+    /// ```
     pub fn current_version(&self, conn: &Connection) -> Result<SchemaVersion> {
         user_version(conn)
             .map(|v| self.db_version_to_schema(v))
@@ -352,12 +380,32 @@ impl<'m> Migrations<'m> {
         }
     }
 
-    #[deprecated(since = "0.4.0", note = "This was renammed to to_latest")]
+    /// Migrate the database to latest schema version. The migrations are applied atomically.
+    #[deprecated(since = "0.4.0", note = "renammed to “to_latest”")]
     pub fn latest(&self, conn: &mut Connection) -> Result<()> {
         self.to_latest(conn)
     }
 
     /// Migrate the database to latest schema version. The migrations are applied atomically.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use rusqlite_migration::{Migrations, M};
+    /// let mut conn = rusqlite::Connection::open_in_memory().unwrap();
+    ///
+    /// let migrations = Migrations::new(vec![
+    ///     M::up("CREATE TABLE animals (name TEXT);"),
+    ///     M::up("CREATE TABLE food (name TEXT);"),
+    /// ]);
+    ///
+    /// // Go to the latest version
+    /// migrations.to_latest(&mut conn).unwrap();
+    ///
+    /// // You can then insert values in the database
+    /// conn.execute("INSERT INTO animals (name) VALUES ('dog')", []).unwrap();
+    /// conn.execute("INSERT INTO food (name) VALUES ('carrot')", []).unwrap();
+    /// ```
     pub fn to_latest(&self, conn: &mut Connection) -> Result<()> {
         let v_max = self.max_schema_version();
         match v_max {
@@ -445,6 +493,21 @@ impl<'m> Migrations<'m> {
 
     /// Run migrations on a temporary in-memory database from first to last, one by one.
     /// Convenience method for testing.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// #[cfg(test)]
+    /// mod tests {
+    ///
+    ///     // … Other tests …
+    ///
+    ///     #[test]
+    ///     fn migrations_test() {
+    ///         assert!(migrations.validate().is_ok());
+    ///     }
+    /// }
+    /// ```
     pub fn validate(&self) -> Result<()> {
         let mut conn = Connection::open_in_memory()?;
         self.to_latest(&mut conn)
