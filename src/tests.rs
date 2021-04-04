@@ -46,12 +46,19 @@ fn empty_migrations_test() {
         m.to_latest(&mut conn)
     );
 
+        assert_eq!(
+            Err(Error::MigrationDefinition(
+                MigrationDefinitionError::NoMigrationsDefined
+            )),
+            m.to_version(&mut conn, None)
+        );
+
     for v in 0..4 {
         assert_eq!(
             Err(Error::MigrationDefinition(
                 MigrationDefinitionError::NoMigrationsDefined
             )),
-            m.to_version(&mut conn, v)
+            m.to_version(&mut conn, Some(v))
         )
     }
 }
