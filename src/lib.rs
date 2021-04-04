@@ -319,9 +319,9 @@ impl<'m> Migrations<'m> {
         }
     }
 
-    #[deprecated(since = "0.4", note = "This was renammed to to_latest")]
+    #[deprecated(since = "0.4.0", note = "This was renammed to to_latest")]
     pub fn latest(&self, conn: &mut Connection) -> Result<()> {
-        return self.to_latest(conn);
+        self.to_latest(conn)
     }
 
     /// Migrate the database to latest schema version. The migrations are applied atomically.
