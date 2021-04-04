@@ -36,7 +36,24 @@ fn m_invalid1() -> M<'static> {
 
 #[test]
 fn empty_migrations_test() {
-    let _ = Migrations::new(vec![]);
+    let mut conn = Connection::open_in_memory().unwrap();
+    let m = Migrations::new(vec![]);
+
+    assert_eq!(
+        Err(Error::MigrationDefinition(
+            MigrationDefinitionError::NoMigrationsDefined
+        )),
+        m.to_latest(&mut conn)
+    );
+
+    for v in 0..4 {
+        assert_eq!(
+            Err(Error::MigrationDefinition(
+                MigrationDefinitionError::NoMigrationsDefined
+            )),
+            m.to_version(&mut conn, v)
+        )
+    }
 }
 
 #[test]

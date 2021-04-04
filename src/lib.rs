@@ -330,7 +330,7 @@ impl<'m> Migrations<'m> {
         match v_max {
             SchemaVersion::NoneSet => {
                 warn!("no migration defined");
-                Ok(())
+                return Err(Error::MigrationDefinition(MigrationDefinitionError::NoMigrationsDefined));
             }
             SchemaVersion::Inside(_) => {
                 debug!("some migrations defined, try to migrate");
@@ -359,7 +359,7 @@ impl<'m> Migrations<'m> {
         match v_max {
             SchemaVersion::NoneSet => {
                 warn!("no migrations defined");
-                Ok(())
+                return Err(Error::MigrationDefinition(MigrationDefinitionError::NoMigrationsDefined));
             }
             SchemaVersion::Inside(_) => {
                 let max_version = v_max.into();

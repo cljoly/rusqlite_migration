@@ -93,6 +93,8 @@ pub enum MigrationDefinitionError {
         /// Index of the migration that caused the error
         migration_index: usize,
     },
+    /// Attempt to migrate when no migrations are defined
+    NoMigrationsDefined,
 }
 
 impl fmt::Display for MigrationDefinitionError {
@@ -106,6 +108,9 @@ impl fmt::Display for MigrationDefinitionError {
                     migration_index,
                     migration_index + 1
                 )
+            }
+            MigrationDefinitionError::NoMigrationsDefined => {
+                write!(f, "Attempt to migrate with no migrations defined")
             }
         }
     }
