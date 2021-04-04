@@ -2,6 +2,8 @@
 
 use std::fmt;
 
+use crate::SchemaVersion;
+
 /// A typedef of the result returned by many methods.
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 
@@ -64,7 +66,10 @@ pub enum SchemaVersionError {
     #[doc(hidden)]
     MigrateToLowerNotSupported,
     /// Attempt to migrate to a version out of range for the supplied migrations
-    TargetVersionOutOfRange { specified: usize, highest: usize },
+    TargetVersionOutOfRange {
+        specified: SchemaVersion,
+        highest: SchemaVersion,
+    },
 }
 
 impl fmt::Display for SchemaVersionError {

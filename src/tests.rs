@@ -63,7 +63,7 @@ fn user_version_convert_test() {
     assert_eq!(Ok(()), migrations.to_latest(&mut conn));
     assert_eq!(Ok(1), user_version(&conn));
     assert_eq!(
-        Ok(SchemaVersion::Inside(0)),
+        Ok(SchemaVersion::Inside(NonZeroUsize::new(1).unwrap())),
         migrations.current_version(&conn)
     );
     assert_eq!(1usize, migrations.current_version(&conn).unwrap().into());
@@ -79,7 +79,7 @@ fn user_version_migrate_test() {
     assert_eq!(Ok(()), migrations.to_latest(&mut conn));
     assert_eq!(Ok(1), user_version(&conn));
     assert_eq!(
-        Ok(SchemaVersion::Inside(0)),
+        Ok(SchemaVersion::Inside(NonZeroUsize::new(1).unwrap())),
         migrations.current_version(&conn)
     );
 
@@ -87,7 +87,7 @@ fn user_version_migrate_test() {
     assert_eq!(Ok(()), migrations.to_latest(&mut conn));
     assert_eq!(Ok(2), user_version(&conn));
     assert_eq!(
-        Ok(SchemaVersion::Inside(1)),
+        Ok(SchemaVersion::Inside(NonZeroUsize::new(2).unwrap())),
         migrations.current_version(&conn)
     );
 }

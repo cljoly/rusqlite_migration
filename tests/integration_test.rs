@@ -1,3 +1,5 @@
+use std::num::NonZeroUsize;
+
 use rusqlite::{params, Connection};
 use rusqlite_migration::{Migrations, SchemaVersion, M};
 
@@ -8,7 +10,7 @@ fn main_test() {
     let mut conn = Connection::open_in_memory().unwrap();
     // Define migrations
     let mut ms = vec![
-        M::up("PRAGMA journal_mode=WAL;"),
+        M::up("CREATE TABLE t(a);"),
         M::up(include_str!("../examples/friend_car.sql")),
         M::up("ALTER TABLE friend ADD COLUMN birthday TEXT;"),
     ];
@@ -18,7 +20,7 @@ fn main_test() {
         migrations.to_latest(&mut conn).unwrap();
 
         assert_eq!(
-            Ok(SchemaVersion::Inside(2)),
+            Ok(SchemaVersion::Inside(NonZeroUsize::new(3).unwrap())),
             migrations.current_version(&conn)
         );
 
@@ -38,7 +40,7 @@ fn main_test() {
         migrations.to_latest(&mut conn).unwrap();
 
         assert_eq!(
-            Ok(SchemaVersion::Inside(4)),
+            Ok(SchemaVersion::Inside(NonZeroUsize::new(5).unwrap())),
             migrations.current_version(&conn)
         );
 
@@ -57,7 +59,7 @@ fn main_test() {
         migrations.to_latest(&mut conn).unwrap();
 
         assert_eq!(
-            Ok(SchemaVersion::Inside(5)),
+            Ok(SchemaVersion::Inside(NonZeroUsize::new(6).unwrap())),
             migrations.current_version(&conn)
         );
 
