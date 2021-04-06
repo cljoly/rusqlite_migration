@@ -16,7 +16,7 @@ limitations under the License.
 
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
-#![allow(clippy::needless_doctest_main)]
+
 //! Rusqlite Migration is a simple schema migration tool for [rusqlite](https://lib.rs/crates/rusqlite) using [user_version](https://sqlite.org/pragma.html#pragma_user_version) instead of an SQL table to maintain the current schema version.
 //!
 //! It aims for:
@@ -28,42 +28,33 @@ limitations under the License.
 //! Here, we define SQL statements to run with [Migrations::new](crate::Migrations::new) and run these (if necessary) with [.to_latest()](crate::Migrations::to_latest).
 //!
 //! ```
-//! use lazy_static::lazy_static;
 //! use rusqlite::{params, Connection};
 //! use rusqlite_migration::{Migrations, M};
 //!
 //! // 1️⃣ Define migrations
-//! lazy_static! {
-//!     static ref MIGRATIONS: Migrations<'static> =
-//!         Migrations::new(vec![
-//!             M::up(r#"
-//!                 CREATE TABLE friend(
-//!                     name TEXT NOT NULL,
-//!                     email TEXT UNIQUE
-//!                 );
-//!             "#),
-//!             // In the future, add more migrations here:
-//!             //M::up("ALTER TABLE friend ADD COLUMN birthday TEXT;"),
-//!         ]);
-//! }
+//! let migrations = Migrations::new(vec![
+//!     M::up("CREATE TABLE friend(name TEXT NOT NULL);"),
+//!     // In the future, add more migrations here:
+//!     //M::up("ALTER TABLE friend ADD COLUMN email TEXT;"),
+//! ]);
 //!
-//! fn main() {
-//!     let mut conn = Connection::open_in_memory().unwrap();
-//!     // Apply some PRAGMA, often better to do it outside of migrations
-//!     conn.pragma_update(None, "journal_mode", &"WAL").unwrap();
+//! let mut conn = Connection::open_in_memory().unwrap();
 //!
-//!     // 2️⃣ Update the database schema, atomically
-//!     MIGRATIONS.to_latest(&mut conn).unwrap();
+//! // Apply some PRAGMA, often better to do it outside of migrations
+//! conn.pragma_update(None, "journal_mode", &"WAL").unwrap();
 //!
-//!     // Use the database 🥳
-//!     conn.execute(
-//!         "INSERT INTO friend (name, email) \
-//!          VALUES (?1, ?2)",
-//!         params!["John", "john@example.org"],
-//!     )
+//! // 2️⃣ Update the database schema, atomically
+//! migrations.to_latest(&mut conn).unwrap();
+//!
+//! // 3️⃣ Use the database 🥳
+//! conn.execute("INSERT INTO friend (name) VALUES (?1)", params!["John"])
 //!     .unwrap();
-//! }
 //! ```
+//!
+//! Please see the [examples](https://github.com/cljoly/rusqlite_migrate/tree/master/examples) folder for more, in particular:
+//! - migrations with multiple SQL statements (using for instance `r#"…"` or `include_str!(…)`)
+//! - use of lazy_static
+//! - migrations to previous versions (downward migrations)
 //!
 //! ### Built-in tests
 //!
@@ -75,10 +66,6 @@ limitations under the License.
 //!     assert!(MIGRATIONS.validate().is_ok());
 //! }
 //! ```
-//!
-//! ### Migrations to previous versions, more detailed examples…
-//!
-//! Please see the [examples](https://github.com/cljoly/rusqlite_migrate/tree/master/examples) folder for more.
 
 use log::{debug, info, trace, warn};
 use rusqlite::Connection;
