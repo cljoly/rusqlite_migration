@@ -113,7 +113,11 @@ mod errors;
 #[cfg(test)]
 mod tests;
 pub use errors::{Error, MigrationDefinitionError, Result, SchemaVersionError};
-use std::cmp::Ordering;
+use std::{
+    cmp::{self, Ordering},
+    fmt,
+    num::NonZeroUsize,
+};
 
 /// One migration
 #[derive(Debug, PartialEq, Clone)]
@@ -156,20 +160,45 @@ impl<'u> M<'u> {
 pub enum SchemaVersion {
     /// No schema version set
     NoneSet,
-    /// The current version in the database is outside any migration defined
-    Outside(usize),
     /// The current version in the database is inside the range of defined
     /// migrations
-    Inside(usize),
+    Inside(NonZeroUsize),
+    /// The current version in the database is outside any migration defined
+    Outside(NonZeroUsize),
+}
+
+impl From<&SchemaVersion> for usize {
+    /// Translate schema version to db version
+    fn from(schema_version: &SchemaVersion) -> usize {
+        match schema_version {
+            SchemaVersion::NoneSet => 0,
+            SchemaVersion::Inside(v) | SchemaVersion::Outside(v) => From::from(*v),
+        }
+    }
 }
 
 impl From<SchemaVersion> for usize {
-    /// Translate schema version to db version
-    fn from(schema_version: SchemaVersion) -> usize {
-        match schema_version {
-            SchemaVersion::NoneSet => 0,
-            SchemaVersion::Inside(v) | SchemaVersion::Outside(v) => v + 1,
+    fn from(schema_version: SchemaVersion) -> Self {
+        From::from(&schema_version)
+    }
+}
+
+impl fmt::Display for SchemaVersion {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            SchemaVersion::NoneSet => write!(f, "0 (no version set)"),
+            SchemaVersion::Inside(v) => write!(f, "{} (inside)", v),
+            SchemaVersion::Outside(v) => write!(f, "{} (outside)", v),
         }
+    }
+}
+
+impl cmp::PartialOrd for SchemaVersion {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        let self_usize: usize = self.into();
+        let other_usize: usize = other.into();
+
+        self_usize.partial_cmp(&other_usize)
     }
 }
 
@@ -194,8 +223,12 @@ impl<'m> Migrations<'m> {
     fn db_version_to_schema(&self, db_version: usize) -> SchemaVersion {
         match db_version {
             0 => SchemaVersion::NoneSet,
-            v if v > 0 && v <= self.ms.len() => SchemaVersion::Inside(v - 1),
-            v => SchemaVersion::Outside(v - 1),
+            v if v > 0 && v <= self.ms.len() => SchemaVersion::Inside(
+                NonZeroUsize::new(v).expect("schema version should not be equal to 0"),
+            ),
+            v => SchemaVersion::Outside(
+                NonZeroUsize::new(v).expect("schema version should not be equal to 0"),
+            ),
         }
     }
 
@@ -311,11 +344,11 @@ impl<'m> Migrations<'m> {
 
     /// Maximum version defined in the migration set
     fn max_schema_version(&self) -> SchemaVersion {
-        let len = self.ms.len();
-        if len == 0 {
-            SchemaVersion::NoneSet
-        } else {
-            SchemaVersion::Inside(len - 1)
+        match self.ms.len() {
+            0 => SchemaVersion::NoneSet,
+            v => SchemaVersion::Inside(
+                NonZeroUsize::new(v).expect("schema version should not be equal to 0"),
+            ),
         }
     }
 
@@ -330,7 +363,9 @@ impl<'m> Migrations<'m> {
         match v_max {
             SchemaVersion::NoneSet => {
                 warn!("no migration defined");
-                return Err(Error::MigrationDefinition(MigrationDefinitionError::NoMigrationsDefined));
+                Err(Error::MigrationDefinition(
+                    MigrationDefinitionError::NoMigrationsDefined,
+                ))
             }
             SchemaVersion::Inside(_) => {
                 debug!("some migrations defined, try to migrate");
@@ -342,11 +377,38 @@ impl<'m> Migrations<'m> {
 
     /// Migrate the database to a given schema version. The migrations are applied atomically.
     ///
-    /// # Version numbering
+    /// # Specifying versions
     ///
     /// - Empty database (no migrations run yet) has version `0`.
-    /// - The version increases after each migration, so after the first migration has run, the schema version is `1`.
-    /// - If there are 3 migrations, version 3 is after all migrations have run.
+    /// - The version increases after each migration, so after the first migration has run, the schema version is `1`. For instance, if there are 3 migrations, version `3` is after all migrations have run.
+    ///
+    /// *Note*: As a result, the version is the index in the migrations vector *starting from 1*.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use rusqlite_migration::{Migrations, M};
+    /// let mut conn = rusqlite::Connection::open_in_memory().unwrap();
+    /// let migrations = Migrations::new(vec![
+    ///     // 0: version 0, before having run any migration
+    ///     M::up("CREATE TABLE animals (name TEXT);").down("DROP TABLE animals;"),
+    ///     // 1: version 1, after having created the “animals” table
+    ///     M::up("CREATE TABLE food (name TEXT);").down("DROP TABLE food;"),
+    ///     // 2: version 2, after having created the food table
+    /// ]);
+    ///
+    /// migrations.to_latest(&mut conn).unwrap(); // Create all tables
+    ///
+    /// // Go back to version 1, i.e. after running the first migration
+    /// migrations.to_version(&mut conn, 1);
+    /// conn.execute("INSERT INTO animals (name) VALUES ('dog')", []).unwrap();
+    /// conn.execute("INSERT INTO food (name) VALUES ('carrot')", []).unwrap_err();
+    ///
+    /// // Go back to an empty database
+    /// migrations.to_version(&mut conn, 0);
+    /// conn.execute("INSERT INTO animals (name) VALUES ('cat')", []).unwrap_err();
+    /// conn.execute("INSERT INTO food (name) VALUES ('milk')", []).unwrap_err();
+    /// ```
     ///
     /// # Errors
     ///
@@ -355,25 +417,27 @@ impl<'m> Migrations<'m> {
     /// When migrating downwards, all the reversed migrations must have a `.down()` variant,
     /// otherwise no migrations are run and the function returns an error.
     pub fn to_version(&self, conn: &mut Connection, version: usize) -> Result<()> {
+        let target_version: SchemaVersion = self.db_version_to_schema(version);
         let v_max = self.max_schema_version();
         match v_max {
             SchemaVersion::NoneSet => {
                 warn!("no migrations defined");
-                return Err(Error::MigrationDefinition(MigrationDefinitionError::NoMigrationsDefined));
+                Err(Error::MigrationDefinition(
+                    MigrationDefinitionError::NoMigrationsDefined,
+                ))
             }
             SchemaVersion::Inside(_) => {
-                let max_version = v_max.into();
-                if version > max_version {
+                if target_version > v_max {
                     warn!("specified version is higher than the max supported version");
                     return Err(Error::SpecifiedSchemaVersion(
                         SchemaVersionError::TargetVersionOutOfRange {
-                            specified: version,
-                            highest: max_version,
+                            specified: target_version,
+                            highest: v_max,
                         },
                     ));
                 }
 
-                self.goto(conn, version)
+                self.goto(conn, target_version.into())
             }
             SchemaVersion::Outside(_) => unreachable!(),
         }

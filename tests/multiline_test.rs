@@ -1,3 +1,5 @@
+use std::num::NonZeroUsize;
+
 use rusqlite::{params, Connection};
 use rusqlite_migration::{Migrations, SchemaVersion, M};
 
@@ -26,7 +28,7 @@ fn main_test() {
         conn.pragma_update(None, "foreign_keys", &"ON").unwrap();
 
         assert_eq!(
-            Ok(SchemaVersion::Inside(ms.len() - 1)),
+            Ok(SchemaVersion::Inside(NonZeroUsize::new(ms.len()).unwrap())),
             migrations.current_version(&conn)
         );
 
@@ -89,7 +91,7 @@ fn main_test() {
         migrations.to_latest(&mut conn).unwrap();
 
         assert_eq!(
-            Ok(SchemaVersion::Inside(2)),
+            Ok(SchemaVersion::Inside(NonZeroUsize::new(3).unwrap())),
             migrations.current_version(&conn)
         );
 

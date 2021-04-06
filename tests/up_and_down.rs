@@ -1,3 +1,5 @@
+use std::num::NonZeroUsize;
+
 use rusqlite::{params, Connection};
 use rusqlite_migration::{MigrationDefinitionError, Migrations, SchemaVersion, M};
 
@@ -20,7 +22,6 @@ fn main_test() {
         // 4
         M::up("CREATE TABLE animal_habitat (animal_id INTEGER, habitat_id INTEGER);")
             .down("DROP TABLE animal_habitat;"),
-        // 5
     ];
 
     {
@@ -39,7 +40,7 @@ fn main_test() {
             .unwrap();
 
         assert_eq!(
-            Ok(SchemaVersion::Inside(0 /* this is off by one */)),
+            Ok(SchemaVersion::Inside(NonZeroUsize::new(1).unwrap())),
             migrations.current_version(&conn)
         );
 
@@ -130,7 +131,6 @@ fn test_errors() {
         // 2
         M::up("CREATE TABLE animal_food (animal_id INTEGER, food_id INTEGER);")
             .down("DROP TABLE animal_food;"),
-        // 3
     ];
 
     {
@@ -140,6 +140,11 @@ fn test_errors() {
 
         migrations.to_latest(&mut conn).unwrap();
 
+        assert_eq!(
+            Ok(SchemaVersion::Inside(NonZeroUsize::new(3).unwrap())),
+            migrations.current_version(&conn)
+        );
+
         conn.execute("INSERT INTO animals (name) VALUES (?1)", params!["Dog"])
             .unwrap();
 
@@ -147,7 +152,7 @@ fn test_errors() {
         assert!(migrations.to_version(&mut conn, 0).is_err()); // oops
 
         assert_eq!(
-            Ok(SchemaVersion::Inside(2 /* off by one */)),
+            Ok(SchemaVersion::Inside(NonZeroUsize::new(3).unwrap())),
             migrations.current_version(&conn)
         );
 
