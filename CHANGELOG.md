@@ -1,5 +1,23 @@
 # Changelog
 
+## Version 0.4.0
+
+### New features
+
+- Add downward migrations, i.e. migrations to go to past schema version of the database. Thanks @MightyPork!
+- Unsafe code is now forbidden.
+
+### Breaking changes
+
+- Rename `latest` to `MightyPorkto_latest`. The old symbol is depracated and will be removed eventually.
+- An error is now returned when a migration is attempted while no migrations exist.
+
+### Other
+
+- Improve general rust API documentation.
+- Generate parts of the readme based on rust comments, for increased consistency with the docs.rs content.
+- Various refactoring and clean-ups.
+
 ## Version 0.3.1
 
 Fix in readme, for crates.io
