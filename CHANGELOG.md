@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 0.4.1
+
+- Update documentation
+
 ## Version 0.4.0
 
 ### New features
