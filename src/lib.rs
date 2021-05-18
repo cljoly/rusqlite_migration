@@ -17,7 +17,7 @@ limitations under the License.
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 
-//! Rusqlite Migration is a simple schema migration tool for [rusqlite](https://lib.rs/crates/rusqlite) using [user_version](https://sqlite.org/pragma.html#pragma_user_version) instead of an SQL table to maintain the current schema version.
+//! Rusqlite Migration is a simple schema migration library for [rusqlite](https://lib.rs/crates/rusqlite) using [user_version](https://sqlite.org/pragma.html#pragma_user_version) instead of an SQL table to maintain the current schema version.
 //!
 //! It aims for:
 //! - **simplicity**: define a set of SQL statements. Just add more SQL statement to change the schema. No external CLI, no macro.
