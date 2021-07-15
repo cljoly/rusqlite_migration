@@ -22,7 +22,7 @@ features = []
 
 [dev-dependencies]
 simple-logging = "2.0.2"
-env_logger = "0.8"
+env_logger = "0.9"
 anyhow = "1"
 lazy_static = "1.4.0"
 mktemp = "0.4"
