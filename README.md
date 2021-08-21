@@ -2,6 +2,8 @@
 ---
 title: "Rusqlite Migration"
 date: 2021-08-21T15:32:05
+aliases:
+- /rusqlite-migration
 ---
 {{< rawhtml >}}
 <div align="center" class="badges">
