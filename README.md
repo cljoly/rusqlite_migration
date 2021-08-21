@@ -1,12 +1,18 @@
 <!-- insert
+---
+title: "Rusqlite Migration"
+date: 2021-08-21T15:32:05
+---
 {{< rawhtml >}}
-end_insert -->
 <div align="center" class="badges">
-<!-- insert
 {{< /rawhtml >}}
 end_insert -->
 
+<!-- remove -->
+<div align="center" class="badges">
+
 # Rusqlite Migration
+<!-- end_remove -->
 
 [![docs.rs](https://img.shields.io/docsrs/rusqlite_migration?style=flat-square)](https://docs.rs/rusqlite_migration) [![Crates.io](https://img.shields.io/crates/v/rusqlite_migration?style=flat-square)](https://crates.io/crates/rusqlite_migration) ![](https://img.shields.io/github/languages/code-size/cljoly/rusqlite_migration?style=flat-square) [![unsafe forbidden](https://img.shields.io/badge/unsafe-forbidden-success.svg?style=flat-square)](https://github.com/rust-secure-code/safety-dance/) 
 
