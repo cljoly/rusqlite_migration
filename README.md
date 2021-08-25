@@ -6,12 +6,12 @@ aliases:
 - /rusqlite-migration
 ---
 {{< rawhtml >}}
-<div align="center" class="badges">
+<div class="badges">
 {{< /rawhtml >}}
 end_insert -->
 
 <!-- remove -->
-<div align="center" class="badges">
+<div align="center">
 
 # Rusqlite Migration
 <!-- end_remove -->
