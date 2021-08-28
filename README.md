@@ -6,11 +6,6 @@ description: "↕️ Simple database schema migration library for rusqlite, writ
 aliases:
 - /rusqlite-migration
 ---
-{{< github_badge >}}
-
-{{< rawhtml >}}
-<div class="badges">
-{{< /rawhtml >}}
 end_insert -->
 
 <!-- remove -->
@@ -18,6 +13,14 @@ end_insert -->
 
 # Rusqlite Migration
 <!-- end_remove -->
+
+<!-- insert
+{{< github_badge >}}
+
+{{< rawhtml >}}
+<div class="badges">
+{{< /rawhtml >}}
+end_insert -->
 
 [![docs.rs](https://img.shields.io/docsrs/rusqlite_migration?style=flat-square)](https://docs.rs/rusqlite_migration) [![Crates.io](https://img.shields.io/crates/v/rusqlite_migration?style=flat-square)](https://crates.io/crates/rusqlite_migration) ![](https://img.shields.io/github/languages/code-size/cljoly/rusqlite_migration?style=flat-square) [![unsafe forbidden](https://img.shields.io/badge/unsafe-forbidden-success.svg?style=flat-square)](https://github.com/rust-secure-code/safety-dance/) 
 
