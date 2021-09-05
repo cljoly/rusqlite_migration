@@ -91,17 +91,20 @@ pub struct M<'u> {
 }
 
 impl<'u> M<'u> {
-    /// Create a schema update.
+    /// Create a schema update. The SQL command will be executed only when the migration has not been
+    /// executed on the underlying database.
     ///
     /// # Please note
     ///
     /// * PRAGMA statements are discouraged here. They are often better applied outside of
     /// migrations, because:
-    ///   * Some PRAGMA need to be executed for each connection (like `foreign_keys`).
-    ///   * Some PRAGMA are no-op when executed inside transactions (that will be the case for the
-    ///   SQL written in `up`) (like `journal_mode`).
-    ///   * Multiple SQL commands contaning `PRAGMA` are [known not to
-    ///   work](https://github.com/rusqlite/rusqlite/pull/794) with the `extra_check` feature of
+    ///   * a PRAGMA executed this way may not be applied consistently. For instance:
+    ///     * [`foreign_keys`](https://sqlite.org/pragma.html#pragma_foreign_keys) needs to be
+    ///     executed for each sqlite connection, not just once per database as a migration,
+    ///     * [`journal_mode`](https://sqlite.org/pragma.html#pragma_journal_mode) has no effect
+    ///     when executed inside transactions (that will be the case for the SQL written in `up`).
+    ///   * Multiple SQL commands contaning `PRAGMA` are [not
+    ///   working](https://github.com/rusqlite/rusqlite/pull/794) with the `extra_check` feature of
     ///   rusqlite.
     /// * SQL commands should end with a “;”.
     ///
