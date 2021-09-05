@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 0.5.0
+
+- Update the `env_logger` dependency
+- Improve the documentation
+
 ## Version 0.4.1 / 0.4.2
 
 - Update documentation
