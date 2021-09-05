@@ -8,7 +8,7 @@ description = "Simple schema migration library for rusqlite using user_version i
 keywords = ["rusqlite", "sqlite", "user_version", "database", "migration"]
 categories = ["database"]
 readme = "README.md"
-homepage = "https://joly.pw/rusqlite_migration"
+homepage = "https://cj.rs/rusqlite_migration"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
