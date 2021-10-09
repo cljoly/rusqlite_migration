@@ -34,13 +34,15 @@ end_insert -->
 
 <!-- cargo-sync-readme start -->
 
-Rusqlite Migration is a simple schema migration library for [rusqlite](https://lib.rs/crates/rusqlite) using [user_version](https://sqlite.org/pragma.html#pragma_user_version) instead of an SQL table to maintain the current schema version.
+Rusqlite Migration is a simple schema migration library for [rusqlite](https://lib.rs/crates/rusqlite) using [user_version][uv] instead of an SQL table to maintain the current schema version.
 
 It aims for:
 - **simplicity**: define a set of SQL statements. Just add more SQL statement to change the schema. No external CLI, no macro.
-- **performance**: no need to add a table to be parsed, the `user_version` field is at a fixed offset in the sqlite file format.
+- **performance**: no need to add a table to be parsed, the [`user_version`][uv] field is at a fixed offset in the sqlite file format.
 
 It works especially well with other small libraries complementing rusqlite, like [serde_rusqlite](https://crates.io/crates/serde_rusqlite).
+
+[uv]: https://sqlite.org/pragma.html#pragma_user_version
 
 ## Example
 
