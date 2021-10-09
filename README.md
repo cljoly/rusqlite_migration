@@ -40,6 +40,8 @@ It aims for:
 - **simplicity**: define a set of SQL statements. Just add more SQL statement to change the schema. No external CLI, no macro.
 - **performance**: no need to add a table to be parsed, the `user_version` field is at a fixed offset in the sqlite file format.
 
+It works especially well with other small libraries complementing rusqlite, like [serde_rusqlite](https://crates.io/crates/serde_rusqlite).
+
 ## Example
 
 Here, we define SQL statements to run with [Migrations::new](crate::Migrations::new) and run these (if necessary) with [.to_latest()](crate::Migrations::to_latest).
@@ -84,9 +86,12 @@ fn migrations_test() {
 }
 ```
 
-<!-- cargo-sync-readme end -->
+## Contributing
+
+Contributions (documentation or code improvements in particular) are welcome, see [contributing](https://cj.rs/docs/contribute/)!
 
 ## Acknowledgments
 
-I would like to thank all the contributors, as well as the authors of the
-dependancies this crate uses.
+I would like to thank all the contributors, as well as the authors of the dependencies this crate uses.
+
+<!-- cargo-sync-readme end -->
