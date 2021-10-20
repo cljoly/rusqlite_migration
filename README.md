@@ -5,6 +5,10 @@ date: 2021-08-21T15:32:05
 description: "↕️ Simple database schema migration library for rusqlite, written with performance in mind."
 aliases:
 - /rusqlite-migration
+tags:
+- Rust
+- SQLite
+- Library
 ---
 end_insert -->
 
