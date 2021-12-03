@@ -3,7 +3,7 @@
 ## Version 0.5.1
 
 ### Potentially Breaking Changes
-- Update the `rusqlite` crate (to protect againt [RUSTSEC-2020-0014](https://rustsec.org/advisories/RUSTSEC-2020-0014.html))
+- Update the `rusqlite` crate (to protect agaisnt [RUSTSEC-2020-0014](https://rustsec.org/advisories/RUSTSEC-2020-0014.html))
 
 ### Other
 - Improve the documentation
