@@ -81,6 +81,8 @@ Please see the [examples](https://github.com/cljoly/rusqlite_migrate/tree/master
 - use of lazy_static
 - migrations to previous versions (downward migrations)
 
+I’ve also made a [cheatsheet of SQLite pragma for improved performance and consistency](https://cj.rs/blog/sqlite-pragma-cheatsheet-for-performance-and-consistency/).
+
 ### Built-in tests
 
 To test that the migrations are working, you can add this in your test module:
