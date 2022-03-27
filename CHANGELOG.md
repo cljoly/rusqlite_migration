@@ -1,5 +1,15 @@
 # Changelog
 
+## Version 1.0.0
+
+### Breaking changes
+
+* Remove deprecated symbols (`Migrations.latest`, `SchemaVersionError::MigrateToLowerNotSupported`)
+
+### Other
+
+* Documentation improvements
+
 ## Version 0.5.1
 
 ### Potentially Breaking Changes
@@ -26,7 +36,7 @@
 
 ### Breaking changes
 
-- Rename `latest` to `MightyPorkto_latest`. The old symbol is depracated and will be removed eventually.
+- Rename `latest` to `to_latest`. The old symbol is deprecated and will be removed eventually.
 - An error is now returned when a migration is attempted while no migrations exist.
 
 ### Other
