@@ -40,6 +40,7 @@ fn main_test() {
 
         conn.query_row(
             "SELECT * FROM pragma_journal_mode",
+            #[allow(deprecated)] // To keep compatibility with lower rusqlite versions
             rusqlite::NO_PARAMS,
             |row| {
                 assert_eq!(row.get::<_, String>(0), Ok(String::from("wal")));
@@ -50,6 +51,7 @@ fn main_test() {
 
         conn.query_row(
             "SELECT * FROM pragma_foreign_keys",
+            #[allow(deprecated)] // To keep compatibility with lower rusqlite versions
             rusqlite::NO_PARAMS,
             |row| {
                 assert_eq!(row.get::<_, bool>(0), Ok(true));
@@ -65,6 +67,7 @@ fn main_test() {
 
         conn.query_row(
             "SELECT * FROM pragma_journal_mode",
+            #[allow(deprecated)] // To keep compatibility with lower rusqlite versions
             rusqlite::NO_PARAMS,
             |row| {
                 assert_eq!(row.get::<_, String>(0), Ok(String::from("wal")));
