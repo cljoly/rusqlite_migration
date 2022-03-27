@@ -66,11 +66,6 @@ impl From<rusqlite::Error> for Error {
 #[allow(clippy::enum_variant_names)]
 #[non_exhaustive]
 pub enum SchemaVersionError {
-    /// Attempts to migrate to a version lower than the version currently in
-    /// the database. This was historically not supported
-    #[deprecated(since = "0.4.0", note = "This error is not returned anymore")]
-    #[doc(hidden)]
-    MigrateToLowerNotSupported,
     /// Attempt to migrate to a version out of range for the supplied migrations
     TargetVersionOutOfRange {
         /// The attempt to migrate to this version caused the error
@@ -83,10 +78,6 @@ pub enum SchemaVersionError {
 impl fmt::Display for SchemaVersionError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            #[allow(deprecated)]
-            SchemaVersionError::MigrateToLowerNotSupported => {
-                write!(f, "Attempt to migrate to a version lower than the version currently in the database. This was historically not supported.")
-            }
             SchemaVersionError::TargetVersionOutOfRange { specified, highest } => {
                 write!(f, "Attempt to migrate to version {}, which is higher than the highest version currently supported, {}.", specified, highest)
             }
