@@ -127,3 +127,28 @@ fn valid_migration_multiple_statement_test() {
 fn all_valid_test() {
     assert_eq!(Ok(()), Migrations::new(all_valid()).validate())
 }
+
+// If we encounter a database with a migration number higher than the number of defined migration,
+// we should return an error, not panic.
+// See https://github.com/cljoly/rusqlite_migration/issues/17
+#[test]
+fn current_version_gt_max_schema_version_test() {
+    let mut conn = Connection::open_in_memory().unwrap();
+
+    // Set migrations to a higher number
+    {
+        let migrations = Migrations::new(vec![m_valid0(), m_valid10()]);
+        migrations.to_latest(&mut conn).unwrap();
+    }
+
+    // We now have less migrations
+    let migrations = Migrations::new(vec![m_valid0()]);
+
+    // We should get an error
+    assert_eq!(
+        migrations.to_latest(&mut conn),
+        Err(Error::MigrationDefinition(
+            MigrationDefinitionError::DatabaseTooFarAhead
+        ))
+    );
+}

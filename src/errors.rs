@@ -99,6 +99,8 @@ pub enum MigrationDefinitionError {
     },
     /// Attempt to migrate when no migrations are defined
     NoMigrationsDefined,
+    /// Attempt to migrate when the database is currently at a higher migration level (see https://github.com/cljoly/rusqlite_migration/issues/17)
+    DatabaseTooFarAhead,
 }
 
 impl fmt::Display for MigrationDefinitionError {
@@ -115,6 +117,12 @@ impl fmt::Display for MigrationDefinitionError {
             }
             MigrationDefinitionError::NoMigrationsDefined => {
                 write!(f, "Attempt to migrate with no migrations defined")
+            }
+            MigrationDefinitionError::DatabaseTooFarAhead => {
+                write!(
+                    f,
+                    "Attempt to migrate a database with a migration number that is too high"
+                )
             }
         }
     }
