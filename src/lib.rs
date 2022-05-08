@@ -349,6 +349,11 @@ impl<'m> Migrations<'m> {
 
         let res = match target_db_version.cmp(&current_version) {
             Ordering::Less => {
+                if current_version > self.ms.len() {
+                    return Err(Error::MigrationDefinition(
+                        MigrationDefinitionError::DatabaseTooFarAhead,
+                    ));
+                }
                 debug!(
                     "rollback to older version requested, target_db_version: {}, current_version: {}",
                     target_db_version, current_version
