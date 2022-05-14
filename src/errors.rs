@@ -99,7 +99,7 @@ pub enum MigrationDefinitionError {
     },
     /// Attempt to migrate when no migrations are defined
     NoMigrationsDefined,
-    /// Attempt to migrate when the database is currently at a higher migration level (see https://github.com/cljoly/rusqlite_migration/issues/17)
+    /// Attempt to migrate when the database is currently at a higher migration level (see <https://github.com/cljoly/rusqlite_migration/issues/17>)
     DatabaseTooFarAhead,
 }
 

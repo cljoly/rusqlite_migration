@@ -38,21 +38,25 @@ end_insert -->
 
 <!-- cargo-sync-readme start -->
 
-Rusqlite Migration is a simple schema migration library for [rusqlite](https://lib.rs/crates/rusqlite) using [user_version][uv] instead of an SQL table to maintain the current schema version.
+Rusqlite Migration is a simple and performant schema migration library for [rusqlite](https://lib.rs/crates/rusqlite).
 
-It aims for:
-- **simplicity**: define a set of SQL statements. Just add more SQL statement to change the schema. No external CLI, no macro.
-- **performance**: no need to add a table to be parsed, the [`user_version`][uv] field is at a fixed offset in the sqlite file format.
+* **Performance**:
+    * *Fast database opening*: to keep track of the current migration state, most tools create one or more tables in the database. These tables require parsing by SQLite and are queried with SQL statements. This library uses the [`user_version`][uv] value instead. It’s much lighter as it is just an integer at a [fixed offset][uv_offset] in the SQLite file.
+    * *Fast compilation*: this crate is very small and does not use macros to define the migrations.
+* **Simplicity**: this crate strives for simplicity. Just define a set of SQL statements as strings in your Rust code. Add more SQL statements over time as needed. No external CLI required. Additionally, rusqlite_migration works especially well with other small libraries complementing rusqlite, like [serde_rusqlite][].
 
-It works especially well with other small libraries complementing rusqlite, like [serde_rusqlite](https://crates.io/crates/serde_rusqlite).
-
+[diesel_migrations]: https://lib.rs/crates/diesel_migrations
+[pgfine]: https://crates.io/crates/pgfine
+[movine]: https://crates.io/crates/movine
 [uv]: https://sqlite.org/pragma.html#pragma_user_version
+[uv_offset]: https://www.sqlite.org/fileformat.html#user_version_number
+[serde_rusqlite]: https://crates.io/crates/serde_rusqlite
 
 ## Example
 
 Here, we define SQL statements to run with [Migrations::new](crate::Migrations::new) and run these (if necessary) with [.to_latest()](crate::Migrations::to_latest).
 
-```rust
+``` rust
 use rusqlite::{params, Connection};
 use rusqlite_migration::{Migrations, M};
 
@@ -87,7 +91,7 @@ I’ve also made a [cheatsheet of SQLite pragma for improved performance and con
 
 To test that the migrations are working, you can add this in your test module:
 
-```rust
+``` rust
 #[test]
 fn migrations_test() {
     assert!(MIGRATIONS.validate().is_ok());
@@ -101,5 +105,6 @@ Contributions (documentation or code improvements in particular) are welcome, se
 ## Acknowledgments
 
 I would like to thank all the contributors, as well as the authors of the dependencies this crate uses.
+
 
 <!-- cargo-sync-readme end -->
