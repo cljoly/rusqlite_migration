@@ -134,7 +134,7 @@ impl<'u> M<'u> {
     ///
     /// M::up("CREATE TABLE animals (name TEXT);");
     /// ```
-    pub fn up(sql: &'u str) -> Self {
+    pub const fn up(sql: &'u str) -> Self {
         Self {
             up: sql,
             down: None,
@@ -154,7 +154,7 @@ impl<'u> M<'u> {
     /// M::up("CREATE TABLE animals (name TEXT);")
     ///     .down("DROP TABLE animals;");
     /// ```
-    pub fn down(mut self, sql: &'u str) -> Self {
+    pub const fn down(mut self, sql: &'u str) -> Self {
         self.down = Some(sql);
         self
     }
