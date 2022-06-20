@@ -23,6 +23,8 @@ pub enum Error {
     SpecifiedSchemaVersion(SchemaVersionError),
     /// Something wrong with migration definitions
     MigrationDefinition(MigrationDefinitionError),
+    /// The foreign key check failed
+    ForeignKeyCheck(ForeignKeyCheckError),
 }
 
 impl Error {
@@ -48,6 +50,7 @@ impl std::error::Error for Error {
             Error::RusqliteError { query: _, err } => Some(err),
             Error::SpecifiedSchemaVersion(e) => Some(e),
             Error::MigrationDefinition(e) => Some(e),
+            Error::ForeignKeyCheck(e) => Some(e),
         }
     }
 }
@@ -129,3 +132,24 @@ impl fmt::Display for MigrationDefinitionError {
 }
 
 impl std::error::Error for MigrationDefinitionError {}
+
+/// Error caused by a foreign key check
+#[derive(Debug, PartialEq, Clone)]
+pub struct ForeignKeyCheckError {
+    pub(super) table: String,
+    pub(super) rowid: i64,
+    pub(super) parent: String,
+    pub(super) fkid: i64,
+}
+
+impl fmt::Display for ForeignKeyCheckError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "Foreign key check found a row {} on table {} missing from {} but required by {}",
+            self.rowid, self.table, self.parent, self.fkid
+        )
+    }
+}
+
+impl std::error::Error for ForeignKeyCheckError {}
