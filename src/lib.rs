@@ -87,15 +87,17 @@ limitations under the License.
 //!
 
 use log::{debug, info, trace, warn};
-use rusqlite::{Connection, OptionalExtension};
 #[allow(deprecated)] // To keep compatibility with lower rusqlite versions
 use rusqlite::NO_PARAMS;
+use rusqlite::{Connection, OptionalExtension};
 
 mod errors;
 
 #[cfg(test)]
 mod tests;
-pub use errors::{Error, MigrationDefinitionError, Result, SchemaVersionError, ForeignKeyCheckError};
+pub use errors::{
+    Error, ForeignKeyCheckError, MigrationDefinitionError, Result, SchemaVersionError,
+};
 use std::{
     cmp::{self, Ordering},
     fmt,
