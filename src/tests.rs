@@ -17,14 +17,17 @@ fn m_valid21() -> M<'static> {
 }
 
 fn m_valid_fk() -> M<'static> {
-    M::up("CREATE TABLE fk1(a PRIMARY KEY); \
+    M::up(
+        "CREATE TABLE fk1(a PRIMARY KEY); \
         CREATE TABLE fk2( \
             a, \
             FOREIGN KEY(a) REFERENCES fk1(a) \
         ); \
         INSERT INTO fk1 (a) VALUES ('foo'); \
         INSERT INTO fk2 (a) VALUES ('foo'); \
-    ").foreign_key_check()
+    ",
+    )
+    .foreign_key_check()
 }
 
 // All valid Ms in the right order
@@ -47,13 +50,16 @@ fn m_invalid1() -> M<'static> {
 }
 
 fn m_invalid_fk() -> M<'static> {
-    M::up("CREATE TABLE fk1(a PRIMARY KEY); \
+    M::up(
+        "CREATE TABLE fk1(a PRIMARY KEY); \
         CREATE TABLE fk2( \
             a, \
             FOREIGN KEY(a) REFERENCES fk1(a) \
         ); \
         INSERT INTO fk2 (a) VALUES ('foo'); \
-    ").foreign_key_check()
+    ",
+    )
+    .foreign_key_check()
 }
 
 #[test]
