@@ -16,6 +16,17 @@ fn m_valid21() -> M<'static> {
     M::up("ALTER TABLE t2 ADD COLUMN a;")
 }
 
+fn m_valid_fk() -> M<'static> {
+    M::up("CREATE TABLE fk1(a PRIMARY KEY); \
+        CREATE TABLE fk2( \
+            a, \
+            FOREIGN KEY(a) REFERENCES fk1(a) \
+        ); \
+        INSERT INTO fk1 (a) VALUES ('foo'); \
+        INSERT INTO fk2 (a) VALUES ('foo'); \
+    ").foreign_key_check()
+}
+
 // All valid Ms in the right order
 fn all_valid() -> Vec<M<'static>> {
     vec![
@@ -24,6 +35,7 @@ fn all_valid() -> Vec<M<'static>> {
         m_valid11(),
         m_valid20(),
         m_valid21(),
+        m_valid_fk(),
     ]
 }
 
@@ -32,6 +44,16 @@ fn m_invalid0() -> M<'static> {
 }
 fn m_invalid1() -> M<'static> {
     M::up("something invalid")
+}
+
+fn m_invalid_fk() -> M<'static> {
+    M::up("CREATE TABLE fk1(a PRIMARY KEY); \
+        CREATE TABLE fk2( \
+            a, \
+            FOREIGN KEY(a) REFERENCES fk1(a) \
+        ); \
+        INSERT INTO fk2 (a) VALUES ('foo'); \
+    ").foreign_key_check()
 }
 
 #[test]
@@ -121,6 +143,21 @@ fn valid_migration_multiple_statement_test() {
         let migrations = Migrations::new(vec![m.clone()]);
         assert_eq!(Ok(()), migrations.validate())
     }
+}
+
+#[test]
+fn valid_fk_check_test() {
+    assert_eq!(Ok(()), Migrations::new(vec![m_valid_fk()]).validate())
+}
+
+#[test]
+fn invalid_fk_check_test() {
+    let migrations = Migrations::new(vec![m_invalid_fk()]);
+
+    assert!(match dbg!(migrations.validate()) {
+        Err(Error::ForeignKeyCheck(_)) => true,
+        _ => false,
+    })
 }
 
 #[test]
