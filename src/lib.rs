@@ -87,15 +87,17 @@ limitations under the License.
 //!
 
 use log::{debug, info, trace, warn};
-use rusqlite::Connection;
 #[allow(deprecated)] // To keep compatibility with lower rusqlite versions
 use rusqlite::NO_PARAMS;
+use rusqlite::{Connection, OptionalExtension};
 
 mod errors;
 
 #[cfg(test)]
 mod tests;
-pub use errors::{Error, MigrationDefinitionError, Result, SchemaVersionError};
+pub use errors::{
+    Error, ForeignKeyCheckError, MigrationDefinitionError, Result, SchemaVersionError,
+};
 use std::{
     cmp::{self, Ordering},
     fmt,
@@ -107,6 +109,7 @@ use std::{
 pub struct M<'u> {
     up: &'u str,
     down: Option<&'u str>,
+    foreign_key_check: bool,
 }
 
 impl<'u> M<'u> {
@@ -138,6 +141,7 @@ impl<'u> M<'u> {
         Self {
             up: sql,
             down: None,
+            foreign_key_check: false,
         }
     }
 
@@ -156,6 +160,22 @@ impl<'u> M<'u> {
     /// ```
     pub const fn down(mut self, sql: &'u str) -> Self {
         self.down = Some(sql);
+        self
+    }
+
+    /// Enable an automatic validation of foreign keys before the migration transaction is closed.
+    /// This will cause the migration to fail if `PRAGMA foreign_key_check` returns any rows.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use rusqlite_migration::M;
+    ///
+    /// M::up("CREATE TABLE animals (name TEXT);")
+    ///     .foreign_key_check();
+    /// ```
+    pub const fn foreign_key_check(mut self) -> Self {
+        self.foreign_key_check = true;
         self
     }
 }
@@ -296,6 +316,10 @@ impl<'m> Migrations<'m> {
 
             tx.execute_batch(m.up)
                 .map_err(|e| Error::with_sql(e, m.up))?;
+
+            if m.foreign_key_check {
+                validate_foreign_keys(&tx)?;
+            }
         }
         set_user_version(&tx, target_version)?;
         tx.commit()?;
@@ -538,4 +562,26 @@ fn set_user_version(conn: &Connection, v: usize) -> Result<()> {
             query: format!("PRAGMA user_version = {}; -- Approximate query", v),
             err: e,
         })
+}
+
+// Validate that no foreign keys are violated
+fn validate_foreign_keys(conn: &Connection) -> Result<()> {
+    #[allow(deprecated)] // To keep compatibility with lower rusqlite versions
+    conn.query_row("PRAGMA foreign_key_check", NO_PARAMS, |row| {
+        Ok(ForeignKeyCheckError {
+            table: row.get(0)?,
+            rowid: row.get(1)?,
+            parent: row.get(2)?,
+            fkid: row.get(3)?,
+        })
+    })
+    .optional()
+    .map_err(|e| Error::RusqliteError {
+        query: String::from("PRAGMA foreign_key_check"),
+        err: e,
+    })
+    .and_then(|o| match o {
+        Some(e) => Err(Error::ForeignKeyCheck(e)),
+        None => Ok(()),
+    })
 }
