@@ -146,7 +146,7 @@ impl fmt::Display for ForeignKeyCheckError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "Foreign key check found a row {} in table {} missing from {} \
+            "Foreign key check found a row {} in table '{}' missing from table '{}' \
             but required by foreign key with id {}",
             self.rowid, self.table, self.parent, self.fkid
         )
