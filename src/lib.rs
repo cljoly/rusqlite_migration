@@ -105,7 +105,7 @@ use std::{
 };
 
 /// One migration
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct M<'u> {
     up: &'u str,
     down: Option<&'u str>,
@@ -181,7 +181,7 @@ impl<'u> M<'u> {
 }
 
 /// Schema version, in the context of Migrations
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum SchemaVersion {
     /// No schema version set
     NoneSet,
@@ -228,7 +228,7 @@ impl cmp::PartialOrd for SchemaVersion {
 }
 
 /// Set of migrations
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Migrations<'m> {
     ms: Vec<M<'m>>,
 }

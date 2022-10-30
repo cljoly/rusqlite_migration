@@ -1,5 +1,4 @@
 use anyhow::Result;
-use env_logger;
 use lazy_static::lazy_static;
 use rusqlite::{params, Connection};
 use rusqlite_migration::{Migrations, M};

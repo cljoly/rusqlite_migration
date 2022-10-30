@@ -65,7 +65,7 @@ impl From<rusqlite::Error> for Error {
 }
 
 /// Errors related to schema versions
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 #[allow(clippy::enum_variant_names)]
 #[non_exhaustive]
 pub enum SchemaVersionError {
@@ -91,7 +91,7 @@ impl fmt::Display for SchemaVersionError {
 impl std::error::Error for SchemaVersionError {}
 
 /// Errors related to schema versions
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 #[allow(clippy::enum_variant_names)]
 #[non_exhaustive]
 pub enum MigrationDefinitionError {
@@ -134,7 +134,7 @@ impl fmt::Display for MigrationDefinitionError {
 impl std::error::Error for MigrationDefinitionError {}
 
 /// Error caused by a foreign key check
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct ForeignKeyCheckError {
     pub(super) table: String,
     pub(super) rowid: i64,
