@@ -1,5 +1,15 @@
 # Changelog
 
+## Version 1.0.1
+
+### Bug Fix
+
+* fix: error instead of panicking on higher migration level (see commit ad57d92d1677420eb81c4e25635be1884f9b7ce7)
+
+### Other
+
+* Documentation improvements
+
 ## Version 1.0.0
 
 ### Breaking changes
