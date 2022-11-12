@@ -435,8 +435,8 @@ impl<'m> Migrations<'m> {
     /// migrations.to_latest(&mut conn).unwrap();
     ///
     /// // You can then insert values in the database
-    /// conn.execute("INSERT INTO animals (name) VALUES ('dog')", []).unwrap();
-    /// conn.execute("INSERT INTO food (name) VALUES ('carrot')", []).unwrap();
+    /// conn.execute("INSERT INTO animals (name) VALUES (?)", ["dog"]).unwrap();
+    /// conn.execute("INSERT INTO food (name) VALUES (?)", ["carrot"]).unwrap();
     /// ```
     pub fn to_latest(&self, conn: &mut Connection) -> Result<()> {
         let v_max = self.max_schema_version();
@@ -481,13 +481,13 @@ impl<'m> Migrations<'m> {
     ///
     /// // Go back to version 1, i.e. after running the first migration
     /// migrations.to_version(&mut conn, 1);
-    /// conn.execute("INSERT INTO animals (name) VALUES ('dog')", []).unwrap();
-    /// conn.execute("INSERT INTO food (name) VALUES ('carrot')", []).unwrap_err();
+    /// conn.execute("INSERT INTO animals (name) VALUES (?)", ["dog"]).unwrap();
+    /// conn.execute("INSERT INTO food (name) VALUES (?)", ["carrot"]).unwrap_err();
     ///
     /// // Go back to an empty database
     /// migrations.to_version(&mut conn, 0);
-    /// conn.execute("INSERT INTO animals (name) VALUES ('cat')", []).unwrap_err();
-    /// conn.execute("INSERT INTO food (name) VALUES ('milk')", []).unwrap_err();
+    /// conn.execute("INSERT INTO animals (name) VALUES (?)", ["cat"]).unwrap_err();
+    /// conn.execute("INSERT INTO food (name) VALUES (?)", ["milk"]).unwrap_err();
     /// ```
     ///
     /// # Errors
