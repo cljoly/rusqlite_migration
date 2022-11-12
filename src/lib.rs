@@ -557,6 +557,8 @@ fn user_version(conn: &Connection) -> Result<usize, rusqlite::Error> {
 fn set_user_version(conn: &Connection, v: usize) -> Result<()> {
     trace!("set user version to: {}", v);
     let v = v as u32;
+    // To keep compatibility with lower rusqlite versions, allow the needless `&v` borrow
+    #[allow(clippy::needless_borrow)]
     conn.pragma_update(None, "user_version", &v)
         .map_err(|e| Error::RusqliteError {
             query: format!("PRAGMA user_version = {}; -- Approximate query", v),
