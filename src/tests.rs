@@ -197,6 +197,17 @@ fn current_version_gt_max_schema_version_test() {
 }
 
 #[test]
+fn new_iter_test() {
+    let mut conn = Connection::open_in_memory().unwrap();
+
+    let sql_migrations = (0..=10).map(|i| format!("CREATE TABLE t{}(a, b, c)", i)).collect::<Vec<_>>();
+    let migrations = Migrations::new_iter(sql_migrations.iter().map(|sql| M::up(sql)));
+    migrations.to_latest(&mut conn).unwrap();
+
+    conn.execute("SELECT * FROM t10", []).unwrap();
+}
+
+#[test]
 fn hook_test() {
     let mut conn = Connection::open_in_memory().unwrap();
 
