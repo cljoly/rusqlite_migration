@@ -14,20 +14,20 @@ limitations under the License.
 
 */
 
+use criterion::measurement::Measurement;
 use criterion::BenchmarkGroup;
 use rusqlite::Connection;
 use rusqlite_migration::{Migrations, M};
 
 use criterion::{criterion_group, criterion_main, BatchSize, BenchmarkId, Criterion};
 use criterion_perf_events::Perf;
-use perfcnt::linux::HardwareEventType as Hardware;
-use perfcnt::linux::PerfCounterBuilderLinux as Builder;
+use perfcnt::linux::{HardwareEventType, PerfCounterBuilderLinux};
 
-fn migrations_benchmark(c: &mut Criterion<Perf>) {
+fn migrations_benchmark<Mes: Measurement>(c: &mut Criterion<Mes>) {
     let mut group = c.benchmark_group("Apply migrations");
 
-    fn iter_batched_connections<S, R>(
-        group: &mut BenchmarkGroup<Perf>,
+    fn iter_batched_connections<Mes: Measurement, S, R>(
+        group: &mut BenchmarkGroup<Mes>,
         description: &str,
         param: i32,
         more_setup: S,
@@ -81,7 +81,7 @@ fn migrations_benchmark(c: &mut Criterion<Perf>) {
 
 criterion_group!(
     name = benches;
-    config = Criterion::default().with_measurement(Perf::new(Builder::from_hardware_event(Hardware::Instructions)));
+    config = Criterion::default().with_measurement(Perf::new(PerfCounterBuilderLinux::from_hardware_event(HardwareEventType::Instructions)));
     targets = migrations_benchmark
 );
 criterion_main!(benches);
