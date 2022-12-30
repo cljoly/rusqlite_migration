@@ -28,7 +28,9 @@ anyhow = "1"
 lazy_static = "1.4.0"
 mktemp = "0.5"
 criterion = { version = "0.4", features = ["html_reports", "cargo_bench_support"] }
+criterion-perf-events = "0.3.0"
+perfcnt = "0.8"
 
 [[bench]]
-name = "apply_migrations"
+name = "criterion"
 harness = false
