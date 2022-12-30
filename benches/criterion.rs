@@ -51,12 +51,17 @@ fn migrations_benchmark<Mes: Measurement>(c: &mut Criterion<Mes>) {
 
     for i in [10, 30, 100] {
         let sql_migrations = (0..=i)
-            .map(|i| format!("CREATE TABLE t{}(a, b, c)", i))
+            .map(|i| {
+                (
+                    format!("CREATE TABLE t{}(a, b, c);", i),
+                    format!("DROP TABLE t{};", i),
+                )
+            })
             .collect::<Vec<_>>();
         let migrations = Migrations::new_iter(
             sql_migrations
                 .iter()
-                .map(|sql| M::up(sql).foreign_key_check()),
+                .map(|(up, down)| M::up(up).down(down).foreign_key_check()),
         );
 
         iter_batched_connections(
