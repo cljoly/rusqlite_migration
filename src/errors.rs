@@ -25,6 +25,8 @@ pub enum Error {
     MigrationDefinition(MigrationDefinitionError),
     /// The foreign key check failed
     ForeignKeyCheck(ForeignKeyCheckError),
+    /// Error returned by the migration hook
+    Hook(String),
 }
 
 impl Error {
@@ -51,6 +53,7 @@ impl std::error::Error for Error {
             Error::SpecifiedSchemaVersion(e) => Some(e),
             Error::MigrationDefinition(e) => Some(e),
             Error::ForeignKeyCheck(e) => Some(e),
+            Error::Hook(_) => None,
         }
     }
 }
@@ -154,3 +157,35 @@ impl fmt::Display for ForeignKeyCheckError {
 }
 
 impl std::error::Error for ForeignKeyCheckError {}
+
+/// Error enum with rusqlite or hook-specified errors.
+#[derive(Debug, PartialEq)]
+#[allow(clippy::enum_variant_names)]
+#[non_exhaustive]
+pub enum HookError {
+    /// Rusqlite error, query may indicate the attempted SQL query
+    RusqliteError(rusqlite::Error),
+    /// Error returned by the hook
+    Hook(String),
+}
+
+impl From<rusqlite::Error> for HookError {
+    fn from(e: rusqlite::Error) -> HookError {
+        HookError::RusqliteError(e)
+    }
+}
+
+impl From<HookError> for Error {
+    fn from(e: HookError) -> Error {
+        match e {
+            HookError::RusqliteError(err) => Error::RusqliteError {
+                query: String::new(),
+                err,
+            },
+            HookError::Hook(s) => Error::Hook(s),
+        }
+    }
+}
+
+/// A typedef of the result returned by hooks.
+pub type HookResult<E = HookError> = std::result::Result<(), E>;
