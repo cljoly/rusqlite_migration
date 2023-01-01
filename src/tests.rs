@@ -195,3 +195,62 @@ fn current_version_gt_max_schema_version_test() {
         ))
     );
 }
+
+#[test]
+fn hook_test() {
+    let mut conn = Connection::open_in_memory().unwrap();
+
+    let text = "Lorem ipsum dolor sit amet, consectetur adipisici elit …".to_string();
+    let cloned = text.clone();
+
+    let migrations = Migrations::new(vec![
+        M::up_with_hook(
+            "CREATE TABLE novels (text TEXT);",
+            move |tx: &Transaction| {
+                tx.execute("INSERT INTO novels (text) VALUES (?1)", (&cloned,))?;
+                Ok(())
+            },
+        ),
+        M::up_with_hook(
+            "ALTER TABLE novels ADD compressed TEXT;",
+            |tx: &Transaction| {
+                let mut stmt = tx.prepare("SELECT rowid, text FROM novels").unwrap();
+                let rows = stmt.query_map([], |row| {
+                    Ok((row.get_unwrap::<_, i64>(0), row.get_unwrap::<_, String>(1)))
+                })?;
+
+                for row in rows {
+                    let row = row.unwrap();
+                    let rowid = row.0;
+                    let text = row.1;
+                    let compressed = &text[..text.len() / 2];
+                    tx.execute(
+                        "UPDATE novels SET compressed = ?1 WHERE rowid = ?2;",
+                        rusqlite::params![compressed, rowid],
+                    )?;
+                }
+
+                Ok(())
+            },
+        )
+        .down_with_hook(
+            "ALTER TABLE novels DROP COLUMN compressed",
+            |_: &Transaction| Ok(()),
+        ),
+    ]);
+
+    assert_eq!(Ok(()), migrations.to_version(&mut conn, 2));
+
+    let result: (String, String) = conn
+        .query_row(
+            "SELECT text, compressed FROM novels WHERE rowid = 1",
+            [],
+            |row| Ok((row.get(0).unwrap(), row.get(1).unwrap())),
+        )
+        .unwrap();
+
+    assert_eq!(result.0, text);
+    assert!(text.starts_with(&result.1));
+
+    assert_eq!(Ok(()), migrations.to_version(&mut conn, 1));
+}
