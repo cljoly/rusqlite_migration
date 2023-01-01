@@ -89,26 +89,64 @@ limitations under the License.
 use log::{debug, info, trace, warn};
 #[allow(deprecated)] // To keep compatibility with lower rusqlite versions
 use rusqlite::NO_PARAMS;
-use rusqlite::{Connection, OptionalExtension};
+use rusqlite::{Connection, OptionalExtension, Transaction};
 
 mod errors;
 
 #[cfg(test)]
 mod tests;
 pub use errors::{
-    Error, ForeignKeyCheckError, MigrationDefinitionError, Result, SchemaVersionError,
+    Error, ForeignKeyCheckError, HookError, HookResult, MigrationDefinitionError, Result,
+    SchemaVersionError,
 };
 use std::{
     cmp::{self, Ordering},
-    fmt,
+    fmt::{self, Debug},
     num::NonZeroUsize,
 };
+
+/// Helper trait to make hook functions clonable.
+pub trait MigrationHook: Fn(&Transaction) -> HookResult + Send + Sync {
+    /// Clone self.
+    fn clone_box(&self) -> Box<dyn MigrationHook>;
+}
+
+impl<T> MigrationHook for T
+where
+    T: 'static + Clone + Send + Sync + Fn(&Transaction) -> HookResult,
+{
+    fn clone_box(&self) -> Box<dyn MigrationHook> {
+        Box::new(self.clone())
+    }
+}
+
+impl PartialEq for Box<dyn MigrationHook> {
+    fn eq(&self, other: &Self) -> bool {
+        self == other
+    }
+}
+
+impl Eq for Box<dyn MigrationHook> {}
+
+impl Debug for Box<dyn MigrationHook> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_tuple("Box").field(&self).finish()
+    }
+}
+
+impl Clone for Box<dyn MigrationHook> {
+    fn clone(&self) -> Self {
+        (**self).clone_box()
+    }
+}
 
 /// One migration
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct M<'u> {
     up: &'u str,
+    up_hook: Option<Box<dyn MigrationHook>>,
     down: Option<&'u str>,
+    down_hook: Option<Box<dyn MigrationHook>>,
     foreign_key_check: bool,
 }
 
@@ -140,9 +178,65 @@ impl<'u> M<'u> {
     pub const fn up(sql: &'u str) -> Self {
         Self {
             up: sql,
+            up_hook: None,
             down: None,
+            down_hook: None,
             foreign_key_check: false,
         }
+    }
+
+    /// Create a schema update running additional Rust code. The SQL command will be executed only
+    /// when the migration has not been executed on the underlying database. The `hook` code will
+    /// be executed *after* the SQL command executed successfully.
+    ///
+    /// See [`Self::up()`] for additional notes.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use rusqlite_migration::{M, Migrations};
+    /// use rusqlite::Transaction;
+    ///
+    /// let migrations = Migrations::new(vec![
+    ///     M::up_with_hook(
+    ///         "CREATE TABLE novels (text TEXT);",
+    ///         move |tx: &Transaction| {
+    ///             tx.execute("INSERT INTO novels (text) VALUES (?1)", ("Lorem Ipsum …",))
+    ///                 .unwrap();
+    ///
+    ///             Ok(())
+    ///         },
+    ///     ),
+    ///     M::up_with_hook(
+    ///         "ALTER TABLE novels ADD compressed TEXT;",
+    ///         |tx: &Transaction| {
+    ///             let mut stmt = tx.prepare("SELECT rowid, text FROM novels")?;
+    ///             let rows = stmt
+    ///                 .query_map([], |row| {
+    ///                     Ok((row.get_unwrap::<_, i64>(0), row.get_unwrap::<_, String>(1)))
+    ///                 })?;
+    ///
+    ///             for row in rows {
+    ///                 let row = row?;
+    ///                 let rowid = row.0;
+    ///                 let text = row.1;
+    ///                 // Replace with a proper compression strategy ...
+    ///                 let compressed = &text[..text.len() / 2];
+    ///                 tx.execute(
+    ///                     "UPDATE novels SET compressed = ?1 WHERE rowid = ?2;",
+    ///                     rusqlite::params![compressed, rowid],
+    ///                 )?;
+    ///             }
+    ///
+    ///             Ok(())
+    ///         },
+    ///     ),
+    /// ]);
+    /// ```
+    pub fn up_with_hook(sql: &'u str, hook: impl MigrationHook + 'static) -> Self {
+        let mut m = Self::up(sql);
+        m.up_hook = Some(hook.clone_box());
+        m
     }
 
     /// Define a down-migration. This SQL statement should exactly reverse the changes
@@ -160,6 +254,15 @@ impl<'u> M<'u> {
     /// ```
     pub const fn down(mut self, sql: &'u str) -> Self {
         self.down = Some(sql);
+        self
+    }
+
+    /// Define a down-migration running additional Rust code. This SQL statement should exactly
+    /// reverse the changes performed in [`Self::up_with_hook()`]. `hook` will run before the SQL
+    /// statement is executed.
+    pub fn down_with_hook(mut self, sql: &'u str, hook: impl MigrationHook + 'static) -> Self {
+        self.down = Some(sql);
+        self.down_hook = Some(hook.clone_box());
         self
     }
 
@@ -310,6 +413,7 @@ impl<'m> Migrations<'m> {
 
         trace!("start migration transaction");
         let tx = conn.transaction()?;
+
         for v in current_version..target_version {
             let m = &self.ms[v];
             debug!("Running: {}", m.up);
@@ -320,7 +424,12 @@ impl<'m> Migrations<'m> {
             if m.foreign_key_check {
                 validate_foreign_keys(&tx)?;
             }
+
+            if let Some(hook) = &m.up_hook {
+                hook(&tx)?;
+            }
         }
+
         set_user_version(&tx, target_version)?;
         tx.commit()?;
         trace!("commited migration transaction");
@@ -360,6 +469,11 @@ impl<'m> Migrations<'m> {
             let m = &self.ms[v];
             if let Some(ref down) = m.down {
                 debug!("Running: {}", down);
+
+                if let Some(hook) = &m.down_hook {
+                    hook(&tx)?;
+                }
+
                 tx.execute_batch(down)
                     .map_err(|e| Error::with_sql(e, down))?;
             } else {
