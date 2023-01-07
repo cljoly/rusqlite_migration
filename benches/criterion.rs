@@ -16,12 +16,11 @@ limitations under the License.
 
 use criterion::measurement::Measurement;
 use criterion::BenchmarkGroup;
-use rusqlite::Connection;
-use rusqlite_migration::{Migrations, M};
-
 use criterion::{criterion_group, criterion_main, BatchSize, BenchmarkId, Criterion};
 use criterion_perf_events::Perf;
 use perfcnt::linux::{HardwareEventType, PerfCounterBuilderLinux};
+use rusqlite::Connection;
+use rusqlite_migration::{Migrations, M};
 
 fn migrations_benchmark<Mes: Measurement>(c: &mut Criterion<Mes>) {
     let mut group = c.benchmark_group("Apply migrations");
