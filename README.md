@@ -102,6 +102,13 @@ fn migrations_test() {
 
 Contributions (documentation or code improvements in particular) are welcome, see [contributing](https://cj.rs/docs/contribute/)!
 
+### Running the Benchmarks
+
+For the criterion benchmarks, we use perf counters, so if you get a permission denied error, run:
+``` bash
+echo 1 | sudo tee /proc/sys/kernel/perf_event_paranoid
+```
+
 ## Acknowledgments
 
 I would like to thank all the contributors, as well as the authors of the dependencies this crate uses.

@@ -83,9 +83,14 @@ fn migrations_benchmark<Mes: Measurement>(c: &mut Criterion<Mes>) {
     group.finish()
 }
 
+// See https://gz.github.io/rust-perfcnt/perfcnt/linux/enum.HardwareEventType.html
+
 criterion_group!(
     name = benches;
-    config = Criterion::default().with_measurement(Perf::new(PerfCounterBuilderLinux::from_hardware_event(HardwareEventType::Instructions)));
+    config = Criterion::default().with_measurement(
+        Perf::new(PerfCounterBuilderLinux::from_hardware_event(HardwareEventType::Instructions))
+    );
     targets = migrations_benchmark
 );
+
 criterion_main!(benches);
