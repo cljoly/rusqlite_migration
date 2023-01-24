@@ -1,8 +1,10 @@
-/target
-Cargo.lock
+**/target
+**/Cargo.lock
 
 # Output of some examples
 my_db.db3
+my_db.wal
+my_db.shm
 
 # Local IDE & editor files
 .idea/

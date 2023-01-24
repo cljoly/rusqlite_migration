@@ -1,0 +1,19 @@
+[package]
+name = "example-simple"
+version = "0.1.0"
+edition = "2018"
+publish = false
+
+[dependencies]
+rusqlite_migration = { path = "../../rusqlite_migration" }
+log = "0.4"
+simple-logging = "2.0.2"
+env_logger = "0.10"
+anyhow = "1"
+lazy_static = "1.4.0"
+mktemp = "0.5"
+
+[dependencies.rusqlite]
+version = ">=0.23.0"
+default-features = false
+features = []

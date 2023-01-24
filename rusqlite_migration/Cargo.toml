@@ -1,0 +1,37 @@
+[package]
+name = "rusqlite_migration"
+version = "1.1.0-alpha.2"
+authors = ["Clément Joly <l@131719.xyz>"]
+edition = "2018"
+license = "Apache-2.0"
+description = "Simple schema migration library for rusqlite using user_version instead of an SQL table to maintain the current schema version."
+keywords = ["rusqlite", "sqlite", "user_version", "database", "migration"]
+categories = ["database"]
+readme = "README.md"
+homepage = "https://cj.rs/rusqlite_migration"
+repository = "https://github.com/cljoly/rusqlite_migration"
+rust-version = "1.61"
+
+[features]
+default = []
+### Enable support for async migrations with the use of `tokio-rusqlite`
+async-tokio-rusqlite = ["dep:tokio-rusqlite", "dep:tokio"]
+
+[dependencies]
+tokio = { version = "1.25", features = ["macros"], optional = true }
+tokio-rusqlite = { version = "0.3.0", optional = true }
+log = "0.4"
+
+[dependencies.rusqlite]
+version = ">=0.23.0"
+default-features = false
+features = []
+
+[dev-dependencies]
+tokio = { version = "1.25", features = ["full"] }
+tokio-test = "0.4.2"
+simple-logging = "2.0.2"
+env_logger = "0.10"
+anyhow = "1"
+lazy_static = "1.4.0"
+mktemp = "0.5"
