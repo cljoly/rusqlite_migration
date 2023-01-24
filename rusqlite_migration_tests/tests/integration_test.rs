@@ -11,7 +11,7 @@ fn main_test() {
     // Define migrations
     let mut ms = vec![
         M::up("CREATE TABLE t(a);"),
-        M::up(include_str!("../examples/friend_car.sql")),
+        M::up(include_str!("../../examples/friend_car.sql")),
         M::up("ALTER TABLE friend ADD COLUMN birthday TEXT;"),
     ];
 

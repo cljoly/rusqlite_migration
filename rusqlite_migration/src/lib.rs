@@ -63,9 +63,12 @@ limitations under the License.
 //! ```
 //!
 //! Please see the [examples](https://github.com/cljoly/rusqlite_migrate/tree/master/examples) folder for more, in particular:
+//! - `async` migrations in the [`quick_start_async.rs`][] file
 //! - migrations with multiple SQL statements (using for instance `r#"…"` or `include_str!(…)`)
 //! - use of lazy_static
 //! - migrations to previous versions (downward migrations)
+//!
+//! [quick_start_async.rs]: https://github.com/cljoly/rusqlite_migrate/tree/master/examples/quick_start_async.rs
 //!
 //! I’ve also made a [cheatsheet of SQLite pragma for improved performance and consistency](https://cj.rs/blog/sqlite-pragma-cheatsheet-for-performance-and-consistency/).
 //!
@@ -94,10 +97,14 @@ use log::{debug, info, trace, warn};
 use rusqlite::NO_PARAMS;
 use rusqlite::{Connection, OptionalExtension, Transaction};
 
+#[cfg(feature = "async-tokio-rusqlite")]
+mod asynch;
 mod errors;
 
 #[cfg(test)]
 mod tests;
+#[cfg(feature = "async-tokio-rusqlite")]
+pub use asynch::AsyncMigrations;
 pub use errors::{
     Error, ForeignKeyCheckError, HookError, HookResult, MigrationDefinitionError, Result,
     SchemaVersionError,

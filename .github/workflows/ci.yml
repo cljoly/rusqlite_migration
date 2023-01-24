@@ -21,8 +21,8 @@ jobs:
         with:
           command: check
 
-  test:
-    name: Test Suite
+  test_no_features:
+    name: Test no features
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -34,6 +34,36 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: test
+
+  test_all_features:
+    name: Test all features
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --all-features
+
+  test_async_tokio_rusqlite:
+    name: Test feature async-tokio-rusqlite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --features async-tokio-rusqlite
 
   min_rust_version:
     name: Check with minimal Rust version
@@ -68,6 +98,9 @@ jobs:
   readme-sync:
     name: Sync Readme
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./rusqlite_migration
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
@@ -77,10 +110,7 @@ jobs:
           override: true
       - uses: Swatinem/rust-cache@v1
       - run: cargo install cargo-sync-readme
-      - uses: actions-rs/cargo@v1
-        with:
-          command: sync-readme
-          args: --check
+      - run: cargo sync-readme --check
   clippy:
     name: Clippy
     runs-on: ubuntu-latest
