@@ -33,7 +33,7 @@ limitations under the License.
 //!
 //! ## Example
 //!
-//! Here, we define SQL statements to run with [Migrations::new](crate::Migrations::new) and run these (if necessary) with [.to_latest()](crate::Migrations::to_latest).
+//! Here, we define SQL statements to run with [`Migrations::new()`] and run these (if necessary) with [`Migrations::to_latest()`].
 //!
 //! ``` rust
 //! use rusqlite::{params, Connection};
@@ -142,6 +142,7 @@ impl Clone for Box<dyn MigrationHook> {
 
 /// One migration
 #[derive(Debug, PartialEq, Eq, Clone)]
+#[must_use]
 pub struct M<'u> {
     up: &'u str,
     up_hook: Option<Box<dyn MigrationHook>>,
@@ -342,6 +343,7 @@ impl<'m> Migrations<'m> {
     ///     M::up("CREATE TABLE food (name TEXT);"),
     /// ]);
     /// ```
+    #[must_use]
     pub fn new(ms: Vec<M<'m>>) -> Self {
         Self { ms }
     }
@@ -386,10 +388,14 @@ impl<'m> Migrations<'m> {
     ///
     /// assert_eq!(SchemaVersion::Inside(NonZeroUsize::new(2).unwrap()), migrations.current_version(&conn).unwrap());
     /// ```
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::RusqliteError`] in case the user version cannot be queried.
     pub fn current_version(&self, conn: &Connection) -> Result<SchemaVersion> {
         user_version(conn)
             .map(|v| self.db_version_to_schema(v))
-            .map_err(|e| e.into())
+            .map_err(std::convert::Into::into)
     }
 
     /// Migrate upward methods. This is rolled back on error.
@@ -460,8 +466,8 @@ impl<'m> Migrations<'m> {
         let tx = conn.transaction()?;
         for v in (target_version..current_version).rev() {
             let m = &self.ms[v];
-            if let Some(ref down) = m.down {
-                debug!("Running: {}", down);
+            if let Some(down) = m.down {
+                debug!("Running: {}", &down);
 
                 if let Some(hook) = &m.down_hook {
                     hook(&tx)?;
@@ -545,6 +551,10 @@ impl<'m> Migrations<'m> {
     /// conn.execute("INSERT INTO animals (name) VALUES (?)", ["dog"]).unwrap();
     /// conn.execute("INSERT INTO food (name) VALUES (?)", ["carrot"]).unwrap();
     /// ```
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::MigrationDefinition`] if no migration is defined.
     pub fn to_latest(&self, conn: &mut Connection) -> Result<()> {
         let v_max = self.max_schema_version();
         match v_max {
@@ -647,6 +657,10 @@ impl<'m> Migrations<'m> {
     ///     }
     /// }
     /// ```
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::RusqliteError`] if the underlying sqlite database open call fails.
     pub fn validate(&self) -> Result<()> {
         let mut conn = Connection::open_in_memory()?;
         self.to_latest(&mut conn)
