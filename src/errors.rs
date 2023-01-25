@@ -31,6 +31,7 @@ pub enum Error {
 
 impl Error {
     /// Associtate the SQL request that caused the error
+    #[must_use]
     pub fn with_sql(e: rusqlite::Error, sql: &str) -> Error {
         Error::RusqliteError {
             query: String::from(sql),

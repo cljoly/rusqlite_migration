@@ -54,7 +54,7 @@ Rusqlite Migration is a simple and performant schema migration library for [rusq
 
 ## Example
 
-Here, we define SQL statements to run with [Migrations::new](crate::Migrations::new) and run these (if necessary) with [.to_latest()](crate::Migrations::to_latest).
+Here, we define SQL statements to run with [`Migrations::new()`] and run these (if necessary) with [`Migrations::to_latest()`].
 
 ``` rust
 use rusqlite::{params, Connection};
