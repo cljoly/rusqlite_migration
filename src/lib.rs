@@ -308,8 +308,8 @@ impl fmt::Display for SchemaVersion {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             SchemaVersion::NoneSet => write!(f, "0 (no version set)"),
-            SchemaVersion::Inside(v) => write!(f, "{} (inside)", v),
-            SchemaVersion::Outside(v) => write!(f, "{} (outside)", v),
+            SchemaVersion::Inside(v) => write!(f, "{v} (inside)"),
+            SchemaVersion::Outside(v) => write!(f, "{v} (outside)"),
         }
     }
 }
@@ -668,7 +668,7 @@ fn set_user_version(conn: &Connection, v: usize) -> Result<()> {
     #[allow(clippy::needless_borrow)]
     conn.pragma_update(None, "user_version", &v)
         .map_err(|e| Error::RusqliteError {
-            query: format!("PRAGMA user_version = {}; -- Approximate query", v),
+            query: format!("PRAGMA user_version = {v}; -- Approximate query"),
             err: e,
         })
 }
