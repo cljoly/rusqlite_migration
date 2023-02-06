@@ -53,8 +53,8 @@ pub fn main() {
     // Apply some PRAGMA. These are often better applied outside of migrations, as some needs to be
     // executed for each connection (like `foreign_keys`) or to be executed outside transactions
     // (`journal_mode` is a noop in a transaction).
-    conn.pragma_update(None, "journal_mode", &"WAL").unwrap();
-    conn.pragma_update(None, "foreign_keys", &"ON").unwrap();
+    conn.pragma_update(None, "journal_mode", "WAL").unwrap();
+    conn.pragma_update(None, "foreign_keys", "ON").unwrap();
 
     // Use the db 🥳
     conn.execute(

@@ -42,7 +42,7 @@ impl Error {
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // TODO Format the error with fmt instead of debug
-        write!(f, "rusqlite_migrate error: {:?}", self)
+        write!(f, "rusqlite_migrate error: {self:?}")
     }
 }
 
@@ -85,7 +85,7 @@ impl fmt::Display for SchemaVersionError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             SchemaVersionError::TargetVersionOutOfRange { specified, highest } => {
-                write!(f, "Attempt to migrate to version {}, which is higher than the highest version currently supported, {}.", specified, highest)
+                write!(f, "Attempt to migrate to version {specified}, which is higher than the highest version currently supported, {highest}.")
             }
         }
     }

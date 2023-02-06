@@ -24,8 +24,8 @@ fn main_test() {
         let migrations = Migrations::new(ms.clone());
         migrations.to_latest(&mut conn).unwrap();
 
-        conn.pragma_update(None, "journal_mode", &"WAL").unwrap();
-        conn.pragma_update(None, "foreign_keys", &"ON").unwrap();
+        conn.pragma_update(None, "journal_mode", "WAL").unwrap();
+        conn.pragma_update(None, "foreign_keys", "ON").unwrap();
 
         assert_eq!(
             Ok(SchemaVersion::Inside(NonZeroUsize::new(ms.len()).unwrap())),
