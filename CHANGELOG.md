@@ -1,5 +1,28 @@
 # Changelog
 
+## Version 1.1.0 Alpha 1
+
+**⚠️ The APIs exposed in this version may be unstable.**
+
+### Minimum Rust Version
+
+Rust 1.61
+
+### New Feature
+
+* Add up/down hooks to run custom Rust code during migrations ([PR](https://github.com/cljoly/rusqlite_migration/pull/28) thanks to [@matze](https://github.com/matze))
+  * The purpose of this release is to get feedback on the new API. Please feel free to comment on [this discussion](https://github.com/cljoly/rusqlite_migration/discussions/36)!
+* Add foreign_key_check method to migrations ([PR](https://github.com/cljoly/rusqlite_migration/pull/20) thanks to [@Jokler](https://github.com/Jokler))
+  * Please beware of the [follow up work needed on this](https://github.com/cljoly/rusqlite_migration/issues/4#issuecomment-1166363260)
+
+### Other
+
+* CI improvements
+* Linter improvements
+* Repository metadata improvements
+* Documentation improvements
+* Dev dependencies update (not dependencies of the library when used in another crate)
+
 ## Version 1.0.1
 
 ### Bug Fix
