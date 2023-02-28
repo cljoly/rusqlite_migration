@@ -33,7 +33,10 @@ limitations under the License.
 //!
 //! ## Example
 //!
-//! Here, we define SQL statements to run with [`Migrations::new()`] and run these (if necessary) with [`Migrations::to_latest()`].
+//! Here, we define SQL statements to run with [`Migrations::new()`][migrations_new] and run these (if necessary) with [`Migrations::to_latest()`][migrations_to_latest].
+//!
+//! [migrations_new]: https://docs.rs/rusqlite_migration/latest/rusqlite_migration/struct.Migrations.html#method.new
+//! [migrations_to_latest]: https://docs.rs/rusqlite_migration/latest/rusqlite_migration/struct.Migrations.html#method.to_latest
 //!
 //! ``` rust
 //! use rusqlite::{params, Connection};
@@ -713,4 +716,3 @@ fn validate_foreign_keys(conn: &Connection) -> Result<()> {
         None => Ok(()),
     })
 }
-
