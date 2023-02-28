@@ -63,12 +63,12 @@ limitations under the License.
 //! ```
 //!
 //! Please see the [examples](https://github.com/cljoly/rusqlite_migrate/tree/master/examples) folder for more, in particular:
-//! - `async` migrations in the [`quick_start_async.rs`][] file
+//! - `async` migrations in the [`quick_start_async.rs`][quick_start_async] file
 //! - migrations with multiple SQL statements (using for instance `r#"…"` or `include_str!(…)`)
 //! - use of lazy_static
 //! - migrations to previous versions (downward migrations)
 //!
-//! [quick_start_async.rs]: https://github.com/cljoly/rusqlite_migrate/tree/master/examples/quick_start_async.rs
+//! [quick_start_async]: https://github.com/cljoly/rusqlite_migrate/tree/master/examples/quick_start_async.rs
 //!
 //! I’ve also made a [cheatsheet of SQLite pragma for improved performance and consistency](https://cj.rs/blog/sqlite-pragma-cheatsheet-for-performance-and-consistency/).
 //!
