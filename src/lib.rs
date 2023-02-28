@@ -669,7 +669,10 @@ impl<'m> Migrations<'m> {
 
 // Read user version field from the SQLite db
 fn user_version(conn: &Connection) -> Result<usize, rusqlite::Error> {
-    #[allow(deprecated)] // To keep compatibility with lower rusqlite versions
+    // To keep compatibility with lower rusqlite versions
+    #[allow(deprecated)]
+    // We can’t fix this without breaking API compatibility
+    #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
     conn.query_row("PRAGMA user_version", NO_PARAMS, |row| row.get(0))
         .map(|v: i64| v as usize)
 }
@@ -677,6 +680,8 @@ fn user_version(conn: &Connection) -> Result<usize, rusqlite::Error> {
 // Set user version field from the SQLite db
 fn set_user_version(conn: &Connection, v: usize) -> Result<()> {
     trace!("set user version to: {}", v);
+    // We can’t fix this without breaking API compatibility
+    #[allow(clippy::cast_possible_truncation)]
     let v = v as u32;
     // To keep compatibility with lower rusqlite versions, allow the needless `&v` borrow
     #[allow(clippy::needless_borrow)]
@@ -708,3 +713,4 @@ fn validate_foreign_keys(conn: &Connection) -> Result<()> {
         None => Ok(()),
     })
 }
+
