@@ -22,6 +22,7 @@ impl AsyncMigrations {
     ///     M::up("CREATE TABLE food (name TEXT);"),
     /// ]);
     /// ```
+    #[must_use]
     pub fn new(ms: Vec<M<'static>>) -> Self {
         Self {
             migrations: Migrations::new(ms),
@@ -52,6 +53,7 @@ impl AsyncMigrations {
     /// assert_eq!(SchemaVersion::Inside(NonZeroUsize::new(2).unwrap()), migrations.current_version(&conn).await.unwrap());
     /// # })
     /// ```
+    #[allow(clippy::missing_errors_doc)]
     pub async fn current_version(&self, async_conn: &AsyncConnection) -> Result<SchemaVersion> {
         let m = self.migrations.clone();
         async_conn.call(move |conn| m.current_version(conn)).await
@@ -79,6 +81,7 @@ impl AsyncMigrations {
     /// conn.call(|conn| conn.execute("INSERT INTO food (name) VALUES (?)", ["carrot"])).await.unwrap();
     /// # });
     /// ```
+    #[allow(clippy::missing_errors_doc)]
     pub async fn to_latest(&self, async_conn: &mut AsyncConnection) -> Result<()> {
         let m = self.migrations.clone();
         async_conn.call(move |conn| m.to_latest(conn)).await
@@ -113,6 +116,7 @@ impl AsyncMigrations {
     /// conn.call(|conn| conn.execute("INSERT INTO food (name) VALUES (?)", ["milk"]).unwrap_err()).await;
     /// # })
     /// ```
+    #[allow(clippy::missing_errors_doc)]
     pub async fn to_version(&self, async_conn: &mut AsyncConnection, version: usize) -> Result<()> {
         let m = self.migrations.clone();
         async_conn
@@ -136,6 +140,7 @@ impl AsyncMigrations {
     ///     }
     /// }
     /// ```
+    #[allow(clippy::missing_errors_doc)]
     pub async fn validate(&self) -> Result<()> {
         let mut async_conn = AsyncConnection::open_in_memory().await?;
         self.to_latest(&mut async_conn).await
