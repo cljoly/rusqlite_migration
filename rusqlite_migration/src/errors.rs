@@ -116,7 +116,7 @@ impl fmt::Display for MigrationDefinitionError {
             MigrationDefinitionError::DownNotDefined { migration_index } => {
                 write!(
                     f,
-                    "Migration {} (version {} -> {}) cannot be reverted.",
+                    "Migration {} (version {} -> {}) cannot be reverted",
                     migration_index,
                     migration_index,
                     migration_index + 1
@@ -150,7 +150,7 @@ impl fmt::Display for ForeignKeyCheckError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "Foreign key check found a row {} in table '{}' missing from table '{}' \
+            "Foreign key check found row with id {} in table '{}' missing from table '{}' \
             but required by foreign key with id {}",
             self.rowid, self.table, self.parent, self.fkid
         )

@@ -103,6 +103,7 @@ mod errors;
 
 #[cfg(test)]
 mod tests;
+
 #[cfg(feature = "async-tokio-rusqlite")]
 pub use asynch::AsyncMigrations;
 pub use errors::{
@@ -113,6 +114,7 @@ use std::{
     cmp::{self, Ordering},
     fmt::{self, Debug},
     num::NonZeroUsize,
+    ptr::addr_of,
 };
 
 /// Helper trait to make hook functions clonable.
@@ -130,17 +132,9 @@ where
     }
 }
 
-impl PartialEq for Box<dyn MigrationHook> {
-    fn eq(&self, other: &Self) -> bool {
-        self == other
-    }
-}
-
-impl Eq for Box<dyn MigrationHook> {}
-
 impl Debug for Box<dyn MigrationHook> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_tuple("Box").field(&self).finish()
+        write!(f, "MigrationHook")
     }
 }
 
@@ -150,8 +144,12 @@ impl Clone for Box<dyn MigrationHook> {
     }
 }
 
-/// One migration
-#[derive(Debug, PartialEq, Eq, Clone)]
+/// One migration.
+///
+/// A migration can contain up- and down-hooks, which are incomparable closures.
+/// To signify `M` equality we compare if two migrations either don't have hooks defined (they are set to `None`)
+/// or if the closure memory addresses are the same.
+#[derive(Debug, Clone)]
 #[must_use]
 pub struct M<'u> {
     up: &'u str,
@@ -160,6 +158,30 @@ pub struct M<'u> {
     down_hook: Option<Box<dyn MigrationHook>>,
     foreign_key_check: bool,
 }
+
+impl<'u> PartialEq for M<'u> {
+    fn eq(&self, other: &Self) -> bool {
+        let equal_up_hooks = match (self.up_hook.as_ref(), other.up_hook.as_ref()) {
+            (None, None) => true,
+            (Some(a), Some(b)) => addr_of!(*a) as usize == addr_of!(*b) as usize,
+            _ => false,
+        };
+
+        let equal_down_hooks = match (self.down_hook.as_ref(), other.down_hook.as_ref()) {
+            (None, None) => true,
+            (Some(a), Some(b)) => addr_of!(*a) as usize == addr_of!(*b) as usize,
+            _ => false,
+        };
+
+        self.up == other.up
+            && self.down == other.down
+            && equal_up_hooks
+            && equal_down_hooks
+            && self.foreign_key_check == other.foreign_key_check
+    }
+}
+
+impl<'u> Eq for M<'u> {}
 
 impl<'u> M<'u> {
     /// Create a schema update. The SQL command will be executed only when the migration has not been
