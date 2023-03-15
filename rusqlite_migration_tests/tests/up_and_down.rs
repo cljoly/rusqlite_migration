@@ -5,8 +5,6 @@ use rusqlite_migration::{MigrationDefinitionError, Migrations, SchemaVersion, M}
 
 #[test]
 fn main_test() {
-    simple_logging::log_to_stderr(log::LevelFilter::Trace);
-
     let ms = vec![
         // 0
         M::up("CREATE TABLE animals (id INTEGER PRIMARY KEY, name TEXT);")
@@ -121,8 +119,6 @@ fn main_test() {
 
 #[test]
 fn test_errors() {
-    simple_logging::log_to_stderr(log::LevelFilter::Trace);
-
     let ms = vec![
         // 0
         M::up("CREATE TABLE animals (id INTEGER, name TEXT);").down("DROP TABLE animals;"),

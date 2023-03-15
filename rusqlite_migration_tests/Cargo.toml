@@ -20,7 +20,7 @@ log = "0.4"
 
 [dependencies.rusqlite_migration]
 path = "../rusqlite_migration"
-features = ["async-tokio-rusqlite"]
+features = ["async-tokio-rusqlite", "from-directory"]
 
 [dependencies.rusqlite]
 version = ">=0.23.0"
@@ -34,6 +34,7 @@ env_logger = "0.10"
 anyhow = "1"
 lazy_static = "1.4.0"
 mktemp = "0.5"
+include_dir = "0.7.3"
 
 [[test]]
 name = "integration_tests"

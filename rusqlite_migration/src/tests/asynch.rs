@@ -1,3 +1,5 @@
+use std::iter::FromIterator;
+
 use crate::{AsyncMigrations, Error, MigrationDefinitionError, M};
 use tokio_rusqlite::Connection as AsyncConnection;
 
@@ -152,4 +154,10 @@ async fn empty_migrations_test() {
             m.to_version(&mut conn, v).await
         )
     }
+}
+
+#[tokio::test]
+async fn test_from_iter() {
+    let migrations = AsyncMigrations::from_iter(vec![m_valid0(), m_valid10()]);
+    assert_eq!(Ok(()), migrations.validate().await);
 }

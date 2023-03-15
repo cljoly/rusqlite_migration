@@ -5,8 +5,6 @@ use rusqlite_migration::{Migrations, SchemaVersion, M};
 
 #[test]
 fn main_test() {
-    simple_logging::log_to_stderr(log::LevelFilter::Trace);
-
     let mut conn = Connection::open_in_memory().unwrap();
     // Define migrations
     let mut ms = vec![
