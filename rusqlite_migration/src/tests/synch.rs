@@ -1,4 +1,4 @@
-use std::num::NonZeroUsize;
+use std::{iter::FromIterator, num::NonZeroUsize};
 
 use rusqlite::{Connection, Transaction};
 
@@ -131,7 +131,7 @@ fn test_migration_hook_debug() {
     let m = M::up_with_hook("", |_: &Transaction| Ok(()));
     assert_eq!(
         format!(
-            r#"M {{ up: "", up_hook: {:?}, down: None, down_hook: None, foreign_key_check: false }}"#,
+            r#"M {{ up: "", up_hook: {:?}, down: None, down_hook: None, foreign_key_check: false, comment: None }}"#,
             m.up_hook
         ),
         format!("{m:?}")
@@ -292,6 +292,9 @@ fn error_test_source() {
     );
 
     let err = Error::Hook(String::new());
+    assert!(std::error::Error::source(&err).is_none());
+
+    let err = Error::FileLoad(String::new());
     assert!(std::error::Error::source(&err).is_none());
 }
 
@@ -540,4 +543,10 @@ fn eq_hook_test() {
     }
     assert_eq!(&vec_migrations[1], &vec_migrations[1]);
     assert_ne!(&vec_migrations[0], &vec_migrations[1]);
+}
+
+#[test]
+fn test_from_iter() {
+    let migrations = Migrations::from_iter(vec![m_valid0(), m_valid10()]);
+    assert_eq!(Ok(()), migrations.validate());
 }

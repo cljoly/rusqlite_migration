@@ -107,6 +107,19 @@ use log::{debug, info, trace, warn};
 use rusqlite::NO_PARAMS;
 use rusqlite::{Connection, OptionalExtension, Transaction};
 
+#[cfg(feature = "from-directory")]
+use include_dir::Dir;
+
+#[cfg(feature = "from-directory")]
+mod loader;
+#[cfg(feature = "from-directory")]
+use loader::from_directory;
+
+#[cfg(feature = "from-directory")]
+mod builder;
+#[cfg(feature = "from-directory")]
+pub use builder::MigrationsBuilder;
+
 #[cfg(feature = "async-tokio-rusqlite")]
 mod asynch;
 mod errors;
@@ -123,6 +136,7 @@ pub use errors::{
 use std::{
     cmp::{self, Ordering},
     fmt::{self, Debug},
+    iter::FromIterator,
     num::NonZeroUsize,
     ptr::addr_of,
 };
@@ -167,6 +181,8 @@ pub struct M<'u> {
     down: Option<&'u str>,
     down_hook: Option<Box<dyn MigrationHook>>,
     foreign_key_check: bool,
+    #[allow(dead_code)]
+    comment: Option<&'u str>,
 }
 
 impl<'u> PartialEq for M<'u> {
@@ -225,7 +241,14 @@ impl<'u> M<'u> {
             down: None,
             down_hook: None,
             foreign_key_check: false,
+            comment: None,
         }
+    }
+
+    /// Add a comment to the schema update
+    pub const fn comment(mut self, comment: &'u str) -> Self {
+        self.comment = Some(comment);
+        self
     }
 
     /// Create a schema update running additional Rust code. The SQL command will be executed only
@@ -390,9 +413,54 @@ impl<'m> Migrations<'m> {
         Self { ms }
     }
 
+    /// Creates a set of migrations from a given directory by scanning subdirectories with a specified name pattern.
+    /// The migrations are loaded and stored in the binary.
+    ///
+    /// # Directory Structure Requirements
+    ///
+    /// The migration directory pointed to by `include_dir!()` must contain
+    /// subdirectories in accordance with the given pattern:
+    /// `{usize id indicating the order}-{convinient migration name}`
+    ///
+    /// Those directories must contain at lest an `up.sql` file containing a valid upward migration.
+    /// They can also contain a `down.sql` file containing a downward migration.
+    ///
+    /// ## Example structure
+    ///
+    /// ```no_test
+    /// migrations
+    /// ├── 01-friend_car
+    /// │  └── up.sql
+    /// ├── 02-add_birthday_column
+    /// │  └── up.sql
+    /// └── 03-add_animal_table
+    ///    ├── down.sql
+    ///    └── up.sql
+    /// ```
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use rusqlite_migration::Migrations;
+    /// use include_dir::{Dir, include_dir};
+    ///
+    /// static MIGRATION_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/../examples/from-directory/migrations");
+    /// let migrations = Migrations::from_directory(&MIGRATION_DIR).unwrap();
+    /// ```
+    ///
+    /// Errors:
+    ///
+    /// Returns [`Error::FileLoad`] in case the subdirectory names are incorrect,
+    /// or don't contain at least a valid `up.sql` file.
+    #[cfg(feature = "from-directory")]
+    pub fn from_directory(dir: &'static Dir<'static>) -> Result<Self> {
+        Ok(Self {
+            ms: from_directory(dir)?,
+        })
+    }
+
     /// Performs allocations transparently.
     pub fn new_iter<I: IntoIterator<Item = M<'m>>>(ms: I) -> Self {
-        use std::iter::FromIterator;
         Self::new(Vec::from_iter(ms))
     }
 
@@ -750,4 +818,12 @@ fn validate_foreign_keys(conn: &Connection) -> Result<()> {
         Some(e) => Err(Error::ForeignKeyCheck(e)),
         None => Ok(()),
     })
+}
+
+impl<'u> FromIterator<M<'u>> for Migrations<'u> {
+    fn from_iter<T: IntoIterator<Item = M<'u>>>(iter: T) -> Self {
+        Self {
+            ms: Vec::from_iter(iter),
+        }
+    }
 }

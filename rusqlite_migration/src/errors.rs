@@ -27,6 +27,8 @@ pub enum Error {
     ForeignKeyCheck(ForeignKeyCheckError),
     /// Error returned by the migration hook
     Hook(String),
+    /// Error returned when loading migrations from directory
+    FileLoad(String),
 }
 
 impl Error {
@@ -55,6 +57,7 @@ impl std::error::Error for Error {
             Error::MigrationDefinition(e) => Some(e),
             Error::ForeignKeyCheck(e) => Some(e),
             Error::Hook(_) => None,
+            Error::FileLoad(_) => None,
         }
     }
 }

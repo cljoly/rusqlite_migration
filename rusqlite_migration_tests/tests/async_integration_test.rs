@@ -6,8 +6,6 @@ use tokio_rusqlite::Connection;
 
 #[tokio::test]
 async fn main_test() {
-    simple_logging::log_to_stderr(log::LevelFilter::Trace);
-
     let mut conn = Connection::open_in_memory().await.unwrap();
     // Define migrations
     let mut ms = vec![

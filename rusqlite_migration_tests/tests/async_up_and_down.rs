@@ -6,8 +6,6 @@ use tokio_rusqlite::Connection;
 
 #[tokio::test]
 async fn main_test() {
-    simple_logging::log_to_stderr(log::LevelFilter::Trace);
-
     let ms = vec![
         // 0
         M::up("CREATE TABLE animals (id INTEGER PRIMARY KEY, name TEXT);")
@@ -139,8 +137,6 @@ async fn main_test() {
 
 #[tokio::test]
 async fn test_errors() {
-    simple_logging::log_to_stderr(log::LevelFilter::Trace);
-
     let ms = vec![
         // 0
         M::up("CREATE TABLE animals (id INTEGER, name TEXT);").down("DROP TABLE animals;"),

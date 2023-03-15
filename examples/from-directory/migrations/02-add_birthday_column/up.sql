@@ -1,0 +1,2 @@
+ALTER TABLE friend ADD COLUMN birthday TEXT;
+ALTER TABLE friend ADD COLUMN comment TEXT;

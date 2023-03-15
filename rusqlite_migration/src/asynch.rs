@@ -1,7 +1,12 @@
+use std::iter::FromIterator;
+
 use tokio_rusqlite::Connection as AsyncConnection;
 
 use crate::errors::Result;
 use crate::{Migrations, SchemaVersion, M};
+
+#[cfg(feature = "from-directory")]
+use include_dir::Dir;
 
 /// Adapter to make `Migrations` available in an async context.
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -27,6 +32,25 @@ impl AsyncMigrations {
         Self {
             migrations: Migrations::new(ms),
         }
+    }
+
+    /// Proxy implementation of the same method in the [Migrations](crate::Migrations::from_directory) struct.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use rusqlite_migration::AsyncMigrations;
+    /// use include_dir::{Dir, include_dir};
+    ///
+    /// static MIGRATION_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/../examples/from-directory/migrations");
+    /// let migrations = AsyncMigrations::from_directory(&MIGRATION_DIR).unwrap();
+    /// ```
+    #[allow(clippy::missing_errors_doc)]
+    #[cfg(feature = "from-directory")]
+    pub fn from_directory(dir: &'static Dir<'static>) -> Result<Self> {
+        Ok(Self {
+            migrations: Migrations::from_directory(dir)?,
+        })
     }
 
     /// Asynchronous version of the same method in the [Migrations](crate::Migrations::current_version) struct.
@@ -144,5 +168,13 @@ impl AsyncMigrations {
     pub async fn validate(&self) -> Result<()> {
         let mut async_conn = AsyncConnection::open_in_memory().await?;
         self.to_latest(&mut async_conn).await
+    }
+}
+
+impl FromIterator<M<'static>> for AsyncMigrations {
+    fn from_iter<T: IntoIterator<Item = M<'static>>>(iter: T) -> Self {
+        Self {
+            migrations: Migrations::from_iter(iter),
+        }
     }
 }
