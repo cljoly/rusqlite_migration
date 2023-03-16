@@ -114,3 +114,5 @@ I would like to thank all the contributors, as well as the authors of the depend
 
 
 <!-- cargo-sync-readme end -->
+
+Thanks to [Migadu](https://www.migadu.com/) for offering a discounted service to support this project. It is not an endorsement by Migadu though.
