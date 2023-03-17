@@ -10,7 +10,7 @@ pub struct AsyncMigrations {
 }
 
 impl AsyncMigrations {
-    /// Adapt a [Migrations](crate::Migrations) instance for use in an asynchronous context.
+    /// Create a proxy struct to a [Migrations](crate::Migrations) instance for use in an asynchronous context.
     ///
     /// # Example
     ///
