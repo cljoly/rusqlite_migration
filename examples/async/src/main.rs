@@ -9,9 +9,9 @@ use tokio_rusqlite::Connection;
 mod tests {
     use super::*;
 
-    #[test]
-    fn migrations_test() {
-        assert!(MIGRATIONS.validate().is_ok());
+    #[tokio::test]
+    async fn migrations_test() {
+        assert!(MIGRATIONS.validate().await.is_ok());
     }
 }
 
