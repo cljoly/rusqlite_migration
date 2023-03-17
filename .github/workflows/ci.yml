@@ -111,6 +111,23 @@ jobs:
       - uses: Swatinem/rust-cache@v1
       - run: cargo install cargo-sync-readme
       - run: cargo sync-readme --check
+
+  mutation-tests:
+    name: Mutation tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - uses: Swatinem/rust-cache@v1
+      - run: cargo install cargo-mutants
+      - uses: actions-rs/cargo@v1
+        with:
+          command: mutants
+
   clippy:
     name: Clippy
     runs-on: ubuntu-latest
