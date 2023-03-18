@@ -26,7 +26,7 @@ end_insert -->
 {{< /rawhtml >}}
 end_insert -->
 
-[![docs.rs](https://img.shields.io/docsrs/rusqlite_migration?style=flat-square)](https://docs.rs/rusqlite_migration) [![Crates.io](https://img.shields.io/crates/v/rusqlite_migration?style=flat-square)](https://crates.io/crates/rusqlite_migration) ![](https://img.shields.io/github/languages/code-size/cljoly/rusqlite_migration?style=flat-square) [![unsafe forbidden](https://img.shields.io/badge/unsafe-forbidden-success.svg?style=flat-square)](https://github.com/rust-secure-code/safety-dance/) [![dependency status](https://deps.rs/repo/github/cljoly/rusqlite_migration/status.svg)](https://deps.rs/repo/github/cljoly/rusqlite_migration)
+[![docs.rs](https://img.shields.io/docsrs/rusqlite_migration)](https://docs.rs/rusqlite_migration) [![Crates.io](https://img.shields.io/crates/v/rusqlite_migration)](https://crates.io/crates/rusqlite_migration) ![](https://img.shields.io/github/languages/code-size/cljoly/rusqlite_migration) [![unsafe forbidden](https://img.shields.io/badge/unsafe-forbidden-success.svg)](https://github.com/rust-secure-code/safety-dance/) [![dependency status](https://deps.rs/repo/github/cljoly/rusqlite_migration/status.svg)](https://deps.rs/repo/github/cljoly/rusqlite_migration) [![Coveralls](https://img.shields.io/coverallsCoverage/github/cljoly/rusqlite_migration)](#code-coverage)
 
 <!-- insert
 {{< rawhtml >}}
@@ -107,6 +107,12 @@ fn migrations_test() {
 ## Contributing
 
 Contributions (documentation or code improvements in particular) are welcome, see [contributing](https://cj.rs/docs/contribute/)!
+
+### Code Coverage
+
+Code coverage can only be imperfectly measured with [cargo-llvm-cov](https://crates.io/crates/cargo-llvm-cov). In particular, doc-tests are not taken into account. For this reason, we exclude the `async-tokio-rusqlite` feature, which is mostly tested through doc-tests, for maintainability reasons.
+
+Full report: [Coveralls](https://coveralls.io/github/cljoly/rusqlite_migration)
 
 ## Acknowledgments
 
