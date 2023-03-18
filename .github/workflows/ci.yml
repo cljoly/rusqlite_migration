@@ -172,13 +172,14 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly
+          toolchain: stable
           override: true
+          components: llvm-tools
       - uses: Swatinem/rust-cache@v1
       - name: Install cargo-llvm-cov
         uses: taiki-e/install-action@cargo-llvm-cov
       - name: Generate code coverage
-        run: cargo +nightly llvm-cov --all-features --doctests --workspace --lcov --output-path lcov.info
+        run: cargo llvm-cov --workspace --all-features --lcov --output-path lcov.info --ignore-filename-regex asynch.rs
       - name: Upload coverage to Coveralls
         uses: coverallsapp/github-action@v1
         with:
