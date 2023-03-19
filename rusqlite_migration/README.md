@@ -108,12 +108,6 @@ fn migrations_test() {
 
 Contributions (documentation or code improvements in particular) are welcome, see [contributing](https://cj.rs/docs/contribute/)!
 
-### Code Coverage
-
-Code coverage can only be imperfectly measured with [cargo-llvm-cov](https://crates.io/crates/cargo-llvm-cov). In particular, doc-tests are not taken into account. For this reason, we exclude the `async-tokio-rusqlite` feature, which is mostly tested through doc-tests, for maintainability reasons.
-
-Full report: [Coveralls](https://coveralls.io/github/cljoly/rusqlite_migration)
-
 ## Acknowledgments
 
 I would like to thank all the contributors, as well as the authors of the dependencies this crate uses.

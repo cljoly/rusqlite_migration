@@ -165,21 +165,15 @@ jobs:
   coverage:
     name: Code coverage
     runs-on: ubuntu-latest
-    env:
-      CARGO_TERM_COLOR: always
+    container:
+      image: xd009642/tarpaulin:latest
+      options: --security-opt seccomp=unconfined
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-          components: llvm-tools
-      - uses: Swatinem/rust-cache@v1
-      - name: Install cargo-llvm-cov
-        uses: taiki-e/install-action@cargo-llvm-cov
+      - name: Checkout repository
+        uses: actions/checkout@v2
       - name: Generate code coverage
-        run: cargo llvm-cov --workspace --all-features --lcov --output-path lcov.info --ignore-filename-regex asynch.rs
+        run: |
+          cargo tarpaulin --verbose --all-features --run-types AllTargets --workspace --timeout 120 --out Lcov
       - name: Upload coverage to Coveralls
         uses: coverallsapp/github-action@v1
         with:
