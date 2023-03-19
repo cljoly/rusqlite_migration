@@ -190,3 +190,33 @@ impl From<HookError> for Error {
 
 /// A typedef of the result returned by hooks.
 pub type HookResult<E = HookError> = std::result::Result<(), E>;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // We should be able to convert rusqlite errors transparently
+    #[test]
+    fn test_rusqlite_error_conversion() {
+        assert!(matches!(
+            Error::from(rusqlite::Error::MultipleStatement),
+            Error::RusqliteError { query: _, err: _ }
+        ));
+
+        let hook_error = HookError::from(rusqlite::Error::MultipleStatement);
+        assert!(matches!(&hook_error, &HookError::RusqliteError(_)));
+        assert!(matches!(
+            Error::from(hook_error),
+            Error::RusqliteError { query: _, err: _ },
+        ));
+    }
+
+    // Hook error conversion preserves the message
+    #[test]
+    fn test_hook_conversion_msg() {
+        let msg = String::from("some error encountered in the hook");
+        let hook_error = HookError::Hook(msg.clone());
+
+        assert_eq!(Error::from(hook_error), Error::Hook(msg))
+    }
+}
