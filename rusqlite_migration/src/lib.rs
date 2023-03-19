@@ -134,7 +134,7 @@ where
 
 impl Debug for Box<dyn MigrationHook> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "MigrationHook")
+        write!(f, "MigrationHook({:#x})", addr_of!(*self) as usize)
     }
 }
 
@@ -685,7 +685,7 @@ impl<'m> Migrations<'m> {
     ///
     ///     #[test]
     ///     fn migrations_test() {
-    ///         assert!(migrations.validate().is_ok());
+    ///         migrations.validate().unwrap();
     ///     }
     /// }
     /// ```

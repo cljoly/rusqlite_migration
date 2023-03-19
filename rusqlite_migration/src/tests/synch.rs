@@ -129,7 +129,13 @@ fn schema_version_partial_cmp_test() {
 #[test]
 fn test_migration_hook_debug() {
     let m = M::up_with_hook("", |_: &Transaction| Ok(()));
-    assert_eq!("M { up: \"\", up_hook: Some(MigrationHook), down: None, down_hook: None, foreign_key_check: false }", format!("{m:?}"));
+    assert_eq!(
+        format!(
+            r#"M {{ up: "", up_hook: {:?}, down: None, down_hook: None, foreign_key_check: false }}"#,
+            m.up_hook
+        ),
+        format!("{m:?}")
+    );
 }
 
 #[test]
@@ -467,4 +473,71 @@ fn hook_test() {
     assert!(text.starts_with(&result.1));
 
     assert_eq!(Ok(()), migrations.to_version(&mut conn, 1));
+}
+
+#[test]
+fn eq_hook_test() {
+    let vec_migrations = vec![
+        M::up("CREATE TABLE novels (text TEXT);"),
+        // Different up
+        M::up("CREATE TABLE IF NOT EXISTS novels (text TEXT);"),
+        // Same up, different down
+        M::up("CREATE TABLE IF NOT EXISTS novels (text TEXT);").down("DROP TABLE novels;"),
+        // Use hooks now
+        M::up_with_hook(
+            "ALTER TABLE novels ADD compressed TEXT;",
+            |_: &Transaction| Ok(()),
+        )
+        .down_with_hook(
+            "ALTER TABLE novels DROP COLUMN compressed",
+            |_: &Transaction| Ok(()),
+        ),
+        // Same as above, but different closures
+        M::up_with_hook(
+            "ALTER TABLE novels ADD compressed TEXT;",
+            |_: &Transaction| Ok(()),
+        )
+        .down_with_hook(
+            "ALTER TABLE novels DROP COLUMN compressed",
+            |_: &Transaction| Ok(()),
+        ),
+        // Only with down hooks
+        M::up_with_hook(
+            "ALTER TABLE novels ADD compressed TEXT;",
+            |_: &Transaction| Ok(()),
+        )
+        .down_with_hook(
+            "ALTER TABLE novels DROP COLUMN compressed",
+            |_: &Transaction| Ok(()),
+        ),
+        // Same as above, the closure should be deemed different
+        M::up_with_hook(
+            "ALTER TABLE novels ADD compressed TEXT;",
+            |_: &Transaction| Ok(()),
+        )
+        .down_with_hook(
+            "ALTER TABLE novels DROP COLUMN compressed",
+            |_: &Transaction| Ok(()),
+        ),
+    ];
+    // When there are no hooks, migrations can be cloned and still be equal
+    {
+        let migrations = Migrations::new_iter(vec_migrations.clone().into_iter().take(2));
+
+        assert_eq!(migrations, migrations.clone());
+    }
+
+    // Complementary checks that PartialEq works as expected. We use assert_{eq,ne} to make
+    // debugging easier
+    for i in 0..vec_migrations.len() {
+        for j in 0..vec_migrations.len() {
+            if i == j {
+                assert_eq!(&vec_migrations[i], &vec_migrations[j]);
+                continue;
+            }
+            assert_ne!(&vec_migrations[i], &vec_migrations[j]);
+        }
+    }
+    assert_eq!(&vec_migrations[1], &vec_migrations[1]);
+    assert_ne!(&vec_migrations[0], &vec_migrations[1]);
 }
