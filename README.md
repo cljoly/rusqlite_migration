@@ -26,7 +26,7 @@ end_insert -->
 {{< /rawhtml >}}
 end_insert -->
 
-[![docs.rs](https://img.shields.io/docsrs/rusqlite_migration?style=flat-square)](https://docs.rs/rusqlite_migration) [![Crates.io](https://img.shields.io/crates/v/rusqlite_migration?style=flat-square)](https://crates.io/crates/rusqlite_migration) ![](https://img.shields.io/github/languages/code-size/cljoly/rusqlite_migration?style=flat-square) [![unsafe forbidden](https://img.shields.io/badge/unsafe-forbidden-success.svg?style=flat-square)](https://github.com/rust-secure-code/safety-dance/) [![dependency status](https://deps.rs/repo/github/cljoly/rusqlite_migration/status.svg)](https://deps.rs/repo/github/cljoly/rusqlite_migration)
+[![docs.rs](https://img.shields.io/docsrs/rusqlite_migration)](https://docs.rs/rusqlite_migration) [![Crates.io](https://img.shields.io/crates/v/rusqlite_migration)](https://crates.io/crates/rusqlite_migration) ![](https://img.shields.io/github/languages/code-size/cljoly/rusqlite_migration) [![unsafe forbidden](https://img.shields.io/badge/unsafe-forbidden-success.svg)](https://github.com/rust-secure-code/safety-dance/) [![dependency status](https://deps.rs/repo/github/cljoly/rusqlite_migration/status.svg)](https://deps.rs/repo/github/cljoly/rusqlite_migration) [![Coveralls](https://img.shields.io/coverallsCoverage/github/cljoly/rusqlite_migration)](https://coveralls.io/github/cljoly/rusqlite_migration)
 
 <!-- insert
 {{< rawhtml >}}
@@ -107,6 +107,16 @@ fn migrations_test() {
 ## Contributing
 
 Contributions (documentation or code improvements in particular) are welcome, see [contributing](https://cj.rs/docs/contribute/)!
+
+Please note that if you want to change something in the main README.md file, you likely need to
+edit the top comment in `rusqlite_migration/src/lib.rs` and then run [`cargo
+sync-readme`][sync-readme] from the `rusqlite_migration` subdirectory (the one that contain
+`src`). This command copies the content of the top comment to the `README.md` file, keeping
+`lib.rs` and the `README.md` sync. The only exception to this is when you want to edit
+something outside of the `<!-- cargo-sync-readme start -->` and
+`<!-- cargo-sync-readme end -->` markers.
+
+[sync-readme]: https://github.com/phaazon/cargo-sync-readme
 
 ## Acknowledgments
 

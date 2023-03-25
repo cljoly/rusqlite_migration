@@ -87,6 +87,16 @@ limitations under the License.
 //!
 //! Contributions (documentation or code improvements in particular) are welcome, see [contributing](https://cj.rs/docs/contribute/)!
 //!
+//! Please note that if you want to change something in the main README.md file, you likely need to
+//! edit the top comment in `rusqlite_migration/src/lib.rs` and then run [`cargo
+//! sync-readme`][sync-readme] from the `rusqlite_migration` subdirectory (the one that contain
+//! `src`). This command copies the content of the top comment to the `README.md` file, keeping
+//! `lib.rs` and the `README.md` sync. The only exception to this is when you want to edit
+//! something outside of the `<!-- cargo-sync-readme start -->` and
+//! `<!-- cargo-sync-readme end -->` markers.
+//!
+//! [sync-readme]: https://github.com/phaazon/cargo-sync-readme
+//!
 //! ## Acknowledgments
 //!
 //! I would like to thank all the contributors, as well as the authors of the dependencies this crate uses.
