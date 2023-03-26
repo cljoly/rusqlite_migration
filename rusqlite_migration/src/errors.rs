@@ -30,7 +30,7 @@ pub enum Error {
 }
 
 impl Error {
-    /// Associtate the SQL request that caused the error
+    /// Associate the SQL request that caused the error
     #[must_use]
     pub fn with_sql(e: rusqlite::Error, sql: &str) -> Error {
         Error::RusqliteError {
@@ -179,10 +179,7 @@ impl From<rusqlite::Error> for HookError {
 impl From<HookError> for Error {
     fn from(e: HookError) -> Error {
         match e {
-            HookError::RusqliteError(err) => Error::RusqliteError {
-                query: String::new(),
-                err,
-            },
+            HookError::RusqliteError(err) => Error::with_sql(err, ""),
             HookError::Hook(s) => Error::Hook(s),
         }
     }

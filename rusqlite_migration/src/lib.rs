@@ -435,9 +435,7 @@ impl<'m> Migrations<'m> {
     ///
     /// Returns [`Error::RusqliteError`] in case the user version cannot be queried.
     pub fn current_version(&self, conn: &Connection) -> Result<SchemaVersion> {
-        user_version(conn)
-            .map(|v| self.db_version_to_schema(v))
-            .map_err(std::convert::Into::into)
+        Ok(user_version(conn).map(|v| self.db_version_to_schema(v))?)
     }
 
     /// Migrate upward methods. This is rolled back on error.
@@ -550,8 +548,7 @@ impl<'m> Migrations<'m> {
             }
             Ordering::Greater => {
                 debug!(
-                    "some migrations to run, target_db_version: {}, current_version: {}",
-                    target_db_version, current_version
+                    "some migrations to run, target: {target_db_version}, current: {current_version}"
                 );
                 self.goto_up(conn, current_version, target_db_version)
             }
@@ -606,8 +603,8 @@ impl<'m> Migrations<'m> {
                     MigrationDefinitionError::NoMigrationsDefined,
                 ))
             }
-            SchemaVersion::Inside(_) => {
-                debug!("some migrations defined, try to migrate");
+            SchemaVersion::Inside(v) => {
+                debug!("some migrations defined (version: {v}), try to migrate");
                 self.goto(conn, v_max.into())
             }
             SchemaVersion::Outside(_) => unreachable!(),
@@ -665,7 +662,8 @@ impl<'m> Migrations<'m> {
                     MigrationDefinitionError::NoMigrationsDefined,
                 ))
             }
-            SchemaVersion::Inside(_) => {
+            SchemaVersion::Inside(v) => {
+                debug!("some migrations defined (version: {v}), try to migrate");
                 if target_version > v_max {
                     warn!("specified version is higher than the max supported version");
                     return Err(Error::SpecifiedSchemaVersion(
@@ -736,8 +734,9 @@ fn set_user_version(conn: &Connection, v: usize) -> Result<()> {
 
 // Validate that no foreign keys are violated
 fn validate_foreign_keys(conn: &Connection) -> Result<()> {
+    let pragma_fk_check = "PRAGMA foreign_key_check";
     #[allow(deprecated)] // To keep compatibility with lower rusqlite versions
-    conn.query_row("PRAGMA foreign_key_check", NO_PARAMS, |row| {
+    conn.query_row(pragma_fk_check, NO_PARAMS, |row| {
         Ok(ForeignKeyCheckError {
             table: row.get(0)?,
             rowid: row.get(1)?,
@@ -746,10 +745,7 @@ fn validate_foreign_keys(conn: &Connection) -> Result<()> {
         })
     })
     .optional()
-    .map_err(|e| Error::RusqliteError {
-        query: String::from("PRAGMA foreign_key_check"),
-        err: e,
-    })
+    .map_err(|e| Error::with_sql(e, pragma_fk_check))
     .and_then(|o| match o {
         Some(e) => Err(Error::ForeignKeyCheck(e)),
         None => Ok(()),
