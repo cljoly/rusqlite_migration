@@ -139,6 +139,9 @@ fn test_errors() {
         let migrations = Migrations::new(ms.clone());
 
         migrations.to_latest(&mut conn).unwrap();
+        // Successful even on the second run (the most common case once migrations have been
+        // applied)
+        migrations.to_latest(&mut conn).unwrap();
 
         assert_eq!(
             Ok(SchemaVersion::Inside(NonZeroUsize::new(3).unwrap())),
