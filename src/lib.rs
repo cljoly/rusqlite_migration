@@ -87,9 +87,7 @@ limitations under the License.
 //!
 
 use log::{debug, info, trace, warn};
-use rusqlite::Connection;
-#[allow(deprecated)] // To keep compatibility with lower rusqlite versions
-use rusqlite::NO_PARAMS;
+use rusqlite::{Connection, ToSql};
 
 mod errors;
 
@@ -525,7 +523,7 @@ impl<'m> Migrations<'m> {
 // Read user version field from the SQLite db
 fn user_version(conn: &Connection) -> Result<usize, rusqlite::Error> {
     #[allow(deprecated)] // To keep compatibility with lower rusqlite versions
-    conn.query_row("PRAGMA user_version", NO_PARAMS, |row| row.get(0))
+    conn.query_row::<_, &[&dyn ToSql], _>("PRAGMA user_version", &[], |row| row.get(0))
         .map(|v: i64| v as usize)
 }
 

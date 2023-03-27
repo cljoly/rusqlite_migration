@@ -3,6 +3,8 @@ use std::num::NonZeroUsize;
 use rusqlite::{params, Connection};
 use rusqlite_migration::{Migrations, SchemaVersion, M};
 
+const NO_PARAMS: &[&dyn rusqlite::ToSql] = &[];
+
 #[test]
 fn main_test() {
     simple_logging::log_to_stderr(log::LevelFilter::Trace);
@@ -41,7 +43,7 @@ fn main_test() {
         conn.query_row(
             "SELECT * FROM pragma_journal_mode",
             #[allow(deprecated)] // To keep compatibility with lower rusqlite versions
-            rusqlite::NO_PARAMS,
+            NO_PARAMS,
             |row| {
                 assert_eq!(row.get::<_, String>(0), Ok(String::from("wal")));
                 Ok(())
@@ -52,7 +54,7 @@ fn main_test() {
         conn.query_row(
             "SELECT * FROM pragma_foreign_keys",
             #[allow(deprecated)] // To keep compatibility with lower rusqlite versions
-            rusqlite::NO_PARAMS,
+            NO_PARAMS,
             |row| {
                 assert_eq!(row.get::<_, bool>(0), Ok(true));
                 Ok(())
@@ -68,7 +70,7 @@ fn main_test() {
         conn.query_row(
             "SELECT * FROM pragma_journal_mode",
             #[allow(deprecated)] // To keep compatibility with lower rusqlite versions
-            rusqlite::NO_PARAMS,
+            NO_PARAMS,
             |row| {
                 assert_eq!(row.get::<_, String>(0), Ok(String::from("wal")));
                 Ok(())
