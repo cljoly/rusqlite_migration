@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 1.0.2
+
+### Bug fix
+
+* fix: adapt to rusqlite 0.29 and tighten dependency requirements for rusqlite (see [this discussion](https://github.com/cljoly/rusqlite_migration/issues/68#issuecomment-1485795284))
+
 ## Version 1.0.1
 
 ### Bug Fix
