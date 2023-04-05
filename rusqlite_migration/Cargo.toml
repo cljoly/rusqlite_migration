@@ -23,7 +23,7 @@ from-directory = ["dep:include_dir"]
 [dependencies]
 include_dir = { version = "0.7.3", optional = true }
 tokio = { version = "1.25", features = ["macros"], optional = true }
-tokio-rusqlite = { version = "0.3.0", optional = true }
+tokio-rusqlite = { version = "0.4.0", optional = true }
 log = "0.4"
 
 [dependencies.rusqlite]
