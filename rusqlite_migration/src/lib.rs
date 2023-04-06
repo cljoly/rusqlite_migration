@@ -448,7 +448,7 @@ impl<'m> Migrations<'m> {
     /// let migrations = Migrations::from_directory(&MIGRATION_DIR).unwrap();
     /// ```
     ///
-    /// Errors:
+    /// # Errors
     ///
     /// Returns [`Error::FileLoad`] in case the subdirectory names are incorrect,
     /// or don't contain at least a valid `up.sql` file.

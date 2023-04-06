@@ -14,7 +14,7 @@ impl<'u> MigrationsBuilder<'u> {
     /// Creates a set of migrations from a given directory by scanning subdirectories with a specified name pattern.
     /// The migrations are loaded and stored in the binary.
     ///
-    /// See the [`Migrations::from_directory`] method for additional information regarding the directory structure.
+    /// See the [`crate::Migrations::from_directory`] method for additional information regarding the directory structure.
     ///
     /// # Example
     ///
@@ -26,9 +26,9 @@ impl<'u> MigrationsBuilder<'u> {
     /// let migrations: Migrations = MigrationsBuilder::from_directory(&MIGRATION_DIR).unwrap().finalize();
     /// ```
     ///
-    /// Errors:
+    /// # Errors
     ///
-    /// Returns [`Error::FileLoad`] in case the subdirectory names are incorrect,
+    /// Returns [`crate::Error::FileLoad`] in case the subdirectory names are incorrect,
     /// or don't contain at least a valid `up.sql` file.
     pub fn from_directory(dir: &'static Dir<'static>) -> Result<Self> {
         Ok(Self {
@@ -38,9 +38,9 @@ impl<'u> MigrationsBuilder<'u> {
 
     /// Allows to edit a migration with a given `id`.
     ///
-    /// Errors:
+    /// # Panics
     ///
-    /// Panics in case a migration with a given `id` does not exist.
+    /// Panics if no migration with the `id` provided exists.
     pub fn edit(mut self, id: usize, f: impl Fn(&mut M)) -> Self {
         if id < 1 {
             panic!("id cannot be equal to 0");
@@ -52,7 +52,8 @@ impl<'u> MigrationsBuilder<'u> {
         self
     }
 
-    /// Finalizes the builder and creates a either a [`crate::Migrations`] or [`crate::asynch::AsyncMigration`] instance.
+    /// Finalizes the builder and creates either a [`crate::Migrations`] or a
+    /// [`crate::AsyncMigrations`] instance.
     pub fn finalize<T: FromIterator<M<'u>>>(self) -> T {
         T::from_iter(self.migrations)
     }
