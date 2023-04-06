@@ -1,4 +1,8 @@
-use std::{collections::HashMap, convert::TryFrom, num::NonZeroUsize};
+use std::{
+    collections::{btree_map::Entry, BTreeMap},
+    convert::TryFrom,
+    num::NonZeroUsize,
+};
 
 use crate::{Error, Result, M};
 use include_dir::Dir;
@@ -91,45 +95,42 @@ impl<'u> From<&MigrationFile> for M<'u> {
 }
 
 pub(crate) fn from_directory(dir: &'static Dir<'static>) -> Result<Vec<M<'static>>> {
-    let mut migrations = dir
-        .dirs()
-        .map(MigrationFile::try_from)
-        .collect::<Result<Vec<MigrationFile>>>()?;
+    // We want to limit the number of allocations here
 
-    if migrations.is_empty() {
+    let mut btreemap = BTreeMap::new();
+
+    // We cannot use FromIterator<(K, V)> for BTreeMap<K, V, Global> because that currently
+    // allocates a Vec and sorts it in the background, which we want to avoid
+    for dir in dir.dirs() {
+        let migration_file = MigrationFile::try_from(dir)?;
+        let entry = btreemap.entry(migration_file.id);
+
+        if let Entry::Occupied(_) = entry {
+            return Err(Error::FileLoad(format!(
+                "Multiple migrations detected for migration id: {}",
+                entry.key()
+            )));
+        }
+
+        entry.or_insert(M::from(&migration_file));
+    }
+
+    if btreemap.is_empty() {
         return Err(Error::FileLoad(
             "Directory does not contain any migration files".to_string(),
         ));
     }
 
-    migrations.sort_by_key(|m| m.id);
+    let (last_id, _) = btreemap
+        .last_key_value()
+        .expect("the btreemap is not empty at this point");
 
-    let ids: HashMap<NonZeroUsize, u32> = migrations.iter().map(|entry| (entry.id, 1)).fold(
-        HashMap::new(),
-        |mut acc, (id, _count)| {
-            acc.entry(id).and_modify(|count| *count += 1).or_insert(1);
-            acc
-        },
-    );
-
-    if let Some(duplicte) = ids.iter().find(|(&_id, &count)| count > 1) {
-        return Err(Error::FileLoad(format!(
-            "Multiple migrations detected for migration id: {}",
-            duplicte.0
-        )));
-    }
-
-    let has_consecutive_ids = migrations
-        .iter()
-        .last()
-        .map(|m| m.id)
-        .map_or(migrations.is_empty(), |k| k.get() == migrations.len());
-
-    if !has_consecutive_ids {
+    if last_id.get() != btreemap.len() {
         return Err(Error::FileLoad(
             "Migration ids must be consecutive numbers".to_string(),
         ));
     }
 
-    Ok(migrations.iter().map(M::from).collect())
+    // The values are returned in the order of the keys, i.e. of IDs
+    Ok(btreemap.into_values().collect())
 }
