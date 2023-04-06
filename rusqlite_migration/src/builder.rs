@@ -41,7 +41,7 @@ impl<'u> MigrationsBuilder<'u> {
     /// Errors:
     ///
     /// Panics in case a migration with a given `id` does not exist.
-    pub fn edit(mut self, id: usize, f: impl Fn(&mut M)) -> Self {
+    pub fn edit(mut self, id: usize, f: impl Fn(M) -> M) -> Self {
         if id < 1 {
             panic!("id cannot be equal to 0");
         }
