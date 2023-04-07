@@ -1,4 +1,4 @@
-/* Copyright 2022 Clément Joly
+/* Copyright 2022-2023 Clément Joly
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ use perfcnt::linux::{HardwareEventType, PerfCounterBuilderLinux};
 use rusqlite::Connection;
 use rusqlite_migration::{Migrations, M};
 
-fn migrations_benchmark<Mes: Measurement>(c: &mut Criterion<Mes>) {
+fn upward_migrations_benchmark<Mes: Measurement>(c: &mut Criterion<Mes>) {
     let mut group = c.benchmark_group("Apply migrations");
 
     fn iter_batched_connections<Mes: Measurement, S, R>(
@@ -84,13 +84,22 @@ fn migrations_benchmark<Mes: Measurement>(c: &mut Criterion<Mes>) {
 }
 
 // See https://gz.github.io/rust-perfcnt/perfcnt/linux/enum.HardwareEventType.html
-
 criterion_group!(
-    name = benches;
+    name = upward_migrations;
     config = Criterion::default().with_measurement(
         Perf::new(PerfCounterBuilderLinux::from_hardware_event(HardwareEventType::Instructions))
     );
-    targets = migrations_benchmark
+    targets = upward_migrations_benchmark
 );
 
-criterion_main!(benches);
+#[cfg(feature = "from-directory")]
+mod from_directory;
+
+#[cfg(not(feature = "from-directory"))]
+mod from_directory {
+    pub fn create() {
+        ()
+    }
+}
+
+criterion_main!(upward_migrations, from_directory::create);

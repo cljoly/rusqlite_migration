@@ -5,14 +5,6 @@ This is a collection of alpha-quality benchmarks. This is a work in progress. Th
 * With Criterion, the migrations benchmark actually estimate the cycles spent in the benchmarked code, as the code benchmarked is a bit too big to reliably measure other indicators. This makes it close to Iai benchmarks.
 * Criterion benchmark are quite often noisy and have outliers (even on a quiet computer)
 
-## Why Both Criterion and Iai?
-
-> Comparison with Criterion-rs
->
-> I intend Iai to be a complement to Criterion-rs, not a competitor. The two projects measure different things in different ways and have different pros, cons, and limitations, so for most projects the best approach is to use both.
-
-From https://bheisler.github.io/criterion.rs/book/iai/comparison.html
-
 ## Criterion
 
 Just run
@@ -32,3 +24,12 @@ Just run
 ```
 cargo bench --bench iai
 ```
+
+## Why Both Criterion and Iai?
+
+> Comparison with Criterion-rs
+>
+> I intend Iai to be a complement to Criterion-rs, not a competitor. The two projects measure different things in different ways and have different pros, cons, and limitations, so for most projects the best approach is to use both.
+
+From https://bheisler.github.io/criterion.rs/book/iai/comparison.html
+
