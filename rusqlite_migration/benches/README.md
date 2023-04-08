@@ -2,7 +2,6 @@
 
 This is a collection of alpha-quality benchmarks. This is a work in progress. They are a bit quirky still and have the following gotchas:
 
-* With Criterion, the migrations benchmark actually estimate the cycles spent in the benchmarked code, as the code benchmarked is a bit too big to reliably measure other indicators. This makes it close to Iai benchmarks.
 * Criterion benchmark are quite often noisy and have outliers (even on a quiet computer)
 
 ## Criterion
