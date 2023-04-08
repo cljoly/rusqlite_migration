@@ -204,7 +204,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: tarpaulin
-          args: --verbose --all-features --run-types AllTargets --workspace --timeout 120 --out Lcov
+          args: --all-features --run-types AllTargets --workspace --timeout 120 --out Lcov --exclude-files '**/benches/*'
       - name: Upload coverage to Coveralls
         uses: coverallsapp/github-action@v1
         with:
