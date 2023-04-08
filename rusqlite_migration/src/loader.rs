@@ -96,7 +96,6 @@ impl<'u> From<&MigrationFile> for M<'u> {
 
 pub(crate) fn from_directory(dir: &'static Dir<'static>) -> Result<Vec<M<'static>>> {
     // We want to limit the number of allocations here
-
     let mut btreemap = BTreeMap::new();
 
     // We cannot use FromIterator<(K, V)> for BTreeMap<K, V, Global> because that currently
@@ -121,11 +120,20 @@ pub(crate) fn from_directory(dir: &'static Dir<'static>) -> Result<Vec<M<'static
         ));
     }
 
-    let (last_id, _) = btreemap
-        .last_key_value()
-        .expect("the btreemap is not empty at this point");
+    /* TODO MSRV 1.66.0
+    let last_id = btreemap
+        .last_entry()
+        .expect("the btreemap is not empty at this point")
+        .key()
+        .get();
+    */
+    let last_id = btreemap
+        .keys()
+        .last()
+        .expect("the btreemap is not empty at this point")
+        .get();
 
-    if last_id.get() != btreemap.len() {
+    if last_id != btreemap.len() {
         return Err(Error::FileLoad(
             "Migration ids must be consecutive numbers".to_string(),
         ));
