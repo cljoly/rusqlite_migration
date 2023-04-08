@@ -56,8 +56,7 @@ impl std::error::Error for Error {
             Error::SpecifiedSchemaVersion(e) => Some(e),
             Error::MigrationDefinition(e) => Some(e),
             Error::ForeignKeyCheck(e) => Some(e),
-            Error::Hook(_) => None,
-            Error::FileLoad(_) => None,
+            Error::Hook(_) | Error::FileLoad(_) => None,
         }
     }
 }
