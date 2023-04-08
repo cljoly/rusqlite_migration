@@ -11,3 +11,7 @@ my_db.shm
 
 # Local IDE & editor files
 .idea/
+
+# Tarpaulin & code coverage artefacts
+lcov.info
+tarpaulin-report.html
