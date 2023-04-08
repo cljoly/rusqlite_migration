@@ -193,18 +193,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      # Necessary for tarpaulin doctests
-      - name: Install Rust nightly
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: nightly
-      - name: Install Rust stable
-        uses: actions-rs/toolchain@v1
+      - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
           toolchain: stable
-          default: true
           override: true
       - uses: Swatinem/rust-cache@v2
       - run: cargo install cargo-tarpaulin
@@ -212,7 +204,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: tarpaulin
-          args: --all-features --workspace --timeout 120 --out Lcov --run-types Doctests,Tests,Examples,Lib,Bins
+          args: --verbose --all-features --run-types AllTargets --workspace --timeout 120 --out Lcov
       - name: Upload coverage to Coveralls
         uses: coverallsapp/github-action@v1
         with:
