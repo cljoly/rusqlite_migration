@@ -14,83 +14,7 @@ limitations under the License.
 
 */
 
-use criterion::measurement::Measurement;
-use criterion::BenchmarkGroup;
-use criterion::{criterion_group, criterion_main, BatchSize, BenchmarkId, Criterion};
-use criterion_perf_events::Perf;
-use perfcnt::linux::{HardwareEventType, PerfCounterBuilderLinux};
-use rusqlite::Connection;
-use rusqlite_migration::{Migrations, M};
-
-fn upward_migrations_benchmark<Mes: Measurement>(c: &mut Criterion<Mes>) {
-    let mut group = c.benchmark_group("Apply migrations");
-
-    fn iter_batched_connections<Mes: Measurement, S, R>(
-        group: &mut BenchmarkGroup<Mes>,
-        description: &str,
-        param: i32,
-        more_setup: S,
-        routine: R,
-    ) where
-        S: Fn(&mut Connection) + Copy,
-        R: Fn(&mut Connection) + Copy,
-    {
-        group.bench_with_input(BenchmarkId::new(description, param), &param, |b, _| {
-            b.iter_batched_ref(
-                || {
-                    let mut conn = Connection::open_in_memory().unwrap();
-                    more_setup(&mut conn);
-                    conn
-                },
-                routine,
-                BatchSize::SmallInput,
-            )
-        });
-    }
-
-    for i in [10, 30, 100] {
-        let sql_migrations = (0..=i)
-            .map(|i| {
-                (
-                    format!("CREATE TABLE t{}(a, b, c);", i),
-                    format!("DROP TABLE t{};", i),
-                )
-            })
-            .collect::<Vec<_>>();
-        let migrations = Migrations::new_iter(
-            sql_migrations
-                .iter()
-                .map(|(up, down)| M::up(up).down(down).foreign_key_check()),
-        );
-
-        iter_batched_connections(
-            &mut group,
-            "upward only",
-            i,
-            |_| {},
-            |conn| {
-                // We need to hold this for the benchmark to be valid, but we don’t need to check
-                // it if we haven’t changed the code
-                // assert_eq!(
-                // rusqlite_migration::SchemaVersion::NoneSet,
-                // migrations.current_version(conn).unwrap()
-                // );
-                migrations.to_latest(conn).unwrap();
-            },
-        );
-    }
-
-    group.finish()
-}
-
-// See https://gz.github.io/rust-perfcnt/perfcnt/linux/enum.HardwareEventType.html
-criterion_group!(
-    name = upward_migrations;
-    config = Criterion::default().with_measurement(
-        Perf::new(PerfCounterBuilderLinux::from_hardware_event(HardwareEventType::Instructions))
-    );
-    targets = upward_migrations_benchmark
-);
+use criterion::criterion_main;
 
 #[cfg(feature = "from-directory")]
 mod from_directory;
@@ -102,4 +26,4 @@ mod from_directory {
     }
 }
 
-criterion_main!(upward_migrations, from_directory::create);
+criterion_main!(from_directory::create);
