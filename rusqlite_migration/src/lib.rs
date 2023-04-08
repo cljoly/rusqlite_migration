@@ -459,7 +459,10 @@ impl<'m> Migrations<'m> {
         })
     }
 
+    /// **Deprecated**: [`Migrations`] now implements [`FromIterator`], so use [`Migrations::from_iter`] instead.
+    ///
     /// Performs allocations transparently.
+    #[deprecated = "Use the `FromIterator` trait implementation instead. For instance, you can call Migrations::from_iter."]
     pub fn new_iter<I: IntoIterator<Item = M<'m>>>(ms: I) -> Self {
         Self::new(Vec::from_iter(ms))
     }
