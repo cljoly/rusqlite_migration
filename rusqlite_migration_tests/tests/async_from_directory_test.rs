@@ -28,7 +28,9 @@ async fn main_test() {
                 params!["John", "1970-01-01"],
             )
             .unwrap();
+            Ok(())
         })
-        .await;
+        .await
+        .unwrap();
     }
 }

@@ -36,26 +36,16 @@ fn main_test() {
         )
         .unwrap();
 
-        conn.query_row(
-            "SELECT * FROM pragma_journal_mode",
-            #[allow(deprecated)] // To keep compatibility with lower rusqlite versions
-            rusqlite::NO_PARAMS,
-            |row| {
-                assert_eq!(row.get::<_, String>(0), Ok(String::from("wal")));
-                Ok(())
-            },
-        )
+        conn.query_row("SELECT * FROM pragma_journal_mode", [], |row| {
+            assert_eq!(row.get::<_, String>(0), Ok(String::from("wal")));
+            Ok(())
+        })
         .unwrap();
 
-        conn.query_row(
-            "SELECT * FROM pragma_foreign_keys",
-            #[allow(deprecated)] // To keep compatibility with lower rusqlite versions
-            rusqlite::NO_PARAMS,
-            |row| {
-                assert_eq!(row.get::<_, bool>(0), Ok(true));
-                Ok(())
-            },
-        )
+        conn.query_row("SELECT * FROM pragma_foreign_keys", [], |row| {
+            assert_eq!(row.get::<_, bool>(0), Ok(true));
+            Ok(())
+        })
         .unwrap();
     }
 
@@ -63,15 +53,10 @@ fn main_test() {
     {
         let conn = Connection::open(&db_file).unwrap();
 
-        conn.query_row(
-            "SELECT * FROM pragma_journal_mode",
-            #[allow(deprecated)] // To keep compatibility with lower rusqlite versions
-            rusqlite::NO_PARAMS,
-            |row| {
-                assert_eq!(row.get::<_, String>(0), Ok(String::from("wal")));
-                Ok(())
-            },
-        )
+        conn.query_row("SELECT * FROM pragma_journal_mode", [], |row| {
+            assert_eq!(row.get::<_, String>(0), Ok(String::from("wal")));
+            Ok(())
+        })
         .unwrap();
 
         conn.execute(

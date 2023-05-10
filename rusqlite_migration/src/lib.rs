@@ -103,8 +103,6 @@ limitations under the License.
 //!
 
 use log::{debug, info, trace, warn};
-#[allow(deprecated)] // To keep compatibility with lower rusqlite versions
-use rusqlite::NO_PARAMS;
 use rusqlite::{Connection, OptionalExtension, Transaction};
 
 #[cfg(feature = "from-directory")]
@@ -784,7 +782,7 @@ fn user_version(conn: &Connection) -> Result<usize, rusqlite::Error> {
     #[allow(deprecated)]
     // We can’t fix this without breaking API compatibility
     #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-    conn.query_row("PRAGMA user_version", NO_PARAMS, |row| row.get(0))
+    conn.query_row("PRAGMA user_version", [], |row| row.get(0))
         .map(|v: i64| v as usize)
 }
 
@@ -807,7 +805,7 @@ fn set_user_version(conn: &Connection, v: usize) -> Result<()> {
 fn validate_foreign_keys(conn: &Connection) -> Result<()> {
     let pragma_fk_check = "PRAGMA foreign_key_check";
     #[allow(deprecated)] // To keep compatibility with lower rusqlite versions
-    conn.query_row(pragma_fk_check, NO_PARAMS, |row| {
+    conn.query_row(pragma_fk_check, [], |row| {
         Ok(ForeignKeyCheckError {
             table: row.get(0)?,
             rowid: row.get(1)?,

@@ -80,7 +80,9 @@ impl AsyncMigrations {
     #[allow(clippy::missing_errors_doc)]
     pub async fn current_version(&self, async_conn: &AsyncConnection) -> Result<SchemaVersion> {
         let m = self.migrations.clone();
-        async_conn.call(move |conn| m.current_version(conn)).await
+        async_conn
+            .call(move |conn| Ok(m.current_version(conn)))
+            .await?
     }
 
     /// Asynchronous version of the same method in the [Migrations](super::Migrations::to_latest) struct.
@@ -108,7 +110,7 @@ impl AsyncMigrations {
     #[allow(clippy::missing_errors_doc)]
     pub async fn to_latest(&self, async_conn: &mut AsyncConnection) -> Result<()> {
         let m = self.migrations.clone();
-        async_conn.call(move |conn| m.to_latest(conn)).await
+        async_conn.call(move |conn| Ok(m.to_latest(conn))).await?
     }
 
     /// Asynchronous version of the same method in the [Migrations](crate::Migrations::to_version) struct.
@@ -131,21 +133,21 @@ impl AsyncMigrations {
     ///
     /// // Go back to version 1, i.e. after running the first migration
     /// migrations.to_version(&mut conn, 1).await;
-    /// conn.call(|conn| conn.execute("INSERT INTO animals (name) VALUES (?)", ["dog"])).await.unwrap();
-    /// conn.call(|conn| conn.execute("INSERT INTO food (name) VALUES (?)", ["carrot"]).unwrap_err()).await;
+    /// conn.call(|conn| Ok(conn.execute("INSERT INTO animals (name) VALUES (?)", ["dog"]))).await.unwrap();
+    /// conn.call(|conn| Ok(conn.execute("INSERT INTO food (name) VALUES (?)", ["carrot"]).unwrap_err())).await;
     ///
     /// // Go back to an empty database
     /// migrations.to_version(&mut conn, 0).await;
-    /// conn.call(|conn| conn.execute("INSERT INTO animals (name) VALUES (?)", ["cat"]).unwrap_err()).await;
-    /// conn.call(|conn| conn.execute("INSERT INTO food (name) VALUES (?)", ["milk"]).unwrap_err()).await;
+    /// conn.call(|conn| Ok(conn.execute("INSERT INTO animals (name) VALUES (?)", ["cat"]).unwrap_err())).await;
+    /// conn.call(|conn| Ok(conn.execute("INSERT INTO food (name) VALUES (?)", ["milk"]).unwrap_err())).await;
     /// # })
     /// ```
     #[allow(clippy::missing_errors_doc)]
     pub async fn to_version(&self, async_conn: &mut AsyncConnection, version: usize) -> Result<()> {
         let m = self.migrations.clone();
         async_conn
-            .call(move |conn| m.to_version(conn, version))
-            .await
+            .call(move |conn| Ok(m.to_version(conn, version)))
+            .await?
     }
 
     /// Asynchronous version of the same method in the [Migrations](crate::Migrations::validate) struct.

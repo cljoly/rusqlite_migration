@@ -7,7 +7,7 @@ use crate::{MigrationsBuilder, M};
 fn test_non_existing_index() {
     let ms = vec![M::up("CREATE TABLE t(a);")];
 
-    MigrationsBuilder::from_iter(ms.clone()).edit(100, move |_t| {});
+    let _ = MigrationsBuilder::from_iter(ms.clone()).edit(100, move |_t| {});
 }
 
 #[test]
@@ -15,5 +15,5 @@ fn test_non_existing_index() {
 fn test_0_index() {
     let ms = vec![M::up("CREATE TABLE t(a);")];
 
-    MigrationsBuilder::from_iter(ms).edit(0, move |_t| {});
+    let _ = MigrationsBuilder::from_iter(ms).edit(0, move |_t| {});
 }
