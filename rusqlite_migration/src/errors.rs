@@ -8,7 +8,7 @@ use crate::SchemaVersion;
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 
 /// Enum listing possible errors.
-#[derive(Debug, PartialEq)]
+#[derive(Debug)]
 #[allow(clippy::enum_variant_names)]
 #[non_exhaustive]
 pub enum Error {
@@ -19,6 +19,9 @@ pub enum Error {
         /// Error returned by rusqlite
         err: rusqlite::Error,
     },
+    /// The underlying SQLite connection is closed
+    #[cfg(feature = "async-tokio-rusqlite")]
+    ConnectionClosed,
     /// Error with the specified schema version
     SpecifiedSchemaVersion(SchemaVersionError),
     /// Something wrong with migration definitions
@@ -29,6 +32,25 @@ pub enum Error {
     Hook(String),
     /// Error returned when loading migrations from directory
     FileLoad(String),
+    /// An unknown error occured
+    Unrecognized(Box<dyn std::error::Error + Send + Sync + 'static>),
+}
+
+impl PartialEq for Error {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (
+                Self::RusqliteError { query: q1, err: e1 },
+                Self::RusqliteError { query: q2, err: e2 },
+            ) => q1 == q2 && e1 == e2,
+            (Self::SpecifiedSchemaVersion(a), Self::SpecifiedSchemaVersion(b)) => a == b,
+            (Self::MigrationDefinition(a), Self::MigrationDefinition(b)) => a == b,
+            (Self::ForeignKeyCheck(e1), Self::ForeignKeyCheck(e2)) => e1 == e2,
+            (Self::Hook(a), Self::Hook(b)) => a == b,
+            (Self::FileLoad(a), Self::FileLoad(b)) => a == b,
+            _ => core::mem::discriminant(self) == core::mem::discriminant(other),
+        }
+    }
 }
 
 impl Error {
@@ -56,7 +78,8 @@ impl std::error::Error for Error {
             Error::SpecifiedSchemaVersion(e) => Some(e),
             Error::MigrationDefinition(e) => Some(e),
             Error::ForeignKeyCheck(e) => Some(e),
-            Error::Hook(_) | Error::FileLoad(_) => None,
+            Error::Hook(_) | Error::FileLoad(_) | Error::ConnectionClosed => None,
+            Error::Unrecognized(ref e) => Some(&**e),
         }
     }
 }
@@ -66,6 +89,22 @@ impl From<rusqlite::Error> for Error {
         Error::RusqliteError {
             query: String::new(),
             err: e,
+        }
+    }
+}
+
+#[cfg(feature = "async-tokio-rusqlite")]
+impl From<tokio_rusqlite::Error> for Error {
+    fn from(e: tokio_rusqlite::Error) -> Self {
+        match e {
+            tokio_rusqlite::Error::ConnectionClosed => Error::ConnectionClosed,
+            tokio_rusqlite::Error::Rusqlite(e) | tokio_rusqlite::Error::Close((_, e)) => {
+                Error::RusqliteError {
+                    err: e,
+                    query: Default::default(),
+                }
+            }
+            e => Error::Unrecognized(Box::new(e)),
         }
     }
 }

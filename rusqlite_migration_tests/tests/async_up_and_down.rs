@@ -36,10 +36,12 @@ async fn main_test() {
         migrations.to_version(&mut conn, 1).await.unwrap();
 
         conn.call(|conn| {
-            conn.execute("INSERT INTO animals (name) VALUES (?1)", params!["Dog"])
-                .unwrap();
+            Ok(conn
+                .execute("INSERT INTO animals (name) VALUES (?1)", params!["Dog"])
+                .unwrap())
         })
-        .await;
+        .await
+        .unwrap();
 
         assert_eq!(
             Ok(SchemaVersion::Inside(NonZeroUsize::new(1).unwrap())),
@@ -51,10 +53,12 @@ async fn main_test() {
 
         // the table is gone now
         conn.call(|conn| {
-            conn.execute("INSERT INTO animals (name) VALUES (?1)", params!["Dog"])
-                .unwrap_err();
+            Ok(conn
+                .execute("INSERT INTO animals (name) VALUES (?1)", params!["Dog"])
+                .unwrap_err())
         })
-        .await;
+        .await
+        .unwrap();
 
         assert_eq!(
             Ok(SchemaVersion::NoneSet),
@@ -104,8 +108,11 @@ async fn main_test() {
                 params![15, 0],
             )
             .unwrap();
+
+            Ok(())
         })
-        .await;
+        .await
+        .unwrap();
 
         // go back
         migrations.to_version(&mut conn, 3).await.unwrap();
@@ -130,8 +137,11 @@ async fn main_test() {
                 params![1, 0],
             )
             .unwrap();
+
+            Ok(())
         })
-        .await;
+        .await
+        .unwrap();
     }
 }
 
@@ -162,8 +172,10 @@ async fn test_errors() {
         conn.call(|conn| {
             conn.execute("INSERT INTO animals (name) VALUES (?1)", params!["Dog"])
                 .unwrap();
+            Ok(())
         })
-        .await;
+        .await
+        .unwrap();
 
         // go back
         assert!(migrations.to_version(&mut conn, 0).await.is_err()); // oops

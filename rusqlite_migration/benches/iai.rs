@@ -14,6 +14,8 @@ limitations under the License.
 
 */
 
+use std::iter::FromIterator;
+
 use iai::black_box;
 use rusqlite::Connection;
 use rusqlite_migration::{Migrations, M};
@@ -31,7 +33,7 @@ fn upward(i: u64) {
         })
         .collect::<Vec<_>>();
     let migrations =
-        Migrations::new_iter(sql_migrations.iter().enumerate().map(|(i, (up, down))| {
+        Migrations::from_iter(sql_migrations.iter().enumerate().map(|(i, (up, down))| {
             let m = M::up(up).down(down);
             if i % 500 == 0 {
                 m.foreign_key_check()

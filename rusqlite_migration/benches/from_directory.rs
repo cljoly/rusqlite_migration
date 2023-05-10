@@ -23,17 +23,18 @@ static MIGRATIONS_DIR_10: Dir = include_dir!("$CARGO_MANIFEST_DIR/benches/10_mig
 static MIGRATIONS_DIR_100: Dir = include_dir!("$CARGO_MANIFEST_DIR/benches/100_migrations");
 
 // Iai
-
+#[allow(dead_code)]
 pub fn small() {
     Migrations::from_directory(&MIGRATIONS_DIR_10).unwrap();
 }
 
+#[allow(dead_code)]
 pub fn big() {
     Migrations::from_directory(&MIGRATIONS_DIR_100).unwrap();
 }
 
 // Criterion
-
+#[allow(dead_code)]
 pub fn create_bench(c: &mut Criterion) {
     c.bench_function("from_directory_small", |b| {
         b.iter_with_large_drop(|| Migrations::from_directory(&MIGRATIONS_DIR_10).unwrap())

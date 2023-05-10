@@ -525,7 +525,7 @@ fn eq_hook_test() {
     ];
     // When there are no hooks, migrations can be cloned and still be equal
     {
-        let migrations = Migrations::new_iter(vec_migrations.clone().into_iter().take(2));
+        let migrations = Migrations::from_iter(vec_migrations.clone().into_iter().take(2));
 
         assert_eq!(migrations, migrations.clone());
     }
