@@ -10,7 +10,7 @@ categories = ["database"]
 readme = "README.md"
 homepage = "https://cj.rs/rusqlite_migration"
 repository = "https://github.com/cljoly/rusqlite_migration"
-rust-version = "1.61"
+rust-version = "1.64"
 publish = false
 
 [dependencies]
