@@ -6,6 +6,14 @@
 
 ### Minimum Rust Version
 
+Rust 1.64
+
+## Version 1.1.0 Alpha 1
+
+**⚠️ The APIs exposed in this version may be unstable.**
+
+### Minimum Rust Version
+
 Rust 1.61
 
 ### New Features
