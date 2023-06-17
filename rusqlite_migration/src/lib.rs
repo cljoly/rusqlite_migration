@@ -452,9 +452,12 @@ impl<'m> Migrations<'m> {
     /// or don't contain at least a valid `up.sql` file.
     #[cfg(feature = "from-directory")]
     pub fn from_directory(dir: &'static Dir<'static>) -> Result<Self> {
-        Ok(Self {
-            ms: from_directory(dir)?,
-        })
+        let migrations = from_directory(dir)?
+            .into_iter()
+            .collect::<Option<Vec<_>>>()
+            .ok_or(Error::FileLoad("Could not load migrations".to_string()))?;
+
+        Ok(Self { ms: migrations })
     }
 
     /// **Deprecated**: [`Migrations`] now implements [`FromIterator`], so use [`Migrations::from_iter`] instead.

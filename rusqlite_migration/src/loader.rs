@@ -90,7 +90,7 @@ impl<'u> From<&MigrationFile> for M<'u> {
     }
 }
 
-pub(crate) fn from_directory(dir: &'static Dir<'static>) -> Result<Vec<M<'static>>> {
+pub(crate) fn from_directory(dir: &'static Dir<'static>) -> Result<Vec<Option<M<'static>>>> {
     let mut migrations: Vec<Option<M>> = vec![None; dir.dirs().count()];
 
     for dir in dir.dirs() {
@@ -127,8 +127,5 @@ pub(crate) fn from_directory(dir: &'static Dir<'static>) -> Result<Vec<M<'static
     }
 
     // The values are returned in the order of the keys, i.e. of IDs
-    migrations
-        .into_iter()
-        .collect::<Option<Vec<_>>>()
-        .ok_or(Error::FileLoad("Could not load migrations".to_string()))
+    Ok(migrations)
 }
