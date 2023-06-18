@@ -78,7 +78,9 @@ impl std::error::Error for Error {
             Error::SpecifiedSchemaVersion(e) => Some(e),
             Error::MigrationDefinition(e) => Some(e),
             Error::ForeignKeyCheck(e) => Some(e),
-            Error::Hook(_) | Error::FileLoad(_) | Error::ConnectionClosed => None,
+            Error::Hook(_) | Error::FileLoad(_) => None,
+            #[cfg(feature = "async-tokio-rusqlite")]
+            Error::ConnectionClosed => None,
             Error::Unrecognized(ref e) => Some(&**e),
         }
     }
