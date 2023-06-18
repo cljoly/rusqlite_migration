@@ -781,8 +781,6 @@ impl<'m> Migrations<'m> {
 
 // Read user version field from the SQLite db
 fn user_version(conn: &Connection) -> Result<usize, rusqlite::Error> {
-    // To keep compatibility with lower rusqlite versions
-    #[allow(deprecated)]
     // We can’t fix this without breaking API compatibility
     #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
     conn.query_row("PRAGMA user_version", [], |row| row.get(0))
@@ -795,9 +793,7 @@ fn set_user_version(conn: &Connection, v: usize) -> Result<()> {
     // We can’t fix this without breaking API compatibility
     #[allow(clippy::cast_possible_truncation)]
     let v = v as u32;
-    // To keep compatibility with lower rusqlite versions, allow the needless `&v` borrow
-    #[allow(clippy::needless_borrow)]
-    conn.pragma_update(None, "user_version", &v)
+    conn.pragma_update(None, "user_version", v)
         .map_err(|e| Error::RusqliteError {
             query: format!("PRAGMA user_version = {v}; -- Approximate query"),
             err: e,
@@ -807,7 +803,6 @@ fn set_user_version(conn: &Connection, v: usize) -> Result<()> {
 // Validate that no foreign keys are violated
 fn validate_foreign_keys(conn: &Connection) -> Result<()> {
     let pragma_fk_check = "PRAGMA foreign_key_check";
-    #[allow(deprecated)] // To keep compatibility with lower rusqlite versions
     conn.query_row(pragma_fk_check, [], |row| {
         Ok(ForeignKeyCheckError {
             table: row.get(0)?,
