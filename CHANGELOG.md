@@ -1,12 +1,31 @@
 # Changelog
 
-## Version 1.1.0 Alpha 1
+## Version 1.1.0 Alpha 2
 
 **⚠️ The APIs exposed in this version may be unstable.**
 
 ### Minimum Rust Version
 
 Rust 1.64
+
+### New Features
+
+* Create migrations from directories holding SQL files. See [the example](https://github.com/cljoly/rusqlite_migration/tree/af4da527ff75e3b8c089d2300cab7fbe66096411/examples/from-directory).
+
+### Depreciation
+
+* Mark `Migrations::from_iter` as deprecated
+
+### Other
+
+* Documentation improvements
+* Code quality improvements
+    * Introduce cargo mutants & fix bugs found
+    * Clippy warning fixes
+    * Report on test coverage & improve test coverage
+    * Add benchmarks
+* Made errors returned more precise
+* Update dependencies
 
 ## Version 1.1.0 Alpha 1
 
