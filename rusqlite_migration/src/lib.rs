@@ -179,7 +179,6 @@ pub struct M<'u> {
     down: Option<&'u str>,
     down_hook: Option<Box<dyn MigrationHook>>,
     foreign_key_check: bool,
-    #[allow(dead_code)]
     comment: Option<&'u str>,
 }
 
