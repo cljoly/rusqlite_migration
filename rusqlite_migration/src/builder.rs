@@ -1,4 +1,4 @@
-use std::iter::FromIterator;
+use std::{iter::FromIterator, mem::take};
 
 use include_dir::Dir;
 
@@ -7,7 +7,7 @@ use crate::{loader::from_directory, MigrationHook, Result, M};
 /// Allows to build a `Vec<M<'u>>` with additional edits.
 #[derive(Default, Debug)]
 pub struct MigrationsBuilder<'u> {
-    migrations: Vec<M<'u>>,
+    migrations: Vec<Option<M<'u>>>,
 }
 
 impl<'u> MigrationsBuilder<'u> {
@@ -42,28 +42,25 @@ impl<'u> MigrationsBuilder<'u> {
     ///
     /// Panics if no migration with the `id` provided exists.
     #[must_use]
-    pub fn edit(mut self, id: usize, f: impl Fn(&mut M)) -> Self {
+    pub fn edit(mut self, id: usize, f: impl Fn(M) -> M) -> Self {
         if id < 1 {
             panic!("id cannot be equal to 0");
         }
-        f(self
-            .migrations
-            .get_mut(id - 1)
-            .expect("No migration with the given index"));
+        self.migrations[id - 1] = take(&mut self.migrations[id - 1]).map(f);
         self
     }
 
     /// Finalizes the builder and creates either a [`crate::Migrations`] or a
     /// [`crate::AsyncMigrations`] instance.
-    pub fn finalize<T: FromIterator<M<'u>>>(self) -> T {
-        T::from_iter(self.migrations)
+    pub fn finalize<T: FromIterator<M<'u>>>(mut self) -> T {
+        T::from_iter(self.migrations.drain(..).flatten())
     }
 }
 
 impl<'u> FromIterator<M<'u>> for MigrationsBuilder<'u> {
     fn from_iter<T: IntoIterator<Item = M<'u>>>(iter: T) -> Self {
         Self {
-            migrations: Vec::from_iter(iter),
+            migrations: Vec::from_iter(iter.into_iter().map(Some)),
         }
     }
 }
@@ -76,8 +73,9 @@ impl<'u> M<'u> {
     /// Use [`M::up_with_hook`] instead if you're creating a new migration.
     /// This method is meant for editing existing transactions
     /// when using the [`MigrationsBuilder`].
-    pub fn set_up_hook(&mut self, hook: impl MigrationHook + 'static) {
+    pub fn set_up_hook(mut self, hook: impl MigrationHook + 'static) -> Self {
         self.up_hook = Some(hook.clone_box());
+        self
     }
 
     /// Replace the `down_hook` in the given migration with the provided one.
@@ -87,7 +85,8 @@ impl<'u> M<'u> {
     /// Use [`M::down_with_hook`] instead if you're creating a new migration.
     /// This method is meant for editing existing transactions
     /// when using the [`MigrationsBuilder`].
-    pub fn set_down_hook(&mut self, hook: impl MigrationHook + 'static) {
+    pub fn set_down_hook(mut self, hook: impl MigrationHook + 'static) -> Self {
         self.down_hook = Some(hook.clone_box());
+        self
     }
 }
