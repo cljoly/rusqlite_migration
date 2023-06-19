@@ -10,6 +10,21 @@ use crate::{
 
 use super::helpers::{m_invalid0, m_invalid1, m_valid20, m_valid21};
 
+fn m_invalid_down_fk() -> M<'static> {
+    M::up(
+        "CREATE TABLE fk1(a PRIMARY KEY); \
+        CREATE TABLE fk2( \
+            a, \
+            FOREIGN KEY(a) REFERENCES fk1(a) \
+        ); \
+        INSERT INTO fk1 (a) VALUES ('foo'); \
+        INSERT INTO fk2 (a) VALUES ('foo'); \
+    ",
+    )
+    .foreign_key_check()
+    .down("DROP TABLE fk1;")
+}
+
 #[test]
 fn empty_migrations_test() {
     let mut conn = Connection::open_in_memory().unwrap();
@@ -326,6 +341,19 @@ fn invalid_fk_check_test() {
     let migrations = Migrations::new(vec![m_invalid_fk()]);
     assert!(matches!(
         dbg!(migrations.validate()),
+        Err(Error::ForeignKeyCheck(_))
+    ));
+}
+
+#[test]
+fn invalid_down_fk_check_test() {
+    let migrations = Migrations::new(vec![m_invalid_down_fk()]);
+
+    let mut conn = Connection::open_in_memory().unwrap();
+    migrations.to_latest(&mut conn).unwrap();
+
+    assert!(matches!(
+        dbg!(migrations.to_version(&mut conn, 0)),
         Err(Error::ForeignKeyCheck(_))
     ));
 }

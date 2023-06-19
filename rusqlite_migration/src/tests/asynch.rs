@@ -2,8 +2,8 @@ use std::iter::FromIterator;
 
 use crate::{
     tests::helpers::{
-        all_valid, m_invalid0, m_invalid1, m_invalid_fk, m_valid0, m_valid10, m_valid11, m_valid20,
-        m_valid21, m_valid_fk,
+        all_valid, m_invalid0, m_invalid1, m_invalid_down_fk, m_invalid_fk, m_valid0, m_valid10,
+        m_valid11, m_valid20, m_valid21, m_valid_fk,
     },
     AsyncMigrations, Error, MigrationDefinitionError,
 };
@@ -47,6 +47,19 @@ async fn invalid_fk_check_test() {
     let migrations = AsyncMigrations::new(vec![m_invalid_fk()]);
     assert!(matches!(
         dbg!(migrations.validate().await),
+        Err(Error::ForeignKeyCheck(_))
+    ));
+}
+
+#[tokio::test]
+async fn invalid_down_fk_check_test() {
+    let migrations = AsyncMigrations::new(vec![m_invalid_down_fk()]);
+
+    let mut conn = AsyncConnection::open_in_memory().await.unwrap();
+    migrations.to_latest(&mut conn).await.unwrap();
+
+    assert!(matches!(
+        dbg!(migrations.to_version(&mut conn, 0).await),
         Err(Error::ForeignKeyCheck(_))
     ));
 }
