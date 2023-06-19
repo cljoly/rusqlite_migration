@@ -129,17 +129,25 @@ impl<'u> M<'u> {
     ///
     /// # Please note
     ///
-    /// * PRAGMA statements are discouraged here. They are often better applied outside of
+    /// ## PRAGMA statements
+    ///
+    /// PRAGMA statements are discouraged here. They are often better applied outside of
     /// migrations, because:
     ///   * a PRAGMA executed this way may not be applied consistently. For instance:
     ///     * [`foreign_keys`](https://sqlite.org/pragma.html#pragma_foreign_keys) needs to be
-    ///     executed for each sqlite connection, not just once per database as a migration,
-    ///     * [`journal_mode`](https://sqlite.org/pragma.html#pragma_journal_mode) has no effect
-    ///     when executed inside transactions (that will be the case for the SQL written in `up`).
-    ///   * Multiple SQL commands contaning `PRAGMA` are [not
-    ///   working](https://github.com/rusqlite/rusqlite/pull/794) with the `extra_check` feature of
-    ///   rusqlite.
+    ///     executed for each sqlite connection, not just once per database as a migration. Please
+    ///     see the [`Self::foreign_key_check()`] method to maintain foreign key constraints during
+    ///     migrations instead.
+    ///     * [`journal_mode`][jm] has no effect when executed inside transactions (that will be
+    ///       the case for the SQL written in `up`).
+    ///   * Multiple SQL commands contaning `PRAGMA` are [not working][ru794] with the
+    ///     `extra_check` feature of rusqlite.
+    ///
+    /// ## Misc.
+    ///
     /// * SQL commands should end with a “;”.
+    /// * You can use the `include_str!` macro to include whole files or opt for the
+    ///   `from-directory` feature of this crate.
     ///
     /// # Example
     ///
@@ -148,6 +156,9 @@ impl<'u> M<'u> {
     ///
     /// M::up("CREATE TABLE animals (name TEXT);");
     /// ```
+    ///
+    /// [ru794]: https://github.com/rusqlite/rusqlite/pull/794
+    /// [jm]: https://sqlite.org/pragma.html#pragma_journal_mode
     pub const fn up(sql: &'u str) -> Self {
         Self {
             up: sql,
@@ -240,16 +251,54 @@ impl<'u> M<'u> {
     }
 
     /// Enable an automatic validation of foreign keys before the migration transaction is closed.
-    /// This will cause the migration to fail if `PRAGMA foreign_key_check` returns any rows.
+    /// This works both for upward and downward migrations.
+    ///
+    /// This will cause the migration to fail if [`PRAGMA foreign_key_check`][fkc] returns any
+    /// foreign key check violations.
+    ///
+    /// # Turning `PRAGMA foreign_keys` ON and OFF
+    ///
+    /// By default with SQLite, foreign key constraints are not checked (that [may change in the
+    /// future][fk]). If you wish to check this, you need to manually turn [`PRAGMA
+    /// foreign_keys`][fk] ON. However, the [documentation for “Making Other Kinds Of Table Schema
+    /// Changes”][doc_other_migration] suggests turning this OFF before running the migrations.
+    ///
+    /// This if you want to enforce foreign key checks, it seems best to disable it first (in case
+    /// future versions of SQLite enable it by default), then run the migrations, then enable it,
+    /// as in the example below.
+    ///
+    /// Please make sure you **do not** call `PRAGMA foreign_keys` from inside the migrations, as
+    /// it would be a no-op (each migration is run inside a transaction).
     ///
     /// # Example
     ///
     /// ```
-    /// use rusqlite_migration::M;
+    /// use rusqlite::{params, Connection};
+    /// use rusqlite_migration::{Migrations, M};
     ///
-    /// M::up("CREATE TABLE animals (name TEXT);")
-    ///     .foreign_key_check();
+    /// let migrations = Migrations::new(vec![
+    ///     M::up("CREATE TABLE animals (name TEXT);")
+    ///         .foreign_key_check(), // Let’s pretend this is necessary here
+    /// ]);
+    ///
+    /// let mut conn = Connection::open_in_memory().unwrap();
+    ///
+    /// // Turn foreign key constraints off for the duration of the migration
+    /// conn.pragma_update(None, "foreign_keys", &"OFF").unwrap();
+    /// conn.pragma_update(None, "journal_mode", &"WAL").unwrap();
+    ///
+    /// migrations.to_latest(&mut conn).unwrap();
+    ///
+    /// // Restore foreign key constraints checks
+    /// conn.pragma_update(None, "foreign_keys", &"ON").unwrap();
+    ///
+    /// conn.execute("INSERT INTO animals (name) VALUES (?1)", params!["dog"])
+    ///     .unwrap();
     /// ```
+    ///
+    /// [fk]: https://www.sqlite.org/pragma.html#pragma_foreign_keys
+    /// [fkc]: https://www.sqlite.org/pragma.html#pragma_foreign_key_check
+    /// [doc_other_migration]: https://www.sqlite.org/lang_altertable.html#making_other_kinds_of_table_schema_changes
     pub const fn foreign_key_check(mut self) -> Self {
         self.foreign_key_check = true;
         self
@@ -336,8 +385,8 @@ impl<'m> Migrations<'m> {
     /// subdirectories in accordance with the given pattern:
     /// `{usize id indicating the order}-{convinient migration name}`
     ///
-    /// Those directories must contain at lest an `up.sql` file containing a valid upward migration.
-    /// They can also contain a `down.sql` file containing a downward migration.
+    /// Those directories must contain at lest an `up.sql` file containing a valid upward
+    /// migration. They can also contain a `down.sql` file containing a downward migration.
     ///
     /// ## Example structure
     ///
@@ -503,6 +552,10 @@ impl<'m> Migrations<'m> {
 
                 tx.execute_batch(down)
                     .map_err(|e| Error::with_sql(e, down))?;
+
+                if m.foreign_key_check {
+                    validate_foreign_keys(&tx)?;
+                }
             } else {
                 unreachable!();
             }

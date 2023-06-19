@@ -27,8 +27,8 @@ fn upward(i: u64) {
     let sql_migrations = (0..=i)
         .map(|i| {
             (
-                format!("CREATE TABLE t{}(a, b, c);", i),
-                format!("DROP TABLE t{};", i),
+                format!("CREATE TABLE t{i}(a, b, c);"),
+                format!("DROP TABLE t{i};"),
             )
         })
         .collect::<Vec<_>>();

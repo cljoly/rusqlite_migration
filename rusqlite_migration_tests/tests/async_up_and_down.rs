@@ -154,7 +154,8 @@ async fn test_errors() {
         M::up("CREATE TABLE food (id INTEGER, name TEXT);"), // no down!!!
         // 2
         M::up("CREATE TABLE animal_food (animal_id INTEGER, food_id INTEGER);")
-            .down("DROP TABLE animal_food;"),
+            .down("DROP TABLE animal_food;")
+            .foreign_key_check(),
     ];
 
     {
