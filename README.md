@@ -38,14 +38,14 @@ end_insert -->
 
 <!-- rustdoc start -->
 
-Rusqlite Migration is a simple and performant schema migration library for [rusqlite](https://lib.rs/crates/rusqlite).
+Rusqlite Migration is a simple and performant schema migration library for [rusqlite](https://crates.io/crates/rusqlite).
 
 * **Performance**:
     * *Fast database opening*: to keep track of the current migration state, most tools create one or more tables in the database. These tables require parsing by SQLite and are queried with SQL statements. This library uses the [`user_version`][uv] value instead. It’s much lighter as it is just an integer at a [fixed offset][uv_offset] in the SQLite file.
     * *Fast compilation*: this crate is very small and does not use macros to define the migrations.
 * **Simplicity**: this crate strives for simplicity. Just define a set of SQL statements as strings in your Rust code. Add more SQL statements over time as needed. No external CLI required. Additionally, rusqlite_migration works especially well with other small libraries complementing rusqlite, like [serde_rusqlite][].
 
-[diesel_migrations]: https://lib.rs/crates/diesel_migrations
+[diesel_migrations]: https://crates.io/crates/diesel_migrations
 [pgfine]: https://crates.io/crates/pgfine
 [movine]: https://crates.io/crates/movine
 [uv]: https://sqlite.org/pragma.html#pragma_user_version
@@ -86,10 +86,12 @@ conn.execute("INSERT INTO friend (name) VALUES (?1)", params!["John"])
 Please see the [examples](https://github.com/cljoly/rusqlite_migrate/tree/master/examples) folder for more, in particular:
 - `async` migrations in the [`quick_start_async.rs`][quick_start_async] file
 - migrations with multiple SQL statements (using for instance `r#"…"` or `include_str!(…)`)
+- migrations defined [from a directory][from_dir] with SQL files
 - use of lazy_static
 - migrations to previous versions (downward migrations)
 
-[quick_start_async]: https://github.com/cljoly/rusqlite_migrate/tree/master/examples/quick_start_async.rs
+[quick_start_async]: https://github.com/cljoly/rusqlite_migration/blob/master/examples/async/src/main.rs
+[from_dir]: https://github.com/cljoly/rusqlite_migration/tree/master/examples/from-directory
 
 I’ve also made a [cheatsheet of SQLite pragma for improved performance and consistency](https://cj.rs/blog/sqlite-pragma-cheatsheet-for-performance-and-consistency/).
 
@@ -103,6 +105,15 @@ fn migrations_test() {
     assert!(MIGRATIONS.validate().is_ok());
 }
 ```
+
+## Optional Features
+
+Rusqlite_migration provides several [Cargo features][cargo_features]. They are:
+
+* `from-directory`: enable loading migrations from *.sql files in a given directory
+* `async-tokio-rusqlite`: enable support for async migrations with `tokio-rusqlite`
+
+[cargo_features]: https://doc.rust-lang.org/cargo/reference/manifest.html#the-features-section
 
 ## Contributing
 
