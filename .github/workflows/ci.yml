@@ -138,23 +138,6 @@ jobs:
           command: fmt
           args: --all -- --check
 
-  readme-sync:
-    name: Sync Readme
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./rusqlite_migration
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - uses: Swatinem/rust-cache@v2
-      - run: cargo install cargo-sync-readme
-      - run: cargo sync-readme --check
-
   mutation-tests:
     name: Mutation tests
     runs-on: ubuntu-latest
