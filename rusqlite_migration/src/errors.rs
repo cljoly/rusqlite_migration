@@ -251,6 +251,21 @@ mod tests {
         ));
     }
 
+    // Two errors with different queries should be considered different
+    #[test]
+    fn test_rusqlite_error_query() {
+        assert_ne!(
+            Error::RusqliteError {
+                query: "SELECTTT".to_owned(),
+                err: rusqlite::Error::InvalidQuery
+            },
+            Error::RusqliteError {
+                query: "SSSELECT".to_owned(),
+                err: rusqlite::Error::InvalidQuery
+            }
+        )
+    }
+
     // Hook error conversion preserves the message
     #[test]
     fn test_hook_conversion_msg() {
