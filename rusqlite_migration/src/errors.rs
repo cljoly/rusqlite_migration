@@ -32,7 +32,7 @@ pub enum Error {
     Hook(String),
     /// Error returned when loading migrations from directory
     FileLoad(String),
-    /// An unknown error occured
+    /// An unknown error occurred
     Unrecognized(Box<dyn std::error::Error + Send + Sync + 'static>),
 }
 

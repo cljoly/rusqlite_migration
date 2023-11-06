@@ -56,7 +56,7 @@ use std::{
     ptr::addr_of,
 };
 
-/// Helper trait to make hook functions clonable.
+/// Helper trait to make hook functions cloneable.
 pub trait MigrationHook: Fn(&Transaction) -> HookResult + Send + Sync {
     /// Clone self.
     fn clone_box(&self) -> Box<dyn MigrationHook>;
@@ -140,7 +140,7 @@ impl<'u> M<'u> {
     ///     migrations instead.
     ///     * [`journal_mode`][jm] has no effect when executed inside transactions (that will be
     ///       the case for the SQL written in `up`).
-    ///   * Multiple SQL commands contaning `PRAGMA` are [not working][ru794] with the
+    ///   * Multiple SQL commands containing `PRAGMA` are [not working][ru794] with the
     ///     `extra_check` feature of rusqlite.
     ///
     /// ## Misc.
@@ -383,7 +383,7 @@ impl<'m> Migrations<'m> {
     ///
     /// The migration directory pointed to by `include_dir!()` must contain
     /// subdirectories in accordance with the given pattern:
-    /// `{usize id indicating the order}-{convinient migration name}`
+    /// `{usize id indicating the order}-{convenient migration name}`
     ///
     /// Those directories must contain at lest an `up.sql` file containing a valid upward
     /// migration. They can also contain a `down.sql` file containing a downward migration.
@@ -508,7 +508,7 @@ impl<'m> Migrations<'m> {
 
         set_user_version(&tx, target_version)?;
         tx.commit()?;
-        trace!("commited migration transaction");
+        trace!("committed migration transaction");
 
         Ok(())
     }
