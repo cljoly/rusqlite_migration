@@ -20,7 +20,7 @@ limitations under the License.
 #![doc = include_str!(concat!(env!("OUT_DIR"), "/readme_for_rustdoc.md"))]
 
 use log::{debug, info, trace, warn};
-use rusqlite::{Connection, OptionalExtension, Transaction};
+use rusqlite::{Connection, Transaction};
 
 #[cfg(feature = "from-directory")]
 use include_dir::Dir;
@@ -773,20 +773,26 @@ fn set_user_version(conn: &Connection, v: usize) -> Result<()> {
 // Validate that no foreign keys are violated
 fn validate_foreign_keys(conn: &Connection) -> Result<()> {
     let pragma_fk_check = "PRAGMA foreign_key_check";
-    conn.query_row(pragma_fk_check, [], |row| {
-        Ok(ForeignKeyCheckError {
-            table: row.get(0)?,
-            rowid: row.get(1)?,
-            parent: row.get(2)?,
-            fkid: row.get(3)?,
+    let mut stmt = conn
+        .prepare_cached(pragma_fk_check)
+        .map_err(|e| Error::with_sql(e, pragma_fk_check))?;
+
+    let fk_errors = stmt
+        .query_map([], |row| {
+            Ok(ForeignKeyCheckError {
+                table: row.get(0)?,
+                rowid: row.get(1)?,
+                parent: row.get(2)?,
+                fkid: row.get(3)?,
+            })
         })
-    })
-    .optional()
-    .map_err(|e| Error::with_sql(e, pragma_fk_check))
-    .and_then(|o| match o {
-        Some(e) => Err(Error::ForeignKeyCheck(e)),
-        None => Ok(()),
-    })
+        .map_err(|e| Error::with_sql(e, pragma_fk_check))?
+        .collect::<Result<Vec<_>, _>>()?;
+    if !fk_errors.is_empty() {
+        Err(crate::Error::ForeignKeyCheck(fk_errors))
+    } else {
+        Ok(())
+    }
 }
 
 impl<'u> FromIterator<M<'u>> for Migrations<'u> {

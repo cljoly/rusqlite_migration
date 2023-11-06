@@ -148,40 +148,38 @@ fn test_migration_definition_error_display() {
 
 #[test]
 fn test_error_display() {
-    let err = Error::SpecifiedSchemaVersion(SchemaVersionError::TargetVersionOutOfRange {
-        specified: SchemaVersion::NoneSet,
-        highest: SchemaVersion::NoneSet,
-    });
-    assert_eq!(
-        "rusqlite_migrate error: SpecifiedSchemaVersion(TargetVersionOutOfRange { specified: NoneSet, highest: NoneSet })",
-        format!("{err}")
-    );
+    insta::assert_display_snapshot!(Error::SpecifiedSchemaVersion(
+        SchemaVersionError::TargetVersionOutOfRange {
+            specified: SchemaVersion::NoneSet,
+            highest: SchemaVersion::NoneSet,
+        }
+    ));
 
-    let err = Error::Hook(String::new());
-    assert_eq!("rusqlite_migrate error: Hook(\"\")", format!("{err}"));
+    insta::assert_display_snapshot!(Error::Hook(String::new()));
 
-    let err = Error::ForeignKeyCheck(ForeignKeyCheckError {
-        table: String::new(),
-        rowid: 1,
-        parent: String::new(),
-        fkid: 2,
-    });
-    assert_eq!("rusqlite_migrate error: ForeignKeyCheck(ForeignKeyCheckError { table: \"\", rowid: 1, parent: \"\", fkid: 2 })", format!("{err}"));
+    insta::assert_display_snapshot!(Error::ForeignKeyCheck(vec![
+        ForeignKeyCheckError {
+            table: String::new(),
+            rowid: 1,
+            parent: String::new(),
+            fkid: 2,
+        },
+        ForeignKeyCheckError {
+            table: String::new(),
+            rowid: 2,
+            parent: String::new(),
+            fkid: 3,
+        },
+    ]));
 
-    let err = Error::MigrationDefinition(MigrationDefinitionError::NoMigrationsDefined);
-    assert_eq!(
-        "rusqlite_migrate error: MigrationDefinition(NoMigrationsDefined)",
-        format!("{err}")
-    );
+    insta::assert_display_snapshot!(Error::MigrationDefinition(
+        MigrationDefinitionError::NoMigrationsDefined
+    ));
 
-    let err = Error::RusqliteError {
+    insta::assert_display_snapshot!(Error::RusqliteError {
         query: String::new(),
         err: rusqlite::Error::InvalidQuery,
-    };
-    assert_eq!(
-        "rusqlite_migrate error: RusqliteError { query: \"\", err: InvalidQuery }",
-        format!("{err}")
-    );
+    });
 }
 
 #[test]
@@ -240,12 +238,12 @@ fn error_test_source() {
         &MigrationDefinitionError::NoMigrationsDefined
     );
 
-    let err = Error::ForeignKeyCheck(ForeignKeyCheckError {
+    let err = Error::ForeignKeyCheck(vec![ForeignKeyCheckError {
         table: String::new(),
         rowid: 1i64,
         parent: String::new(),
         fkid: 1i64,
-    });
+    }]);
     assert_eq!(
         std::error::Error::source(&err)
             .and_then(|e| e.downcast_ref::<ForeignKeyCheckError>())
@@ -350,10 +348,7 @@ fn valid_fk_check_test() {
 #[test]
 fn invalid_fk_check_test() {
     let migrations = Migrations::new(vec![m_invalid_fk()]);
-    assert!(matches!(
-        dbg!(migrations.validate()),
-        Err(Error::ForeignKeyCheck(_))
-    ));
+    insta::assert_debug_snapshot!(migrations.validate());
 }
 
 #[test]
