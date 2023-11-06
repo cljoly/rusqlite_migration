@@ -1,0 +1,22 @@
+---
+source: rusqlite_migration/src/tests/synch.rs
+expression: migrations.validate()
+---
+Err(
+    ForeignKeyCheck(
+        [
+            ForeignKeyCheckError {
+                table: "fk2",
+                rowid: 1,
+                parent: "fk1",
+                fkid: 0,
+            },
+            ForeignKeyCheckError {
+                table: "fk2",
+                rowid: 2,
+                parent: "fk1",
+                fkid: 0,
+            },
+        ],
+    ),
+)

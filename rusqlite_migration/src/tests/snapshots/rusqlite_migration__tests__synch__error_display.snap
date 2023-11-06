@@ -1,0 +1,5 @@
+---
+source: rusqlite_migration/src/tests/synch.rs
+expression: "Error::SpecifiedSchemaVersion(SchemaVersionError::TargetVersionOutOfRange {\n        specified: SchemaVersion::NoneSet,\n        highest: SchemaVersion::NoneSet,\n    })"
+---
+rusqlite_migrate error: SpecifiedSchemaVersion(TargetVersionOutOfRange { specified: NoneSet, highest: NoneSet })

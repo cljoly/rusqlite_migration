@@ -1,0 +1,5 @@
+---
+source: rusqlite_migration/src/tests/synch.rs
+expression: "Error::RusqliteError {\n    query: String::new(),\n    err: rusqlite::Error::InvalidQuery,\n}"
+---
+rusqlite_migrate error: RusqliteError { query: "", err: InvalidQuery }

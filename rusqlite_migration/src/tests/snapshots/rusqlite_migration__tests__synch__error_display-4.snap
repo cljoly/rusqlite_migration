@@ -1,0 +1,5 @@
+---
+source: rusqlite_migration/src/tests/synch.rs
+expression: "Error::MigrationDefinition(MigrationDefinitionError::NoMigrationsDefined)"
+---
+rusqlite_migrate error: MigrationDefinition(NoMigrationsDefined)

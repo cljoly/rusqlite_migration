@@ -27,7 +27,7 @@ pub enum Error {
     /// Something wrong with migration definitions
     MigrationDefinition(MigrationDefinitionError),
     /// The foreign key check failed
-    ForeignKeyCheck(ForeignKeyCheckError),
+    ForeignKeyCheck(Vec<ForeignKeyCheckError>),
     /// Error returned by the migration hook
     Hook(String),
     /// Error returned when loading migrations from directory
@@ -81,7 +81,7 @@ impl std::error::Error for Error {
             Error::RusqliteError { query: _, err } => Some(err),
             Error::SpecifiedSchemaVersion(e) => Some(e),
             Error::MigrationDefinition(e) => Some(e),
-            Error::ForeignKeyCheck(e) => Some(e),
+            Error::ForeignKeyCheck(vec) => Some(vec.get(0)?),
             Error::Hook(_) | Error::FileLoad(_) => None,
             #[cfg(feature = "async-tokio-rusqlite")]
             Error::ConnectionClosed => None,
@@ -339,18 +339,18 @@ mod tests {
     #[test]
     fn test_rusqlite_error_fkc() {
         assert_ne!(
-            Error::ForeignKeyCheck(ForeignKeyCheckError {
+            Error::ForeignKeyCheck(vec![ForeignKeyCheckError {
                 table: "t1".to_owned(),
                 rowid: 1,
                 parent: "t2".to_owned(),
                 fkid: 3
-            }),
-            Error::ForeignKeyCheck(ForeignKeyCheckError {
+            }]),
+            Error::ForeignKeyCheck(vec![ForeignKeyCheckError {
                 table: "t1".to_owned(),
                 rowid: 3,
                 parent: "t2".to_owned(),
                 fkid: 3
-            },),
+            }]),
         )
     }
 

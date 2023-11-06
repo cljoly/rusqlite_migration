@@ -72,6 +72,7 @@ pub fn m_invalid_fk() -> M<'static> {
             FOREIGN KEY(a) REFERENCES fk1(a) \
         ); \
         INSERT INTO fk2 (a) VALUES ('foo'); \
+        INSERT INTO fk2 (a) VALUES ('bar'); \
     ",
     )
     .foreign_key_check()
