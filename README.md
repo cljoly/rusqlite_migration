@@ -117,7 +117,7 @@ Rusqlite_migration provides several [Cargo features][cargo_features]. They are:
 
 ## Active Users
 
-This crate is actively used in a number of projects. You can find up to date list of those on:
+This crate is actively used in a number of projects. You can find up-to-date list of those on:
 
 * [crates.io](https://crates.io/crates/rusqlite_migration/reverse_dependencies) / [lib.rs](https://lib.rs/crates/rusqlite_migration/rev)
 * [GitHub’s list of dependent repositories](https://github.com/cljoly/rusqlite_migration/network/dependents?dependent_type=REPOSITORY)
