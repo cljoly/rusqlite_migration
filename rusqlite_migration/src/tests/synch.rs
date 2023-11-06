@@ -3,27 +3,14 @@ use std::{iter::FromIterator, num::NonZeroUsize};
 use rusqlite::{Connection, Transaction};
 
 use crate::{
-    tests::helpers::{all_valid, m_invalid_fk, m_valid0, m_valid10, m_valid11, m_valid_fk},
+    tests::helpers::{
+        all_valid, m_invalid_down_fk, m_invalid_fk, m_valid0, m_valid10, m_valid11, m_valid_fk,
+    },
     user_version, Error, ForeignKeyCheckError, MigrationDefinitionError, Migrations, SchemaVersion,
     SchemaVersionError, M,
 };
 
 use super::helpers::{m_invalid0, m_invalid1, m_valid20, m_valid21};
-
-fn m_invalid_down_fk() -> M<'static> {
-    M::up(
-        "CREATE TABLE fk1(a PRIMARY KEY); \
-        CREATE TABLE fk2( \
-            a, \
-            FOREIGN KEY(a) REFERENCES fk1(a) \
-        ); \
-        INSERT INTO fk1 (a) VALUES ('foo'); \
-        INSERT INTO fk2 (a) VALUES ('foo'); \
-    ",
-    )
-    .foreign_key_check()
-    .down("DROP TABLE fk1;")
-}
 
 #[test]
 fn empty_migrations_test() {
