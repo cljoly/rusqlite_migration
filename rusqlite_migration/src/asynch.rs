@@ -103,8 +103,8 @@ impl AsyncMigrations {
     /// migrations.to_latest(&mut conn).await.unwrap();
     ///
     /// // You can then insert values in the database
-    /// conn.call(|conn| conn.execute("INSERT INTO animals (name) VALUES (?)", ["dog"])).await.unwrap();
-    /// conn.call(|conn| conn.execute("INSERT INTO food (name) VALUES (?)", ["carrot"])).await.unwrap();
+    /// conn.call_unwrap(|conn| conn.execute("INSERT INTO animals (name) VALUES (?)", ["dog"])).await.unwrap();
+    /// conn.call_unwrap(|conn| conn.execute("INSERT INTO food (name) VALUES (?)", ["carrot"])).await.unwrap();
     /// # });
     /// ```
     #[allow(clippy::missing_errors_doc)]

@@ -23,7 +23,7 @@ async fn main_test() {
             migrations.current_version(&conn).await
         );
 
-        conn.call(|c| {
+        conn.call_unwrap(|c| {
             c.execute(
                 "INSERT INTO friend (name, birthday) VALUES (?1, ?2)",
                 params!["John", "1970-01-01"],
@@ -46,7 +46,7 @@ async fn main_test() {
             migrations.current_version(&conn).await
         );
 
-        conn.call(|c| {
+        conn.call_unwrap(|c| {
             c.execute(
                 "INSERT INTO friend (name, birth) VALUES (?1, ?2)",
                 params!["Alice", "2000-01-01"],
@@ -68,7 +68,7 @@ async fn main_test() {
             migrations.current_version(&conn).await
         );
 
-        conn.call(|c| {
+        conn.call_unwrap(|c| {
             c.execute(
                 "INSERT INTO friend (name, birth) VALUES (?1, ?2)",
                 params!["Alice", "2000-01-01"],
