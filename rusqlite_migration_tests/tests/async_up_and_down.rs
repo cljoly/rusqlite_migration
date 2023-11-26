@@ -87,7 +87,7 @@ async fn main_test() {
 
         migrations.to_version(&mut conn, 5).await.unwrap();
 
-        conn.call(|conn| {
+        conn.call_unwrap(|conn| {
             conn.execute(
                 "INSERT INTO habitats (id, name) VALUES (?1, ?2)",
                 params![0, "Forest"],
@@ -119,7 +119,7 @@ async fn main_test() {
 
         // the table is gone now
         assert!(conn
-            .call(|conn| {
+            .call_unwrap(|conn| {
                 conn.execute("INSERT INTO habitats (name) VALUES (?1)", params!["Beach"])
             })
             .await
