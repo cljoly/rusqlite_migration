@@ -721,7 +721,7 @@ impl<'m> Migrations<'m> {
         }
     }
 
-    /// Run migrations on a temporary in-memory database from first to last, one by one.
+    /// Run upward migrations on a temporary in-memory database from first to last, one by one.
     /// Convenience method for testing.
     ///
     /// # Example
