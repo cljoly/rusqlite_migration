@@ -1,11 +1,41 @@
 # Changelog
-## Version 1.1.0 Alpha 3
+
+## Version 1.1.0 Beta 1
 
 **⚠️ The APIs exposed in this version may be unstable.**
+
+Summing up all the changes from the previous Alpha versions.
+
+### See also
+
+Rusqlite was updated from 0.29.0 to 0.30.0. Please see [its release notes](https://github.com/rusqlite/rusqlite/releases/tag/v0.30.0)
 
 ### Minimum Rust Version
 
 Rust 1.70
+
+### New Features
+
+* Create migrations from directories holding SQL files thanks to [@czocher](https://github.com/czocher). See [the example](https://github.com/cljoly/rusqlite_migration/tree/af4da527ff75e3b8c089d2300cab7fbe66096411/examples/from-directory).
+* Add up/down hooks to run custom Rust code during migrations ([PR](https://github.com/cljoly/rusqlite_migration/pull/28) thanks to [@matze](https://github.com/matze))
+* Add foreign_key_check method to migrations ([PR](https://github.com/cljoly/rusqlite_migration/pull/20) thanks to [@Jokler](https://github.com/Jokler))
+* Make `Migration` functions const ([PR](https://github.com/cljoly/rusqlite_migration/pull/19) thanks to [@fkaa](https://github.com/fkaa))
+
+### Depreciation
+
+* Mark `Migrations::from_iter` as deprecated
+
+### Other
+
+* Documentation improvements
+    * Repository metadata improvements
+* Code quality improvements
+    * Introduce cargo mutants & fix bugs found
+    * Clippy warning fixes and other linter improvements
+    * Report on test coverage & improve test coverage
+    * Add benchmarks
+* Made errors returned more precise
+* Updated dependencies
 
 ## Version 1.1.0 Alpha 2
 
