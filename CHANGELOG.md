@@ -8,7 +8,7 @@ Summing up all the changes from the previous Alpha versions.
 
 ### See also
 
-Rusqlite was updated from 0.29.0 to 0.30.0. See its release notes: https://github.com/rusqlite/rusqlite/releases/tag/v0.30.0
+Rusqlite was updated from 0.29.0 to 0.30.0. Please see [its release notes](https://github.com/rusqlite/rusqlite/releases/tag/v0.30.0)
 
 ### Minimum Rust Version
 
