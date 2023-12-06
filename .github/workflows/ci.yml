@@ -149,10 +149,16 @@ jobs:
           toolchain: stable
           override: true
       - uses: Swatinem/rust-cache@v2
-      - run: cargo install --version 23.9.1 cargo-mutants
+      - run: cargo install --version 23.12.0 cargo-mutants
       - uses: actions-rs/cargo@v1
         with:
           command: mutants
+      - name: Archive results
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: mutation-report
+          path: mutants.out
 
   clippy:
     name: Clippy

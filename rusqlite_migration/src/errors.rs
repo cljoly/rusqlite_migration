@@ -266,6 +266,34 @@ mod tests {
         )
     }
 
+    // Two errors with different file load errors should be considered different
+    #[test]
+    fn test_rusqlite_error_file_load() {
+        assert_ne!(
+            Error::FileLoad("s1".to_owned()),
+            Error::FileLoad("s2".to_owned())
+        )
+    }
+
+    // Two errors with different foreign key checks should be considered different
+    #[test]
+    fn test_rusqlite_error_fkc() {
+        assert_ne!(
+            Error::ForeignKeyCheck(ForeignKeyCheckError {
+                table: "t1".to_owned(),
+                rowid: 1,
+                parent: "t2".to_owned(),
+                fkid: 3
+            }),
+            Error::ForeignKeyCheck(ForeignKeyCheckError {
+                table: "t1".to_owned(),
+                rowid: 3,
+                parent: "t2".to_owned(),
+                fkid: 3
+            },),
+        )
+    }
+
     // Hook error conversion preserves the message
     #[test]
     fn test_hook_conversion_msg() {
