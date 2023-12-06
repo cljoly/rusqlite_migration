@@ -149,7 +149,7 @@ jobs:
           toolchain: stable
           override: true
       - uses: Swatinem/rust-cache@v2
-      - run: cargo install --version 23.9.1 cargo-mutants
+      - run: cargo install cargo-mutants
       - uses: actions-rs/cargo@v1
         with:
           command: mutants
