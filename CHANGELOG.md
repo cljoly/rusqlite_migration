@@ -2,6 +2,8 @@
 
 ## Version 1.1.0 Beta 1
 
+**⚠️ The APIs exposed in this version may be unstable.**
+
 Summing up all the changes from the previous Alpha versions.
 
 ### See also
