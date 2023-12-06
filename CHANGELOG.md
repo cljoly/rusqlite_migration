@@ -2,6 +2,12 @@
 
 ## Version 1.1.0 Beta 1
 
+Summing up all the changes from the previous Alpha versions.
+
+### See also
+
+Rusqlite was updated from 0.29.0 to 0.30.0. See its release notes: https://github.com/rusqlite/rusqlite/releases/tag/v0.30.0
+
 ### Minimum Rust Version
 
 Rust 1.70
@@ -28,14 +34,6 @@ Rust 1.70
     * Add benchmarks
 * Made errors returned more precise
 * Updated dependencies
-
-## Version 1.1.0 Alpha 3
-
-**⚠️ The APIs exposed in this version may be unstable.**
-
-### Minimum Rust Version
-
-Rust 1.70
 
 ## Version 1.1.0 Alpha 2
 
