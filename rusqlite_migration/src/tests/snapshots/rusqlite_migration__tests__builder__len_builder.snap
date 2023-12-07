@@ -1,0 +1,24 @@
+---
+source: rusqlite_migration/src/tests/builder.rs
+expression: migrations
+---
+Migrations {
+    ms: [
+        M {
+            up: "CREATE TABLE friend(name TEXT);",
+            up_hook: None,
+            down: None,
+            down_hook: None,
+            foreign_key_check: false,
+            comment: None,
+        },
+        M {
+            up: "ALTER TABLE friend ADD COLUMN birthday TEXT;",
+            up_hook: None,
+            down: None,
+            down_hook: None,
+            foreign_key_check: false,
+            comment: None,
+        },
+    ],
+}

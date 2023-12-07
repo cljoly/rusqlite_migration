@@ -5,6 +5,8 @@ name: Continuous integration
 env:
   MSRV: 1.70.0
   CARGO_TERM_COLOR: always
+  # Useful for cargo insta
+  CI: true
 
 jobs:
   check:

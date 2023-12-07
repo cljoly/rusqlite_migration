@@ -1,0 +1,28 @@
+---
+source: rusqlite_migration/src/tests/builder.rs
+expression: "MigrationsBuilder::from_iter(ms).edit(1,\n            move |m|\n                m.down(\"DROP TABLE t1;\")).edit(2,\n        move |m| m.down(\"DROP TABLE t2;\")).finalize::<Migrations>()"
+---
+Migrations {
+    ms: [
+        M {
+            up: "CREATE TABLE t1(a);",
+            up_hook: None,
+            down: Some(
+                "DROP TABLE t1;",
+            ),
+            down_hook: None,
+            foreign_key_check: false,
+            comment: None,
+        },
+        M {
+            up: "CREATE TABLE t2(a);",
+            up_hook: None,
+            down: Some(
+                "DROP TABLE t2;",
+            ),
+            down_hook: None,
+            foreign_key_check: false,
+            comment: None,
+        },
+    ],
+}
