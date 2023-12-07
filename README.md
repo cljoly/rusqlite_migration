@@ -108,10 +108,9 @@ fn migrations_test() {
 
 ## Optional Features
 
-Rusqlite_migration provides several [Cargo features][cargo_features]. They are:
+Rusqlite_migration provides one [Cargo feature][cargo_features]:
 
 * `from-directory`: enable loading migrations from *.sql files in a given directory
-* `async-tokio-rusqlite`: enable support for async migrations with `tokio-rusqlite`
 
 [cargo_features]: https://doc.rust-lang.org/cargo/reference/manifest.html#the-features-section
 

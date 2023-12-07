@@ -10,6 +10,10 @@ Summing up all the changes from the previous Alpha versions.
 
 Rusqlite was updated from 0.29.0 to 0.30.0. Please see [its release notes](https://github.com/rusqlite/rusqlite/releases/tag/v0.30.0)
 
+### Breaking changes since Version 1.1.0 Alpha 3
+
+* Moved the `async-tokio-rusqlite` feature to a different crate
+
 ### Minimum Rust Version
 
 Rust 1.70

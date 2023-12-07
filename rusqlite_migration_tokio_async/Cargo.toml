@@ -1,6 +1,6 @@
 [package]
 name = "rusqlite_migration_tokio_async"
-version = "0.0.1-alpha1"
+version = "0.1.0"
 authors = ["Clément Joly <foss@131719.xyz>"]
 edition = "2018"
 license = "Apache-2.0"
@@ -10,3 +10,31 @@ categories = ["database"]
 readme = "README.md"
 homepage = "https://cj.rs/rusqlite_migration"
 repository = "https://github.com/cljoly/rusqlite_migration/tree/master/rusqlite_migration_tokio_async"
+rust-version = "1.70"
+
+[features]
+default = []
+
+### Enable loading migrations from *.sql files in a given directory
+from-directory = ["dep:include_dir"]
+
+[dependencies]
+rusqlite_migration = { path = "../rusqlite_migration/", version = "1.1.0-beta.1" }
+include_dir = { version = "0.7.3", optional = true }
+tokio = { version = "1.25", features = ["macros"], optional = true }
+tokio-rusqlite = { version = "0.5.0", optional = true }
+log = "0.4"
+
+[dependencies.rusqlite]
+version = "=0.30.0"
+default-features = false
+features = []
+
+[dev-dependencies]
+tokio = { version = "1.25", features = ["full"] }
+tokio-test = "0.4.2"
+simple-logging = "2.0.2"
+env_logger = "0.10"
+anyhow = "1"
+lazy_static = "1.4.0"
+mktemp = "0.5"

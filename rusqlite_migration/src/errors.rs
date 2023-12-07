@@ -95,7 +95,6 @@ impl From<rusqlite::Error> for Error {
     }
 }
 
-#[cfg(feature = "async-tokio-rusqlite")]
 impl From<tokio_rusqlite::Error> for Error {
     fn from(e: tokio_rusqlite::Error) -> Self {
         match e {
