@@ -48,6 +48,36 @@ fn empty_migrations_test() {
 }
 
 #[test]
+fn test_db_version_to_schema_empty() {
+    let m = Migrations::new(vec![]);
+
+    assert_eq!(m.db_version_to_schema(0), SchemaVersion::NoneSet);
+    assert_eq!(
+        m.db_version_to_schema(1),
+        SchemaVersion::Outside(NonZeroUsize::new(1).unwrap())
+    );
+    assert_eq!(
+        m.db_version_to_schema(10),
+        SchemaVersion::Outside(NonZeroUsize::new(10).unwrap())
+    );
+}
+
+#[test]
+fn test_db_version_to_schema_two() {
+    let m = Migrations::new(vec![m_valid10(), m_valid11()]);
+
+    assert_eq!(m.db_version_to_schema(0), SchemaVersion::NoneSet);
+    assert_eq!(
+        m.db_version_to_schema(1),
+        SchemaVersion::Inside(NonZeroUsize::new(1).unwrap())
+    );
+    assert_eq!(
+        m.db_version_to_schema(10),
+        SchemaVersion::Outside(NonZeroUsize::new(10).unwrap())
+    );
+}
+
+#[test]
 fn schema_version_partial_cmp_test() {
     assert_eq!(SchemaVersion::NoneSet, SchemaVersion::NoneSet);
     assert_eq!(

@@ -22,6 +22,7 @@ fn get_name(value: &'static Dir<'static>) -> Result<&'static str> {
         )))
 }
 
+#[cfg_attr(test, mutants::skip)] // Tested at a high level
 fn get_migrations(
     name: &'static str,
     value: &'static Dir<'static>,
@@ -90,6 +91,7 @@ impl<'u> From<&MigrationFile> for M<'u> {
     }
 }
 
+#[cfg_attr(test, mutants::skip)] // Tested at a high level
 pub(crate) fn from_directory(dir: &'static Dir<'static>) -> Result<Vec<Option<M<'static>>>> {
     let mut migrations: Vec<Option<M>> = vec![None; dir.dirs().count()];
 
