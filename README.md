@@ -106,6 +106,20 @@ fn migrations_test() {
 }
 ```
 
+The migrations object is also suitable for serialisation with [insta][], using the `Debug` serialisation. You can store a snapshot of your migrations like this:
+
+```rust
+#[test]
+fn migrations_insta_snapshot() {
+    let migrations = Migrations::new(vec![
+        // ...
+    ]);
+    insta::assert_debug_snapshot!(migrations);
+}
+```
+
+[insta]: https://insta.rs/
+
 ## Optional Features
 
 Rusqlite_migration provides several [Cargo features][cargo_features]. They are:
@@ -127,6 +141,13 @@ A number of contributors are also reporting issues as they arise, another indica
 ## Contributing
 
 Contributions (documentation or code improvements in particular) are welcome, see [contributing](https://cj.rs/docs/contribute/)!
+
+We use various tools for testing that you may find helpful to install locally (e.g. to fix failing CI checks):
+* [cargo-insta][]
+* [cargo-mutants][]
+
+[cargo-insta]: https://crates.io/crates/cargo-insta
+[cargo-mutants]: https://mutants.rs/installation.html
 
 ## Acknowledgments
 

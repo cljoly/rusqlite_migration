@@ -20,6 +20,7 @@ Rust 1.70
 * Add up/down hooks to run custom Rust code during migrations ([PR](https://github.com/cljoly/rusqlite_migration/pull/28) thanks to [@matze](https://github.com/matze))
 * Add foreign_key_check method to migrations ([PR](https://github.com/cljoly/rusqlite_migration/pull/20) thanks to [@Jokler](https://github.com/Jokler))
 * Make `Migration` functions const ([PR](https://github.com/cljoly/rusqlite_migration/pull/19) thanks to [@fkaa](https://github.com/fkaa))
+* Make `Migrations` serializable (using the Debug serializer) with [insta](https://insta.rs).
 
 ### Depreciation
 
