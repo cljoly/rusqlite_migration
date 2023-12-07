@@ -30,6 +30,7 @@ impl<'u> MigrationsBuilder<'u> {
     ///
     /// Returns [`crate::Error::FileLoad`] in case the subdirectory names are incorrect,
     /// or don't contain at least a valid `up.sql` file.
+    #[cfg_attr(test, mutants::skip)] // Tested at a high level
     pub fn from_directory(dir: &'static Dir<'static>) -> Result<Self> {
         Ok(Self {
             migrations: from_directory(dir)?,

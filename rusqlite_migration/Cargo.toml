@@ -45,6 +45,7 @@ criterion = { version = "0.5", features = [
 ] }
 iai = "0.1"
 insta = "1.34.0"
+mutants = "0.0.3"
 
 [[bench]]
 name = "criterion"

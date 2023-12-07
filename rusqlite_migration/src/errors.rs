@@ -32,7 +32,8 @@ pub enum Error {
     Hook(String),
     /// Error returned when loading migrations from directory
     FileLoad(String),
-    /// An unknown error occurred
+    /// An unknown error occurred. *Note*: such errors are not comparable between one another,
+    /// much like NaN for floats.
     Unrecognized(Box<dyn std::error::Error + Send + Sync + 'static>),
 }
 
@@ -48,6 +49,9 @@ impl PartialEq for Error {
             (Self::ForeignKeyCheck(e1), Self::ForeignKeyCheck(e2)) => e1 == e2,
             (Self::Hook(a), Self::Hook(b)) => a == b,
             (Self::FileLoad(a), Self::FileLoad(b)) => a == b,
+            // This makes Unrecognized errors behave like NaN (where NaN != NaN)
+            (Self::Unrecognized(_), Self::Unrecognized(_)) => false,
+            // Fallback to comparing enum variants
             _ => core::mem::discriminant(self) == core::mem::discriminant(other),
         }
     }
@@ -233,6 +237,8 @@ pub type HookResult<E = HookError> = std::result::Result<(), E>;
 
 #[cfg(test)]
 mod tests {
+    use std::num::NonZeroUsize;
+
     use super::*;
 
     // We should be able to convert rusqlite errors transparently
@@ -251,7 +257,51 @@ mod tests {
         ));
     }
 
-    // Two errors with different queries should be considered different
+    // Check that Unrecognized errors correctly implement PartialEq, namely that
+    // > a != b if and only if !(a == b).
+    // from https://doc.rust-lang.org/std/cmp/trait.PartialEq.html
+    #[test]
+    fn test_unrecognized_errors() {
+        let u1 = Error::Unrecognized(Box::new(Error::Hook(String::new())));
+        let u2 = Error::Unrecognized(Box::new(Error::Hook(String::new())));
+        let u3 = Error::Unrecognized(Box::new(Error::Hook("1".to_owned())));
+        let u4 = Error::Unrecognized(Box::new(Error::Hook(String::new())));
+        let u5 = Error::FileLoad("1".to_owned());
+        let u6 = Error::Unrecognized(Box::new(Error::Hook(String::new())));
+
+        for (e1, e2) in &[(u1, u2), (u3, u4), (u5, u6)] {
+            assert!(e1 != e2);
+            assert!(!(e1 == e2));
+        }
+    }
+
+    #[test]
+    // Errors on specified schema versions should be equal if and only if all versions are
+    // equal
+    fn test_specified_schema_version_error() {
+        assert_eq!(
+            Error::SpecifiedSchemaVersion(SchemaVersionError::TargetVersionOutOfRange {
+                specified: SchemaVersion::Outside(NonZeroUsize::new(10).unwrap()),
+                highest: SchemaVersion::Inside(NonZeroUsize::new(4).unwrap()),
+            }),
+            Error::SpecifiedSchemaVersion(SchemaVersionError::TargetVersionOutOfRange {
+                specified: SchemaVersion::Outside(NonZeroUsize::new(10).unwrap()),
+                highest: SchemaVersion::Inside(NonZeroUsize::new(4).unwrap()),
+            }),
+        );
+        assert_ne!(
+            Error::SpecifiedSchemaVersion(SchemaVersionError::TargetVersionOutOfRange {
+                specified: SchemaVersion::Outside(NonZeroUsize::new(9).unwrap()),
+                highest: SchemaVersion::Inside(NonZeroUsize::new(4).unwrap()),
+            }),
+            Error::SpecifiedSchemaVersion(SchemaVersionError::TargetVersionOutOfRange {
+                specified: SchemaVersion::Outside(NonZeroUsize::new(10).unwrap()),
+                highest: SchemaVersion::Inside(NonZeroUsize::new(4).unwrap()),
+            }),
+        );
+    }
+
+    // Two errors with different queries or errors should be considered different
     #[test]
     fn test_rusqlite_error_query() {
         assert_ne!(
@@ -261,6 +311,16 @@ mod tests {
             },
             Error::RusqliteError {
                 query: "SSSELECT".to_owned(),
+                err: rusqlite::Error::InvalidQuery
+            }
+        );
+        assert_ne!(
+            Error::RusqliteError {
+                query: "SELECT".to_owned(),
+                err: rusqlite::Error::MultipleStatement
+            },
+            Error::RusqliteError {
+                query: "SELECT".to_owned(),
                 err: rusqlite::Error::InvalidQuery
             }
         )
