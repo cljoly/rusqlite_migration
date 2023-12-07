@@ -9,7 +9,7 @@ use crate::{Migrations, MigrationsBuilder, SchemaVersion, M};
 fn test_non_existing_index() {
     let ms = vec![M::up("CREATE TABLE t(a);")];
 
-    let _ = MigrationsBuilder::from_iter(ms.clone()).edit(100, move |t| t);
+    let _ = MigrationsBuilder::from_iter(ms.clone()).edit(100, move |m| m);
 }
 
 #[test]
@@ -17,7 +17,17 @@ fn test_non_existing_index() {
 fn test_0_index() {
     let ms = vec![M::up("CREATE TABLE t(a);")];
 
-    let _ = MigrationsBuilder::from_iter(ms).edit(0, move |t| t);
+    let _ = MigrationsBuilder::from_iter(ms).edit(0, move |m| m);
+}
+
+#[test]
+fn test_valid_index() {
+    let ms = vec![M::up("CREATE TABLE t1(a);"), M::up("CREATE TABLE t2(a);")];
+
+    insta::assert_debug_snapshot!(MigrationsBuilder::from_iter(ms)
+        .edit(1, move |m| m.down("DROP TABLE t1;"))
+        .edit(2, move |m| m.down("DROP TABLE t2;"))
+        .finalize::<Migrations>());
 }
 
 #[test]
@@ -36,6 +46,7 @@ fn test_len_builder() {
 
         migrations.to_latest(&mut conn).unwrap();
 
+        insta::assert_debug_snapshot!(migrations);
         assert_eq!(migrations.ms.len(), 2);
         assert_eq!(
             Ok(SchemaVersion::Inside(NonZeroUsize::new(2).unwrap())),

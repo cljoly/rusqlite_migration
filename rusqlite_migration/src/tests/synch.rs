@@ -85,13 +85,7 @@ fn schema_version_partial_cmp_test() {
 #[test]
 fn test_migration_hook_debug() {
     let m = M::up_with_hook("", |_: &Transaction| Ok(()));
-    assert_eq!(
-        format!(
-            r#"M {{ up: "", up_hook: {:?}, down: None, down_hook: None, foreign_key_check: false, comment: None }}"#,
-            m.up_hook
-        ),
-        format!("{m:?}")
-    );
+    insta::assert_debug_snapshot!(m);
 }
 
 #[test]

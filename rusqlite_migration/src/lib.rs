@@ -73,7 +73,8 @@ where
 
 impl Debug for Box<dyn MigrationHook> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "MigrationHook({:#x})", addr_of!(*self) as usize)
+        // Don’t print the closure address as it changes between runs
+        write!(f, "MigrationHook(<closure>)")
     }
 }
 

@@ -1,0 +1,14 @@
+---
+source: rusqlite_migration/src/tests/synch.rs
+expression: m
+---
+M {
+    up: "",
+    up_hook: Some(
+        MigrationHook(<closure>),
+    ),
+    down: None,
+    down_hook: None,
+    foreign_key_check: false,
+    comment: None,
+}
