@@ -12,6 +12,13 @@ homepage = "https://cj.rs/rusqlite_migration"
 repository = "https://github.com/cljoly/rusqlite_migration"
 rust-version = "1.70"
 
+# Locally, run:
+#     RUSTDOCFLAGS="--cfg docsrs" cargo +nightly doc --all-features
+[package.metadata.docs.rs]
+# Document all features
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
 [features]
 default = []
 ### Enable support for async migrations with the use of `tokio-rusqlite`
@@ -40,8 +47,8 @@ anyhow = "1"
 lazy_static = "1.4.0"
 mktemp = "0.5"
 criterion = { version = "0.5", features = [
-    "html_reports",
-    "cargo_bench_support",
+  "html_reports",
+  "cargo_bench_support",
 ] }
 iai = "0.1"
 insta = "1.34.0"
