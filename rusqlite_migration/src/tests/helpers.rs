@@ -18,28 +18,30 @@ pub fn m_valid21() -> M<'static> {
 
 pub fn m_valid_fk() -> M<'static> {
     M::up(
-        "CREATE TABLE fk1(a PRIMARY KEY); \
-        CREATE TABLE fk2( \
-            a, \
-            FOREIGN KEY(a) REFERENCES fk1(a) \
-        ); \
-        INSERT INTO fk1 (a) VALUES ('foo'); \
-        INSERT INTO fk2 (a) VALUES ('foo'); \
-    ",
+        r#"
+        CREATE TABLE fk1(a PRIMARY KEY);
+        CREATE TABLE fk2(
+            a,
+            FOREIGN KEY(a) REFERENCES fk1(a)
+        );
+        INSERT INTO fk1 (a) VALUES ('foo');
+        INSERT INTO fk2 (a) VALUES ('foo');
+    "#,
     )
     .foreign_key_check()
 }
 
 pub fn m_invalid_down_fk() -> M<'static> {
     M::up(
-        "CREATE TABLE fk1(a PRIMARY KEY); \
-        CREATE TABLE fk2( \
-            a, \
-            FOREIGN KEY(a) REFERENCES fk1(a) \
-        ); \
-        INSERT INTO fk1 (a) VALUES ('foo'); \
-        INSERT INTO fk2 (a) VALUES ('foo'); \
-    ",
+        r#"
+        CREATE TABLE fk1(a PRIMARY KEY);
+        CREATE TABLE fk2(
+            a,
+            FOREIGN KEY(a) REFERENCES fk1(a)
+        );
+        INSERT INTO fk1 (a) VALUES ('foo');
+        INSERT INTO fk2 (a) VALUES ('foo');
+    "#,
     )
     .foreign_key_check()
     .down("DROP TABLE fk1;")
@@ -66,14 +68,15 @@ pub fn m_invalid1() -> M<'static> {
 
 pub fn m_invalid_fk() -> M<'static> {
     M::up(
-        "CREATE TABLE fk1(a PRIMARY KEY); \
-        CREATE TABLE fk2( \
-            a, \
-            FOREIGN KEY(a) REFERENCES fk1(a) \
-        ); \
-        INSERT INTO fk2 (a) VALUES ('foo'); \
-        INSERT INTO fk2 (a) VALUES ('bar'); \
-    ",
+        r#"
+        CREATE TABLE fk1(a PRIMARY KEY);
+        CREATE TABLE fk2(
+            a,
+            FOREIGN KEY(a) REFERENCES fk1(a)
+        );
+        INSERT INTO fk2 (a) VALUES ('foo');
+        INSERT INTO fk2 (a) VALUES ('bar');
+    "#,
     )
     .foreign_key_check()
 }
