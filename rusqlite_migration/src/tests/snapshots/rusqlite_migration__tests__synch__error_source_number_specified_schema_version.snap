@@ -1,0 +1,10 @@
+---
+source: rusqlite_migration/src/tests/synch.rs
+expression: e.source()
+---
+Some(
+    TargetVersionOutOfRange {
+        specified: NoneSet,
+        highest: NoneSet,
+    },
+)

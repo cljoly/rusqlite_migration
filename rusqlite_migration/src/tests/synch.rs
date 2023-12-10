@@ -1,6 +1,6 @@
 use std::{iter::FromIterator, num::NonZeroUsize};
 
-use rusqlite::{Connection, Transaction};
+use rusqlite::{Connection, OpenFlags, Transaction};
 
 use crate::{
     tests::helpers::{
@@ -10,7 +10,7 @@ use crate::{
     SchemaVersionError, M,
 };
 
-use super::helpers::{m_invalid0, m_invalid1, m_valid20, m_valid21};
+use super::helpers::{all_errors, m_invalid0, m_invalid1, m_valid20, m_valid21};
 
 #[test]
 fn empty_migrations_test() {
@@ -148,38 +148,19 @@ fn test_migration_definition_error_display() {
 
 #[test]
 fn test_error_display() {
-    insta::assert_display_snapshot!(Error::SpecifiedSchemaVersion(
-        SchemaVersionError::TargetVersionOutOfRange {
-            specified: SchemaVersion::NoneSet,
-            highest: SchemaVersion::NoneSet,
-        }
-    ));
+    for (name, e) in all_errors() {
+        insta::assert_display_snapshot!(format!("error_display__{name}"), e);
+    }
+}
 
-    insta::assert_display_snapshot!(Error::Hook(String::new()));
+#[test]
+fn test_error_source() {
+    use std::error::Error;
 
-    insta::assert_display_snapshot!(Error::ForeignKeyCheck(vec![
-        ForeignKeyCheckError {
-            table: String::new(),
-            rowid: 1,
-            parent: String::new(),
-            fkid: 2,
-        },
-        ForeignKeyCheckError {
-            table: String::new(),
-            rowid: 2,
-            parent: String::new(),
-            fkid: 3,
-        },
-    ]));
-
-    insta::assert_display_snapshot!(Error::MigrationDefinition(
-        MigrationDefinitionError::NoMigrationsDefined
-    ));
-
-    insta::assert_display_snapshot!(Error::RusqliteError {
-        query: String::new(),
-        err: rusqlite::Error::InvalidQuery,
-    });
+    for (name, e) in all_errors() {
+        // For API stability reasons (if that changes, we must change the major version)
+        insta::assert_debug_snapshot!(format!("error_source_number_{name}"), e.source());
+    }
 }
 
 #[test]
@@ -371,6 +352,18 @@ fn all_valid_test() {
     insta::assert_debug_snapshot!(migrations)
 }
 
+// When the DB encounters an error, it is surfaced
+#[test]
+fn test_read_only_db_all_valid() {
+    let mut conn = Connection::open_in_memory_with_flags(OpenFlags::SQLITE_OPEN_READ_ONLY).unwrap();
+    let migrations = Migrations::new(all_valid());
+
+    let e = migrations.to_latest(&mut conn);
+
+    assert!(e.is_err());
+    insta::assert_debug_snapshot!(e)
+}
+
 // If we encounter a database with a migration number higher than the number of defined migration,
 // we should return an error, not panic.
 // See https://github.com/cljoly/rusqlite_migration/issues/17
@@ -526,4 +519,14 @@ fn eq_hook_test() {
 fn test_from_iter() {
     let migrations = Migrations::from_iter(vec![m_valid0(), m_valid10()]);
     assert_eq!(Ok(()), migrations.validate());
+}
+
+#[test]
+fn test_user_version_error() {
+    // This will cause error because the DB is read only
+    let conn = Connection::open_in_memory_with_flags(OpenFlags::SQLITE_OPEN_READ_ONLY).unwrap();
+    let e = crate::set_user_version(&conn, 1);
+
+    assert!(e.is_err(), "{:?}", e);
+    insta::assert_debug_snapshot!(e)
 }

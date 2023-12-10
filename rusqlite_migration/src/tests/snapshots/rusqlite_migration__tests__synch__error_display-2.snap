@@ -1,5 +1,0 @@
----
-source: rusqlite_migration/src/tests/synch.rs
-expression: "Error::Hook(String::new())"
----
-rusqlite_migrate error: Hook("")

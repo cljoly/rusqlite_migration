@@ -1,0 +1,8 @@
+---
+source: rusqlite_migration/src/tests/asynch.rs
+expression: "crate::Error::from(TError::Rusqlite(rusqlite::Error::InvalidQuery))"
+---
+RusqliteError {
+    query: "",
+    err: InvalidQuery,
+}

@@ -1,5 +1,0 @@
----
-source: rusqlite_migration/src/tests/synch.rs
-expression: "Error::ForeignKeyCheck(vec![ForeignKeyCheckError\n        {\n            table : String :: new(), rowid : 1, parent : String :: new(), fkid\n            : 2,\n        }, ForeignKeyCheckError\n        {\n            table : String :: new(), rowid : 2, parent : String :: new(), fkid\n            : 3,\n        },])"
----
-rusqlite_migrate error: ForeignKeyCheck([ForeignKeyCheckError { table: "", rowid: 1, parent: "", fkid: 2 }, ForeignKeyCheckError { table: "", rowid: 2, parent: "", fkid: 3 }])

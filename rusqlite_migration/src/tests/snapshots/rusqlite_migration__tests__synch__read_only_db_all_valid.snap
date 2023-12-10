@@ -1,0 +1,18 @@
+---
+source: rusqlite_migration/src/tests/synch.rs
+expression: e
+---
+Err(
+    RusqliteError {
+        query: "CREATE TABLE m1(a, b); CREATE TABLE m2(a, b, c);",
+        err: SqliteFailure(
+            Error {
+                code: ReadOnly,
+                extended_code: 8,
+            },
+            Some(
+                "attempt to write a readonly database",
+            ),
+        ),
+    },
+)

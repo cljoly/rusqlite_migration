@@ -118,3 +118,17 @@ async fn test_from_iter() {
     let migrations = AsyncMigrations::from_iter(vec![m_valid0(), m_valid10()]);
     assert_eq!(Ok(()), migrations.validate().await);
 }
+
+#[tokio::test]
+async fn test_tokio_rusqlite_conversion() {
+    use tokio_rusqlite::Error as TError;
+
+    insta::assert_debug_snapshot!(
+        "convert_connection_closed_error",
+        crate::Error::from(TError::ConnectionClosed)
+    );
+    insta::assert_debug_snapshot!(
+        "convert_rusqlite_error",
+        crate::Error::from(TError::Rusqlite(rusqlite::Error::InvalidQuery))
+    );
+}
