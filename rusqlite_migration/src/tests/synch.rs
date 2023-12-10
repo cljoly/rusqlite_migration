@@ -366,7 +366,9 @@ fn invalid_down_fk_check_test() {
 
 #[test]
 fn all_valid_test() {
-    assert_eq!(Ok(()), Migrations::new(all_valid()).validate());
+    let migrations = Migrations::new(all_valid());
+    assert_eq!(Ok(()), migrations.validate());
+    insta::assert_debug_snapshot!(migrations)
 }
 
 // If we encounter a database with a migration number higher than the number of defined migration,
