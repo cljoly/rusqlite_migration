@@ -20,7 +20,7 @@ pub enum Error {
         err: rusqlite::Error,
     },
     /// The underlying SQLite connection is closed
-    #[cfg(feature = "async-tokio-rusqlite")]
+    #[cfg(feature = "alpha-async-tokio-rusqlite")]
     ConnectionClosed,
     /// Error with the specified schema version
     SpecifiedSchemaVersion(SchemaVersionError),
@@ -83,7 +83,7 @@ impl std::error::Error for Error {
             Error::MigrationDefinition(e) => Some(e),
             Error::ForeignKeyCheck(vec) => Some(vec.get(0)?),
             Error::Hook(_) | Error::FileLoad(_) => None,
-            #[cfg(feature = "async-tokio-rusqlite")]
+            #[cfg(feature = "alpha-async-tokio-rusqlite")]
             Error::ConnectionClosed => None,
             Error::Unrecognized(ref e) => Some(&**e),
         }
@@ -99,7 +99,7 @@ impl From<rusqlite::Error> for Error {
     }
 }
 
-#[cfg(feature = "async-tokio-rusqlite")]
+#[cfg(feature = "alpha-async-tokio-rusqlite")]
 impl From<tokio_rusqlite::Error> for Error {
     fn from(e: tokio_rusqlite::Error) -> Self {
         match e {
