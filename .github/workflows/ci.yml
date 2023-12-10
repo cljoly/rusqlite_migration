@@ -53,7 +53,7 @@ jobs:
           args: --all-features
 
   test_async_tokio_rusqlite:
-    name: Test feature async-tokio-rusqlite
+    name: Test feature alpha-async-tokio-rusqlite
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -65,7 +65,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --features async-tokio-rusqlite
+          args: --features alpha-async-tokio-rusqlite
 
   test_from_directory:
     name: Test feature from-directory

@@ -16,7 +16,7 @@ tokio = { version = "1.25.0", features = ["full"] }
 
 [dependencies.rusqlite_migration]
 path = "../../rusqlite_migration"
-features = ["async-tokio-rusqlite"]
+features = ["alpha-async-tokio-rusqlite"]
 
 [dependencies.rusqlite]
 version = "=0.30.0"

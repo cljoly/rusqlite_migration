@@ -125,7 +125,7 @@ fn migrations_insta_snapshot() {
 Rusqlite_migration provides several [Cargo features][cargo_features]. They are:
 
 * `from-directory`: enable loading migrations from *.sql files in a given directory
-* `async-tokio-rusqlite`: enable support for async migrations with `tokio-rusqlite`
+* `alpha-async-tokio-rusqlite`: enable support for async migrations with `tokio-rusqlite`. As the name implies, there are no API stability guarantees on this feature.
 
 [cargo_features]: https://doc.rust-lang.org/cargo/reference/manifest.html#the-features-section
 
