@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 1.2.0 Alpha 1
+
+### Minimum Rust Version
+
+Now using edition 2021
+
 ## Version 1.1.0
 
 *Same code as version 1.1.0-beta.1*
