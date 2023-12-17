@@ -26,7 +26,7 @@ end_insert -->
 {{< /rawhtml >}}
 end_insert -->
 
-[![docs.rs](https://img.shields.io/docsrs/rusqlite_migration)](https://docs.rs/rusqlite_migration) [![Crates.io](https://img.shields.io/crates/v/rusqlite_migration)](https://crates.io/crates/rusqlite_migration) [![unsafe forbidden](https://img.shields.io/badge/unsafe-forbidden-success.svg)](https://github.com/rust-secure-code/safety-dance/) [![dependency status](https://deps.rs/crate/rusqlite_migration/1.0.2/status.svg)](https://deps.rs/crate/rusqlite_migration) [![Coveralls](https://img.shields.io/coverallsCoverage/github/cljoly/rusqlite_migration)](https://coveralls.io/github/cljoly/rusqlite_migration)
+[![docs.rs](https://img.shields.io/docsrs/rusqlite_migration)](https://docs.rs/rusqlite_migration) [![Crates.io](https://img.shields.io/crates/v/rusqlite_migration)](https://crates.io/crates/rusqlite_migration) [![unsafe forbidden](https://img.shields.io/badge/unsafe-forbidden-success.svg)](https://github.com/rust-secure-code/safety-dance/) [![dependency status](https://deps.rs/crate/rusqlite_migration/1.1.0/status.svg)](https://deps.rs/crate/rusqlite_migration) [![Coveralls](https://img.shields.io/coverallsCoverage/github/cljoly/rusqlite_migration)](https://coveralls.io/github/cljoly/rusqlite_migration)
 
 <!-- insert
 {{< rawhtml >}}

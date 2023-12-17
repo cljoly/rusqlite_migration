@@ -1,5 +1,42 @@
 # Changelog
 
+## Version 1.1.0
+
+*Same code as version 1.1.0-beta.1*
+
+### Minimum Rust Version
+
+Rust 1.70
+
+### New Features
+
+* Support for tokio-rusqlite behind the feature named `alpha-async-tokio-rusqlite`thanks to [@czocher](https://github.com/czocher). See [the example](https://github.com/cljoly/rusqlite_migration/tree/c54951d22691432fbfd511cc68f1c5b8a2306737/examples/async). This feature is alpha, meaning that compatibility in future minor versions is not guaranteed.
+* Create migrations from directories holding SQL files thanks to [@czocher](https://github.com/czocher). See [the example](https://github.com/cljoly/rusqlite_migration/tree/af4da527ff75e3b8c089d2300cab7fbe66096411/examples/from-directory).
+* Add up/down hooks to run custom Rust code during migrations ([PR](https://github.com/cljoly/rusqlite_migration/pull/28) thanks to [@matze](https://github.com/matze))
+* Add foreign_key_check method to migrations ([PR](https://github.com/cljoly/rusqlite_migration/pull/20) thanks to [@Jokler](https://github.com/Jokler))
+* Make `Migration` functions const ([PR](https://github.com/cljoly/rusqlite_migration/pull/19) thanks to [@fkaa](https://github.com/fkaa))
+* Make `Migrations` serializable (using the Debug serializer) with [insta](https://insta.rs).
+
+### Depreciation
+
+* Mark `Migrations::from_iter` as deprecated
+
+### Other
+
+* Documentation improvements
+    * Repository metadata improvements
+* Code quality improvements
+    * Introduce cargo mutants & fix bugs found
+    * Clippy warning fixes and other linter improvements
+    * Report on test coverage & improve test coverage
+    * Add benchmarks
+* Made errors returned more precise
+* Updated dependencies
+
+### See also
+
+Rusqlite was updated from 0.29.0 to 0.30.0. Please see [its release notes](https://github.com/rusqlite/rusqlite/releases/tag/v0.30.0)
+
 ## Version 1.1.0 Beta 1
 
 **⚠️ The APIs exposed in this version may be unstable.**
