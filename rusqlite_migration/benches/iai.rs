@@ -14,14 +14,14 @@ limitations under the License.
 
 */
 
+//! Why criterion and iai? It’s actually recommended:
+//! https://bheisler.github.io/criterion.rs/book/iai/comparison.html
+
 use std::iter::FromIterator;
 
 use iai::black_box;
 use rusqlite::Connection;
 use rusqlite_migration::{Migrations, M};
-
-// Why criterion and iai? It’s actually recommended:
-// https://bheisler.github.io/criterion.rs/book/iai/comparison.html
 
 fn upward(i: u64) {
     let sql_migrations = (0..=i)

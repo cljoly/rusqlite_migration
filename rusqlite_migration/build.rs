@@ -1,3 +1,5 @@
+//! Insert the readme as documentation of the crate
+
 use std::{
     env,
     error::Error,

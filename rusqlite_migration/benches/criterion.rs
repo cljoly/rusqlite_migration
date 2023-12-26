@@ -14,6 +14,8 @@ limitations under the License.
 
 */
 
+//! Benchmarks using criterion
+
 use criterion::criterion_main;
 
 #[cfg(feature = "from-directory")]

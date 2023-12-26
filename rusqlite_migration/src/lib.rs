@@ -15,8 +15,6 @@ limitations under the License.
 */
 
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
-#![forbid(unsafe_code)]
-#![warn(missing_docs)]
 // The doc is extracted from the README.md file at build time
 #![doc = include_str!(concat!(env!("OUT_DIR"), "/readme_for_rustdoc.md"))]
 

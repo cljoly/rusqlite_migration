@@ -1,3 +1,6 @@
+//! Might eventually hold the async code
+
+/// Add
 pub fn add(left: usize, right: usize) -> usize {
     left + right
 }
