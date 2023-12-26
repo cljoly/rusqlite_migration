@@ -19,6 +19,9 @@ rust-version = "1.70"
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
+[lints]
+workspace = true
+
 [features]
 default = []
 ### Enable support for async migrations with the use of `tokio-rusqlite`
