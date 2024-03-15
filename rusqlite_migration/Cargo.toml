@@ -46,7 +46,7 @@ env_logger = "0.10"
 anyhow = "1"
 lazy_static = "1.4.0"
 mktemp = "0.5"
-criterion = { version = "0.5", features = [
+criterion = { version = "0.5.0", features = [
   "html_reports",
   "cargo_bench_support",
 ] }
