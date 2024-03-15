@@ -2,7 +2,6 @@ mutants.out
 mutants.out.old
 
 **/target
-**/Cargo.lock
 
 # Output of some examples
 my_db.db3

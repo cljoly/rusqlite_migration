@@ -81,7 +81,7 @@ impl std::error::Error for Error {
             Error::RusqliteError { query: _, err } => Some(err),
             Error::SpecifiedSchemaVersion(e) => Some(e),
             Error::MigrationDefinition(e) => Some(e),
-            Error::ForeignKeyCheck(vec) => Some(vec.get(0)?),
+            Error::ForeignKeyCheck(vec) => Some(vec.first()?),
             Error::Hook(_) | Error::FileLoad(_) => None,
             #[cfg(feature = "alpha-async-tokio-rusqlite")]
             Error::ConnectionClosed => None,
