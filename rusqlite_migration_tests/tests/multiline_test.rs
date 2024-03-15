@@ -10,9 +10,8 @@ fn main_test() {
     let mut ms = vec![M::up(
         r#"
               CREATE TABLE friend (name TEXT PRIMARY KEY, email TEXT) WITHOUT ROWID;
-              PRAGMA journal_mode = WAL;
-              PRAGMA foreign_keys = ON;
               ALTER TABLE friend ADD COLUMN birthday TEXT;
+              ALTER TABLE friend ADD COLUMN notes TEXT;
               "#,
     )];
 
@@ -22,7 +21,13 @@ fn main_test() {
         let migrations = Migrations::new(ms.clone());
         migrations.to_latest(&mut conn).unwrap();
 
-        conn.pragma_update(None, "journal_mode", "WAL").unwrap();
+        conn.pragma_update_and_check(None, "journal_mode", "WAL", |r| {
+            match r.get::<_, String>(0) {
+                Ok(v) if v.to_lowercase() == "wal" => Ok(()),
+                val => panic!("unexpected journal_mode after setting it: {:?}", val),
+            }
+        })
+        .unwrap();
         conn.pragma_update(None, "foreign_keys", "ON").unwrap();
 
         assert_eq!(
@@ -31,8 +36,8 @@ fn main_test() {
         );
 
         conn.execute(
-            "INSERT INTO friend (name, birthday) VALUES (?1, ?2)",
-            params!["John", "1970-01-01"],
+            "INSERT INTO friend (name, birthday, notes) VALUES (?1, ?2, ?3)",
+            params!["John", "1970-01-01", "fun fact: ..."],
         )
         .unwrap();
 

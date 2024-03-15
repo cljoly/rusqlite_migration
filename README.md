@@ -73,7 +73,7 @@ let migrations = Migrations::new(vec![
 let mut conn = Connection::open_in_memory().unwrap();
 
 // Apply some PRAGMA, often better to do it outside of migrations
-conn.pragma_update(None, "journal_mode", &"WAL").unwrap();
+conn.pragma_update_and_check(None, "journal_mode", &"WAL", |_| Ok(())).unwrap();
 
 // 2️⃣ Update the database schema, atomically
 migrations.to_latest(&mut conn).unwrap();

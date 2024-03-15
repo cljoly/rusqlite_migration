@@ -56,28 +56,32 @@ async fn main() {
     // executed for each connection (like `foreign_keys`) or to be executed outside transactions
     // (`journal_mode` is a noop in a transaction).
     async_conn
-        .call(|conn| conn.pragma_update(None, "journal_mode", "WAL"))
+        .call(|conn| Ok(conn.pragma_update(None, "journal_mode", "WAL")))
         .await
+        .unwrap()
         .unwrap();
     async_conn
-        .call(|conn| conn.pragma_update(None, "foreign_keys", "ON"))
+        .call(|conn| Ok(conn.pragma_update(None, "foreign_keys", "ON")))
         .await
+        .unwrap()
         .unwrap();
 
     // Use the db 🥳
     async_conn
         .call(|conn| {
-            conn.execute(
+            Ok(conn.execute(
                 "INSERT INTO friend (name, birthday) VALUES (?1, ?2)",
                 params!["John", "1970-01-01"],
-            )
+            ))
         })
         .await
+        .unwrap()
         .unwrap();
 
     async_conn
-        .call(|conn| conn.execute("INSERT INTO animal (name) VALUES (?1)", params!["dog"]))
+        .call(|conn| Ok(conn.execute("INSERT INTO animal (name) VALUES (?1)", params!["dog"])))
         .await
+        .unwrap()
         .unwrap();
 
     // If we want to revert the last migration
@@ -85,7 +89,7 @@ async fn main() {
 
     // The table was removed
     async_conn
-        .call(|conn| conn.execute("INSERT INTO animal (name) VALUES (?1)", params!["cat"]))
+        .call(|conn| Ok(conn.execute("INSERT INTO animal (name) VALUES (?1)", params!["cat"])))
         .await
         .unwrap_err();
 }

@@ -285,7 +285,6 @@ impl<'u> M<'u> {
     ///
     /// // Turn foreign key constraints off for the duration of the migration
     /// conn.pragma_update(None, "foreign_keys", &"OFF").unwrap();
-    /// conn.pragma_update(None, "journal_mode", &"WAL").unwrap();
     ///
     /// migrations.to_latest(&mut conn).unwrap();
     ///
