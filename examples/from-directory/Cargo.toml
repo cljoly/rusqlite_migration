@@ -17,6 +17,6 @@ mktemp = "0.5"
 include_dir = "0.7.3"
 
 [dependencies.rusqlite]
-version = "0.30.0"
+version = "0.31.0"
 default-features = false
 features = []

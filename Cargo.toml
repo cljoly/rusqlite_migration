@@ -3,6 +3,7 @@ members = [
   "rusqlite_migration",
   "rusqlite_migration_tokio_async",
   "rusqlite_migration_tests",
+  "examples/*",
 ]
 
 # https://doc.rust-lang.org/cargo/reference/resolver.html#feature-resolver-version-2
