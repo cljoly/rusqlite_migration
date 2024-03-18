@@ -37,7 +37,7 @@ tokio-rusqlite = { version = "0.5.0", optional = true }
 log = "0.4"
 
 [dependencies.rusqlite]
-version = "0.30.0"
+version = "0.31.0"
 default-features = false
 features = []
 
