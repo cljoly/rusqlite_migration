@@ -1,6 +1,6 @@
 [package]
 name = "rusqlite_migration"
-version = "1.2.0-beta.1"
+version = "1.2.0"
 authors = ["Clément Joly <foss@131719.xyz>"]
 edition = "2021"
 license = "Apache-2.0"
