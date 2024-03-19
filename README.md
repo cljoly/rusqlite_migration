@@ -26,7 +26,7 @@ end_insert -->
 {{< /rawhtml >}}
 end_insert -->
 
-[![docs.rs](https://img.shields.io/docsrs/rusqlite_migration)](https://docs.rs/rusqlite_migration) [![Crates.io](https://img.shields.io/crates/v/rusqlite_migration)](https://crates.io/crates/rusqlite_migration) [![unsafe forbidden](https://img.shields.io/badge/unsafe-forbidden-success.svg)](https://github.com/rust-secure-code/safety-dance/) [![dependency status](https://deps.rs/crate/rusqlite_migration/1.1.0/status.svg)](https://deps.rs/crate/rusqlite_migration) [![Coveralls](https://img.shields.io/coverallsCoverage/github/cljoly/rusqlite_migration)](https://coveralls.io/github/cljoly/rusqlite_migration)
+[![docs.rs](https://img.shields.io/docsrs/rusqlite_migration)][docs] [![Crates.io](https://img.shields.io/crates/v/rusqlite_migration)][cio] [![Crates.io Downloads (recent)](https://img.shields.io/crates/dr/rusqlite_migration)][cio] [![unsafe forbidden](https://img.shields.io/badge/unsafe-forbidden-success.svg)][safety-dance] [![dependency status](https://deps.rs/crate/rusqlite_migration/1.1.0/status.svg)][deps] [![Coveralls](https://img.shields.io/coverallsCoverage/github/cljoly/rusqlite_migration)][coveralls]
 
 <!-- insert
 {{< rawhtml >}}
@@ -44,13 +44,6 @@ Rusqlite Migration is a simple and performant schema migration library for [rusq
     * *Fast database opening*: to keep track of the current migration state, most tools create one or more tables in the database. These tables require parsing by SQLite and are queried with SQL statements. This library uses the [`user_version`][uv] value instead. It’s much lighter as it is just an integer at a [fixed offset][uv_offset] in the SQLite file.
     * *Fast compilation*: this crate is very small and does not use macros to define the migrations.
 * **Simplicity**: this crate strives for simplicity. Just define a set of SQL statements as strings in your Rust code. Add more SQL statements over time as needed. No external CLI required. Additionally, rusqlite_migration works especially well with other small libraries complementing rusqlite, like [serde_rusqlite][].
-
-[diesel_migrations]: https://crates.io/crates/diesel_migrations
-[pgfine]: https://crates.io/crates/pgfine
-[movine]: https://crates.io/crates/movine
-[uv]: https://sqlite.org/pragma.html#pragma_user_version
-[uv_offset]: https://www.sqlite.org/fileformat.html#user_version_number
-[serde_rusqlite]: https://crates.io/crates/serde_rusqlite
 
 ## Example
 
@@ -93,7 +86,7 @@ Please see the [examples](https://github.com/cljoly/rusqlite_migrate/tree/master
 [quick_start_async]: https://github.com/cljoly/rusqlite_migration/blob/master/examples/async/src/main.rs
 [from_dir]: https://github.com/cljoly/rusqlite_migration/tree/master/examples/from-directory
 
-I’ve also made a [cheatsheet of SQLite pragma for improved performance and consistency](https://cj.rs/blog/sqlite-pragma-cheatsheet-for-performance-and-consistency/).
+I’ve also made a [cheatsheet of SQLite pragma for improved performance and consistency][cheat].
 
 ### Built-in tests
 
@@ -133,24 +126,40 @@ Rusqlite_migration provides several [Cargo features][cargo_features]. They are:
 
 This crate is actively used in a number of projects. You can find up-to-date list of those on:
 
-* [crates.io](https://crates.io/crates/rusqlite_migration/reverse_dependencies) / [lib.rs](https://lib.rs/crates/rusqlite_migration/rev)
-* [GitHub’s list of dependent repositories](https://github.com/cljoly/rusqlite_migration/network/dependents?dependent_type=REPOSITORY)
+* [crates.io][cio_reverse] / [lib.rs][lrs_reverse]
+* [GitHub’s list of dependent repositories][gh_reverse]
 
 A number of contributors are also reporting issues as they arise, another indicator of active use.
 
 ## Contributing
 
-Contributions (documentation or code improvements in particular) are welcome, see [contributing](https://cj.rs/docs/contribute/)!
+Contributions (documentation or code improvements in particular) are welcome, see [contributing][]!
 
 We use various tools for testing that you may find helpful to install locally (e.g. to fix failing CI checks):
 * [cargo-insta][]
 * [cargo-mutants][]
-
-[cargo-insta]: https://crates.io/crates/cargo-insta
-[cargo-mutants]: https://mutants.rs/installation.html
 
 ## Acknowledgments
 
 I would like to thank all the contributors, as well as the authors of the dependencies this crate uses.
 
 Thanks to [Migadu](https://www.migadu.com/) for offering a discounted service to support this project. It is not an endorsement by Migadu though.
+
+[deps]: https://deps.rs/crate/rusqlite_migration
+[coveralls]: https://coveralls.io/github/cljoly/rusqlite_migration
+[safety-dance]: https://github.com/rust-secure-code/safety-dance/
+[cio]: https://crates.io/crates/rusqlite_migration
+[cio_reverse]: https://crates.io/crates/rusqlite_migration/reverse_dependencies
+[lrs_reverse]: https://lib.rs/crates/rusqlite_migration/rev
+[gh_reverse]: https://github.com/cljoly/rusqlite_migration/network/dependents?dependent_type=REPOSITORY
+[contributing]: https://cj.rs/docs/contribute/
+[diesel_migrations]: https://crates.io/crates/diesel_migrations
+[pgfine]: https://crates.io/crates/pgfine
+[movine]: https://crates.io/crates/movine
+[uv]: https://sqlite.org/pragma.html#pragma_user_version
+[uv_offset]: https://www.sqlite.org/fileformat.html#user_version_number
+[serde_rusqlite]: https://crates.io/crates/serde_rusqlite
+[cargo-insta]: https://crates.io/crates/cargo-insta
+[cargo-mutants]: https://mutants.rs/installation.html
+[cheat]: https://cj.rs/blog/sqlite-pragma-cheatsheet-for-performance-and-consistency/
+[docs]: https://docs.rs/rusqlite_migration
