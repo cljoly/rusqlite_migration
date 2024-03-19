@@ -1,8 +1,16 @@
 # Changelog
 
+## Version 1.2.0
+
+*Same code as version 1.2.0-beta.1*
+
+### Documentation
+
+- Improved the badges a little bit
+
 ## Version 1.2.0 Beta 1
 
-Small update, mainly to update dependencies.
+Small release, mainly to update dependencies.
 
 ### Minimum Rust Version
 
