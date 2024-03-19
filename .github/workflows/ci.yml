@@ -143,6 +143,9 @@ jobs:
   mutation-tests:
     name: Mutation tests
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        shard: [0, 1, 2, 3]
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
@@ -155,7 +158,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: mutants
-          args: --colors=always
+          args: --colors=always --no-shuffle -vV --shard ${{ matrix.shard }}/4
       - name: Archive results
         uses: actions/upload-artifact@v3
         if: failure()
