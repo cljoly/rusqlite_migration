@@ -530,3 +530,26 @@ fn test_user_version_error() {
     assert!(e.is_err(), "{:?}", e);
     insta::assert_debug_snapshot!(e)
 }
+
+#[test]
+fn test_missing_down_migration() {
+    let mut conn = Connection::open_in_memory().unwrap();
+    let ms = vec![
+        M::up("CREATE TABLE t1(a)").down("DROP TABLE t1"),
+        M::up("CREATE TABLE t2(a)").down("DROP TABLE t2"),
+        M::up("CREATE TABLE t3(a)"),
+        M::up("CREATE TABLE t4(a)").down("DROP TABLE t4"),
+        M::up("CREATE TABLE t5(a)"),
+    ];
+
+    let m = Migrations::new(ms);
+    m.to_version(&mut conn, 4).unwrap();
+
+    m.to_version(&mut conn, 3).unwrap();
+    assert_eq!(
+        Err(Error::MigrationDefinition(
+            MigrationDefinitionError::DownNotDefined { migration_index: 2 }
+        )),
+        m.to_version(&mut conn, 2)
+    );
+}
