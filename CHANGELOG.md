@@ -1,10 +1,29 @@
 # Changelog
 
-## Version 1.2.0 Alpha 1
+## Version 1.2.0 Beta 1
+
+Small update, mainly to update dependencies.
 
 ### Minimum Rust Version
 
-Now using edition 2021
+Now using edition 2021, but the minimum rust version is still 1.70
+
+### New Features
+
+No new features.
+
+### Other
+
+- Update rusqlite to 0.31
+- Update various development dependencies
+- Improve CI build time
+- Impove documentation
+- Fix some broken examples
+
+### See also
+
+Rusqlite was updated from 0.30 to 0.31. Please see [its release notes](https://github.com/rusqlite/rusqlite/releases/tag/v0.31.0)
+
 
 ## Version 1.1.0
 
