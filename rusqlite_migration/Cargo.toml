@@ -43,7 +43,7 @@ features = []
 
 [dev-dependencies]
 tokio = { version = "1.36", features = ["full"] }
-tokio-test = "0.4.2"
+tokio-test = "0.4.4"
 simple-logging = "2.0.2"
 env_logger = "0.10"
 anyhow = "1"
