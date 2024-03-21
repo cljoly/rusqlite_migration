@@ -26,7 +26,11 @@ end_insert -->
 {{< /rawhtml >}}
 end_insert -->
 
-[![docs.rs](https://img.shields.io/docsrs/rusqlite_migration)][docs] [![Crates.io](https://img.shields.io/crates/v/rusqlite_migration)][cio] [![unsafe forbidden](https://img.shields.io/badge/unsafe-forbidden-success.svg)][safety-dance] [![dependency status](https://deps.rs/crate/rusqlite_migration/1.2.0-beta.1/status.svg)][deps] [![Coveralls](https://img.shields.io/coverallsCoverage/github/cljoly/rusqlite_migration)][coveralls]
+[![docs.rs](https://img.shields.io/docsrs/rusqlite_migration)][docs]
+[![Crates.io](https://img.shields.io/crates/v/rusqlite_migration)][cio]
+[![unsafe forbidden](https://img.shields.io/badge/unsafe-forbidden-success.svg)][safety-dance]
+[![dependency status](https://deps.rs/crate/rusqlite_migration/1.2.0-beta.1/status.svg)][deps]
+[![Coveralls](https://img.shields.io/coverallsCoverage/github/cljoly/rusqlite_migration)][coveralls]
 
 <!-- insert
 {{< rawhtml >}}
@@ -124,7 +128,19 @@ Rusqlite_migration provides several [Cargo features][cargo_features]. They are:
 
 ## Active Users
 
+<!-- insert
+{{< rawhtml >}}
+<div class="badges">
+{{< /rawhtml >}}
+end_insert -->
+
 [![Crates.io Downloads](https://img.shields.io/crates/d/rusqlite_migration?style=social)][cio] [![Crates.io Downloads (recent)](https://img.shields.io/crates/dr/rusqlite_migration?style=social)][cio]
+
+<!-- insert
+{{< rawhtml >}}
+</div>
+{{< /rawhtml >}}
+end_insert -->
 
 This crate is actively used in a number of projects. You can find up-to-date list of those on:
 
