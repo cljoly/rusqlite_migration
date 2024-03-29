@@ -22,6 +22,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: check
+          args: --locked
 
   test_no_features:
     name: Test no features
@@ -36,6 +37,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: test
+          args: --locked
 
   test_all_features:
     name: Test all features
@@ -50,7 +52,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --all-features
+          args: --locked --all-features
 
   test_async_tokio_rusqlite:
     name: Test feature alpha-async-tokio-rusqlite
@@ -65,7 +67,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --features alpha-async-tokio-rusqlite
+          args: --locked --features alpha-async-tokio-rusqlite
 
   test_from_directory:
     name: Test feature from-directory
@@ -80,7 +82,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --features from-directory
+          args: --locked --features from-directory
 
   test_examples:
     name: Test examples
@@ -98,6 +100,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: test
+          args: --locked
 
   min_rust_version:
     name: Check with minimal Rust version
@@ -112,6 +115,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: test
+          args: --locked
 
   doc:
     name: Documentation
@@ -122,7 +126,7 @@ jobs:
         with:
           profile: minimal
           toolchain: stable
-      - run: RUSTDOCFLAGS="-D warnings" cargo doc --all-features --no-deps --lib
+      - run: RUSTDOCFLAGS="-D warnings" cargo --locked doc --all-features --no-deps --lib
 
   fmt:
     name: Rustfmt
@@ -181,7 +185,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --all-features -- -D warnings
+          args: --locked --all-features -- -D warnings
 
   clippy_main:
     name: Clippy (main package)
@@ -199,7 +203,7 @@ jobs:
         with:
           command: clippy
           # More stringent requirements
-          args: --all-features -p rusqlite_migration -- -D warnings -D clippy::missing_errors_doc -D clippy::missing_panics_doc -D clippy::doc_link_with_quotes -D clippy::doc_markdown
+          args: --locked --all-features -p rusqlite_migration -- -D warnings -D clippy::missing_errors_doc -D clippy::missing_panics_doc -D clippy::doc_link_with_quotes -D clippy::doc_markdown
 
   coverage:
     name: Code coverage
@@ -212,12 +216,12 @@ jobs:
           toolchain: stable
           override: true
       - uses: Swatinem/rust-cache@v2
-      - run: cargo install cargo-tarpaulin
+      - run: cargo install --locked cargo-tarpaulin
       - name: Generate code coverage
         uses: actions-rs/cargo@v1
         with:
           command: tarpaulin
-          args: --all-features --run-types AllTargets --workspace --timeout 120 --out Lcov --exclude-files '**/benches/*'
+          args: --locked --all-features --run-types AllTargets --workspace --timeout 120 --out Lcov --exclude-files '**/benches/*'
       - name: Upload coverage to Coveralls
         uses: coverallsapp/github-action@v1
         with:
