@@ -14,7 +14,7 @@ rust-version = "1.70"
 publish = false
 
 [dependencies]
-tokio = { version = "1.37", features = ["macros"] }
+tokio = { version = "1.38", features = ["macros"] }
 tokio-rusqlite = { version = "0.5.0" }
 log = "0.4"
 
