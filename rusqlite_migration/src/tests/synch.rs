@@ -149,7 +149,7 @@ fn test_migration_definition_error_display() {
 #[test]
 fn test_error_display() {
     for (name, e) in all_errors() {
-        insta::assert_display_snapshot!(format!("error_display__{name}"), e);
+        insta::assert_snapshot!(format!("error_display__{name}"), e);
     }
 }
 
