@@ -601,7 +601,7 @@ impl<'m> Migrations<'m> {
     }
 
     /// Maximum version defined in the migration set
-    fn max_schema_version(&self) -> SchemaVersion {
+    pub fn max_schema_version(&self) -> SchemaVersion {
         match self.ms.len() {
             0 => SchemaVersion::NoneSet,
             v => SchemaVersion::Inside(
