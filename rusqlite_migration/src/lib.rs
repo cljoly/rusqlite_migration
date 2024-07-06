@@ -601,12 +601,12 @@ impl<'m> Migrations<'m> {
     }
 
     /// Maximum version defined in the migration set
+    #[allow(clippy::missing_panics_doc)]
     pub fn max_schema_version(&self) -> SchemaVersion {
         match self.ms.len() {
             0 => SchemaVersion::NoneSet,
             v => SchemaVersion::Inside(
-                NonZeroUsize::new(v).expect("schema version should not be equal to 0"),
-            ),
+                NonZeroUsize::new(v).expect("Already checked for 0 in previous match arm")),
         }
     }
 
