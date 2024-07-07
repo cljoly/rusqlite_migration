@@ -611,7 +611,8 @@ impl<'m> Migrations<'m> {
         match self.ms.len() {
             0 => SchemaVersion::NoneSet,
             v => SchemaVersion::Inside(
-                NonZeroUsize::new(v).expect("Already checked for 0 in previous match arm"),
+                NonZeroUsize::new(v)
+                    .unwrap_or_else(|| unreachable!("Already checked for 0 in previous match arm")),
             ),
         }
     }
