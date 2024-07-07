@@ -150,6 +150,12 @@ impl AsyncMigrations {
             .await?
     }
 
+    /// Asynchronous version of the same method in the
+    /// [Migrations](crate::Migrations::max_schema_version) struct.
+    pub fn max_schema_version(&self) -> SchemaVersion {
+        self.migrations.max_schema_version()
+    }
+
     /// Asynchronous version of the same method in the [Migrations](crate::Migrations::validate) struct.
     ///
     /// # Example
