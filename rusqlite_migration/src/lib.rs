@@ -600,8 +600,13 @@ impl<'m> Migrations<'m> {
         res
     }
 
-    /// Maximum version defined in the migration set
-    #[allow(clippy::missing_panics_doc)]
+    /// Return the maximum version defined in the migration set.
+    ///
+    /// If you are using [`Migrations::from_directory()`] and `include_dir!`, it is non-trivial to
+    /// access the number of migrations loaded, so you may need to use this method.
+    ///
+    /// For the most common scenarios though, you should be able to just call
+    /// [`Migrations::to_latest`].
     pub fn max_schema_version(&self) -> SchemaVersion {
         match self.ms.len() {
             0 => SchemaVersion::NoneSet,
