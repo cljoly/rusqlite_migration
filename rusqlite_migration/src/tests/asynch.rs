@@ -1,11 +1,11 @@
-use std::{iter::FromIterator, num::NonZeroUsize};
+use std::iter::FromIterator;
 
 use crate::{
     tests::helpers::{
         all_valid, m_invalid0, m_invalid1, m_invalid_down_fk, m_invalid_fk, m_valid0, m_valid10,
         m_valid11, m_valid20, m_valid21, m_valid_fk,
     },
-    AsyncMigrations, Error, MigrationDefinitionError, SchemaVersion,
+    AsyncMigrations, Error, MigrationDefinitionError
 };
 use tokio_rusqlite::Connection as AsyncConnection;
 
@@ -76,19 +76,15 @@ async fn current_version_gt_max_schema_version_async_test() {
     // Set migrations to a higher number
     {
         let migrations = AsyncMigrations::new(vec![m_valid0(), m_valid10()]);
-        assert_eq!(
-            SchemaVersion::Inside(NonZeroUsize::new(2).unwrap()),
-            migrations.max_schema_version()
-        );
+        assert_eq!(2, migrations.latest_schema_version());
         migrations.to_latest(&mut conn).await.unwrap();
     }
 
     // We now have fewer migrations
     let migrations = AsyncMigrations::new(vec![m_valid0()]);
-    assert_eq!(
-        SchemaVersion::Inside(NonZeroUsize::new(1).unwrap()),
-        migrations.max_schema_version()
-    );
+    assert_eq!(1, migrations.latest_schema_version());
+
+    assert_eq!(Ok(false), migrations.is_latest_schema_version(&conn).await);
 
     // We should get an error
     assert_eq!(
