@@ -158,6 +158,7 @@ impl AsyncMigrations {
 
     /// Asynchronous version of the same method in the
     /// [Migrations](crate::Migrations::is_latest_schema_version) struct.
+    #[allow(clippy::missing_errors_doc)]
     pub async fn is_latest_schema_version(&self, async_conn: &AsyncConnection) -> Result<bool> {
         let m = self.migrations.clone();
 
