@@ -270,22 +270,24 @@ fn user_version_migrate_test() {
         Ok(SchemaVersion::Inside(NonZeroUsize::new(1).unwrap())),
         migrations.current_version(&conn)
     );
-    assert_eq!(
-        SchemaVersion::Inside(NonZeroUsize::new(1).unwrap()),
-        migrations.max_schema_version()
-    );
+    assert_eq!(1, migrations.latest_schema_version());
+    assert_eq!(Ok(true), migrations.is_latest_schema_version(&conn));
 
     let migrations = Migrations::new(vec![m_valid10(), m_valid11()]);
+
+    // Before to_latest
+    assert_eq!(2, migrations.latest_schema_version());
+    assert_eq!(Ok(false), migrations.is_latest_schema_version(&conn));
+
     assert_eq!(Ok(()), migrations.to_latest(&mut conn));
+
+    // After to_latest
     assert_eq!(Ok(2), user_version(&conn));
     assert_eq!(
         Ok(SchemaVersion::Inside(NonZeroUsize::new(2).unwrap())),
         migrations.current_version(&conn)
     );
-    assert_eq!(
-        SchemaVersion::Inside(NonZeroUsize::new(2).unwrap()),
-        migrations.max_schema_version()
-    );
+    assert_eq!(Ok(true), migrations.is_latest_schema_version(&conn));
 }
 
 #[test]

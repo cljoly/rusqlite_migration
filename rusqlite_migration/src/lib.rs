@@ -605,16 +605,23 @@ impl<'m> Migrations<'m> {
     /// If you are using [`Migrations::from_directory()`] and `include_dir!`, it is non-trivial to
     /// access the number of migrations loaded, so you may need to use this method.
     ///
-    /// For the most common scenarios though, you should be able to just call
-    /// [`Migrations::to_latest`].
-    pub fn max_schema_version(&self) -> SchemaVersion {
-        match self.ms.len() {
-            0 => SchemaVersion::NoneSet,
-            v => SchemaVersion::Inside(
-                NonZeroUsize::new(v)
-                    .unwrap_or_else(|| unreachable!("Already checked for 0 in previous match arm")),
-            ),
-        }
+    /// For most common scenarios, you should be able to just call
+    /// [`Migrations::to_latest`], which already checks the schema version.
+    ///
+    /// See also: [`Migrations::is_latest_schema_version`].
+    pub fn latest_schema_version(&self) -> usize {
+        self.ms.len()
+    }
+
+    /// Return whether the current database version is the latest one for the loaded migrations.
+    ///
+    /// For most common scenarios, you should be able to just call
+    /// [`Migrations::to_latest`], which already checks the schema version.
+    ///
+    /// See also: [`Migrations::latest_schema_version`].
+    pub fn is_latest_schema_version(&self, conn: &Connection) -> Result<bool> {
+        let curr_v = user_version(conn)?;
+        Ok(self.latest_schema_version() == curr_v)
     }
 
     /// Migrate the database to latest schema version. The migrations are applied atomically.
@@ -679,19 +686,18 @@ impl<'m> Migrations<'m> {
     /// [default_behavior]: https://github.com/rusqlite/rusqlite/pull/1532
     /// [sqlite_doc]: https://sqlite.org/lang_transaction.html
     pub fn to_latest(&self, conn: &mut Connection) -> Result<()> {
-        let v_max = self.max_schema_version();
+        let v_max = self.latest_schema_version();
         match v_max {
-            SchemaVersion::NoneSet => {
+            0 => {
                 warn!("no migration defined");
                 Err(Error::MigrationDefinition(
                     MigrationDefinitionError::NoMigrationsDefined,
                 ))
-            }
-            SchemaVersion::Inside(v) => {
+            },
+            v => {
                 debug!("some migrations defined (version: {v}), try to migrate");
-                self.goto(conn, v_max.into())
+                self.goto(conn, v)
             }
-            SchemaVersion::Outside(_) => unreachable!(),
         }
     }
 
@@ -737,30 +743,31 @@ impl<'m> Migrations<'m> {
     /// When migrating downwards, all the reversed migrations must have a `.down()` variant,
     /// otherwise no migrations are run and the function returns an error.
     pub fn to_version(&self, conn: &mut Connection, version: usize) -> Result<()> {
-        let target_version: SchemaVersion = self.db_version_to_schema(version);
-        let v_max = self.max_schema_version();
+        let v_max = self.latest_schema_version();
         match v_max {
-            SchemaVersion::NoneSet => {
+            0 => {
                 warn!("no migrations defined");
                 Err(Error::MigrationDefinition(
                     MigrationDefinitionError::NoMigrationsDefined,
                 ))
-            }
-            SchemaVersion::Inside(v) => {
-                debug!("some migrations defined (version: {v}), try to migrate");
-                if target_version > v_max {
+            },
+            v_max => {
+                debug!("some migrations defined (version: {v_max}), try to migrate");
+                if version > v_max {
                     warn!("specified version is higher than the max supported version");
+
+                    let specified: SchemaVersion = self.db_version_to_schema(version);
+                    let highest: SchemaVersion = self.db_version_to_schema(v_max);
+
                     return Err(Error::SpecifiedSchemaVersion(
                         SchemaVersionError::TargetVersionOutOfRange {
-                            specified: target_version,
-                            highest: v_max,
+                            highest, specified,
                         },
                     ));
                 }
 
-                self.goto(conn, target_version.into())
-            }
-            SchemaVersion::Outside(_) => unreachable!(),
+                self.goto(conn, version)
+            },
         }
     }
 
