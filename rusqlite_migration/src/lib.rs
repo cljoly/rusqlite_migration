@@ -656,7 +656,7 @@ impl<'m> Migrations<'m> {
                 Err(Error::MigrationDefinition(
                     MigrationDefinitionError::NoMigrationsDefined,
                 ))
-            },
+            }
             v => {
                 debug!("some migrations defined (version: {v}), try to migrate");
                 self.goto(conn, v)
@@ -713,7 +713,7 @@ impl<'m> Migrations<'m> {
                 Err(Error::MigrationDefinition(
                     MigrationDefinitionError::NoMigrationsDefined,
                 ))
-            },
+            }
             v_max => {
                 debug!("some migrations defined (version: {v_max}), try to migrate");
                 if version > v_max {
@@ -723,14 +723,12 @@ impl<'m> Migrations<'m> {
                     let highest: SchemaVersion = self.db_version_to_schema(v_max);
 
                     return Err(Error::SpecifiedSchemaVersion(
-                        SchemaVersionError::TargetVersionOutOfRange {
-                            highest, specified,
-                        },
+                        SchemaVersionError::TargetVersionOutOfRange { highest, specified },
                     ));
                 }
 
                 self.goto(conn, version)
-            },
+            }
         }
     }
 

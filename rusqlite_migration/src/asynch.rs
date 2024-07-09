@@ -1,7 +1,4 @@
-use std::{
-    iter::FromIterator,
-    sync::Arc,
-};
+use std::{iter::FromIterator, sync::Arc};
 
 use tokio_rusqlite::Connection as AsyncConnection;
 
@@ -164,8 +161,9 @@ impl AsyncMigrations {
     pub async fn is_latest_schema_version(&self, async_conn: &AsyncConnection) -> Result<bool> {
         let m = Arc::clone(&self.migrations);
 
-        async_conn.call(move |conn| Ok(m.is_latest_schema_version(conn)))
-                  .await?
+        async_conn
+            .call(move |conn| Ok(m.is_latest_schema_version(conn)))
+            .await?
     }
 
     /// Asynchronous version of the same method in the [Migrations](crate::Migrations::validate) struct.
