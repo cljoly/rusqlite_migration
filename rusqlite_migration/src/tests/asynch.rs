@@ -76,13 +76,22 @@ async fn current_version_gt_max_schema_version_async_test() {
     // Set migrations to a higher number
     {
         let migrations = AsyncMigrations::new(vec![m_valid0(), m_valid10()]);
+
+        // Before to_latest.
         assert_eq!(2, migrations.latest_schema_version());
+        assert_eq!(Ok(false), migrations.is_latest_schema_version(&conn).await);
+
         migrations.to_latest(&mut conn).await.unwrap();
+
+        // After to_latest
+        assert_eq!(2_usize, migrations.current_version(&conn).await.unwrap().into());
+        assert_eq!(Ok(true), migrations.is_latest_schema_version(&conn).await);
     }
 
     // We now have fewer migrations
     let migrations = AsyncMigrations::new(vec![m_valid0()]);
     assert_eq!(1, migrations.latest_schema_version());
+    assert_eq!(2_usize, migrations.current_version(&conn).await.unwrap().into());
 
     assert_eq!(Ok(false), migrations.is_latest_schema_version(&conn).await);
 
