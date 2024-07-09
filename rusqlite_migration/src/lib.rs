@@ -619,6 +619,10 @@ impl<'m> Migrations<'m> {
     /// [`Migrations::to_latest`], which already checks the schema version.
     ///
     /// See also: [`Migrations::latest_schema_version`].
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::RusqliteError`] in case the user version cannot be queried.
     pub fn is_latest_schema_version(&self, conn: &Connection) -> Result<bool> {
         let curr_v = user_version(conn)?;
         Ok(self.latest_schema_version() == curr_v)
