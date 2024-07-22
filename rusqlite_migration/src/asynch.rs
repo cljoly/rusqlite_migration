@@ -1,4 +1,4 @@
-use std::iter::FromIterator;
+use std::{iter::FromIterator, sync::Arc};
 
 use tokio_rusqlite::Connection as AsyncConnection;
 
@@ -11,7 +11,7 @@ use include_dir::Dir;
 /// Adapter to make `Migrations` available in an async context.
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct AsyncMigrations {
-    migrations: Migrations<'static>,
+    migrations: Arc<Migrations<'static>>,
 }
 
 impl AsyncMigrations {
@@ -30,7 +30,7 @@ impl AsyncMigrations {
     #[must_use]
     pub fn new(ms: Vec<M<'static>>) -> Self {
         Self {
-            migrations: Migrations::new(ms),
+            migrations: Arc::new(Migrations::new(ms)),
         }
     }
 
@@ -49,7 +49,7 @@ impl AsyncMigrations {
     #[cfg(feature = "from-directory")]
     pub fn from_directory(dir: &'static Dir<'static>) -> Result<Self> {
         Ok(Self {
-            migrations: Migrations::from_directory(dir)?,
+            migrations: Arc::new(Migrations::from_directory(dir)?),
         })
     }
 
@@ -79,7 +79,7 @@ impl AsyncMigrations {
     /// ```
     #[allow(clippy::missing_errors_doc)]
     pub async fn current_version(&self, async_conn: &AsyncConnection) -> Result<SchemaVersion> {
-        let m = self.migrations.clone();
+        let m = Arc::clone(&self.migrations);
         async_conn
             .call(move |conn| Ok(m.current_version(conn)))
             .await?
@@ -109,7 +109,7 @@ impl AsyncMigrations {
     /// ```
     #[allow(clippy::missing_errors_doc)]
     pub async fn to_latest(&self, async_conn: &mut AsyncConnection) -> Result<()> {
-        let m = self.migrations.clone();
+        let m = Arc::clone(&self.migrations);
         async_conn.call(move |conn| Ok(m.to_latest(conn))).await?
     }
 
@@ -144,7 +144,7 @@ impl AsyncMigrations {
     /// ```
     #[allow(clippy::missing_errors_doc)]
     pub async fn to_version(&self, async_conn: &mut AsyncConnection, version: usize) -> Result<()> {
-        let m = self.migrations.clone();
+        let m = Arc::clone(&self.migrations);
         async_conn
             .call(move |conn| Ok(m.to_version(conn, version)))
             .await?
@@ -176,7 +176,7 @@ impl AsyncMigrations {
 impl FromIterator<M<'static>> for AsyncMigrations {
     fn from_iter<T: IntoIterator<Item = M<'static>>>(iter: T) -> Self {
         Self {
-            migrations: Migrations::from_iter(iter),
+            migrations: Arc::new(Migrations::from_iter(iter)),
         }
     }
 }
