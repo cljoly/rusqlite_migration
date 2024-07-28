@@ -135,9 +135,9 @@ impl<'u> M<'u> {
     /// migrations, because:
     ///   * a PRAGMA executed this way may not be applied consistently. For instance:
     ///     * [`foreign_keys`](https://sqlite.org/pragma.html#pragma_foreign_keys) needs to be
-    ///     executed for each sqlite connection, not just once per database as a migration. Please
-    ///     see the [`Self::foreign_key_check()`] method to maintain foreign key constraints during
-    ///     migrations instead.
+    ///       executed for each sqlite connection, not just once per database as a migration. Please
+    ///       see the [`Self::foreign_key_check()`] method to maintain foreign key constraints during
+    ///       migrations instead.
     ///     * [`journal_mode`][jm] has no effect when executed inside transactions (that will be
     ///       the case for the SQL written in `up`).
     ///   * Multiple SQL commands containing `PRAGMA` are [not working][ru794] with the
