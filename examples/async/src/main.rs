@@ -1,5 +1,6 @@
+use std::sync::LazyLock;
+
 use anyhow::Result;
-use lazy_static::lazy_static;
 use rusqlite::params;
 use rusqlite_migration::{AsyncMigrations, M};
 use tokio_rusqlite::Connection;
@@ -16,26 +17,23 @@ mod tests {
 }
 
 // Define migrations. These are applied atomically.
-lazy_static! {
-    static ref MIGRATIONS: AsyncMigrations =
-        AsyncMigrations::new(vec![
-            M::up(include_str!("../../friend_car.sql")),
-            // PRAGMA are better applied outside of migrations, see below for details.
-            M::up(r#"
+static MIGRATIONS: LazyLock<AsyncMigrations> = LazyLock::new(|| {
+    AsyncMigrations::new(vec![
+        M::up(include_str!("../../friend_car.sql")),
+        // PRAGMA are better applied outside of migrations, see below for details.
+        M::up(
+            r#"
                   ALTER TABLE friend ADD COLUMN birthday TEXT;
                   ALTER TABLE friend ADD COLUMN comment TEXT;
-                  "#),
-
-            // This migration can be reverted
-            M::up("CREATE TABLE animal(name TEXT);")
-            .down("DROP TABLE animal;")
-
-            // In the future, if the need to change the schema arises, put
-            // migrations here, like so:
-            // M::up("CREATE INDEX UX_friend_email ON friend(email);"),
-            // M::up("CREATE INDEX UX_friend_name ON friend(name);"),
-        ]);
-}
+                  "#,
+        ),
+        // This migration can be reverted
+        M::up("CREATE TABLE animal(name TEXT);").down("DROP TABLE animal;"), // In the future, if the need to change the schema arises, put
+                                                                             // migrations here, like so:
+                                                                             // M::up("CREATE INDEX UX_friend_email ON friend(email);"),
+                                                                             // M::up("CREATE INDEX UX_friend_name ON friend(name);"),
+    ])
+});
 
 pub async fn init_db() -> Result<Connection> {
     let mut async_conn = Connection::open("./my_db.db3").await?;
