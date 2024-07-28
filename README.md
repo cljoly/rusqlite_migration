@@ -84,13 +84,8 @@ Please see the [examples](https://github.com/cljoly/rusqlite_migrate/tree/master
 - `async` migrations in the [`quick_start_async.rs`][quick_start_async] file
 - migrations with multiple SQL statements (using for instance `r#"…"` or `include_str!(…)`)
 - migrations defined [from a directory][from_dir] with SQL files
-- use of [lazy_static][]
+- use of [`LazyLock`][lazy_lock] (or [lazy_static][] with older versions of Rust)
 - migrations to [previous versions (downward migrations)][generic_example]
-
-[quick_start_async]: https://github.com/cljoly/rusqlite_migration/blob/master/examples/async/src/main.rs
-[from_dir]: https://github.com/cljoly/rusqlite_migration/tree/master/examples/from-directory
-[lazy_static]: https://github.com/cljoly/rusqlite_migration/blob/f3d19847065b890efe73c27393b2980d1571f871/examples/simple/src/main.rs#L18
-[generic_example]: https://github.com/cljoly/rusqlite_migration/blob/master/examples/simple/src/main.rs
 
 I’ve also made a [cheatsheet of SQLite pragma for improved performance and consistency][cheat].
 
@@ -176,6 +171,7 @@ Thanks to [Migadu](https://www.migadu.com/) for offering a discounted service to
 [safety-dance]: https://github.com/rust-secure-code/safety-dance/
 [cio]: https://crates.io/crates/rusqlite_migration
 [cio_reverse]: https://crates.io/crates/rusqlite_migration/reverse_dependencies
+[lazy_lock]: https://doc.rust-lang.org/std/sync/struct.LazyLock.html
 [lrs_reverse]: https://lib.rs/crates/rusqlite_migration/rev
 [gh_reverse]: https://github.com/cljoly/rusqlite_migration/network/dependents?dependent_type=REPOSITORY
 [contributing]: https://cj.rs/docs/contribute/
@@ -190,3 +186,7 @@ Thanks to [Migadu](https://www.migadu.com/) for offering a discounted service to
 [cheat]: https://cj.rs/blog/sqlite-pragma-cheatsheet-for-performance-and-consistency/
 [docs]: https://docs.rs/rusqlite_migration
 [msrv]: https://github.com/rusqlite/rusqlite?tab=readme-ov-file#minimum-supported-rust-version-msrv
+[quick_start_async]: https://github.com/cljoly/rusqlite_migration/blob/master/examples/async/src/main.rs
+[from_dir]: https://github.com/cljoly/rusqlite_migration/tree/master/examples/from-directory
+[lazy_static]: https://github.com/cljoly/rusqlite_migration/blob/f3d19847065b890efe73c27393b2980d1571f871/examples/simple/src/main.rs#L18
+[generic_example]: https://github.com/cljoly/rusqlite_migration/blob/master/examples/simple/src/main.rs
