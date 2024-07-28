@@ -1,17 +1,18 @@
 [package]
 name = "rusqlite_migration_tests"
-version = "1.1.0"
-authors = ["Clément Joly <foss@131719.xyz>"]
 edition = "2018"
-license = "Apache-2.0"
-description = "Simple schema migration library for rusqlite using user_version instead of an SQL table to maintain the current schema version."
-keywords = ["rusqlite", "sqlite", "user_version", "database", "migration"]
-categories = ["database"]
 readme = "README.md"
-homepage = "https://cj.rs/rusqlite_migration"
-repository = "https://github.com/cljoly/rusqlite_migration"
-rust-version = "1.70"
 publish = false
+
+authors.workspace = true
+categories.workspace = true
+description.workspace = true
+homepage.workspace = true
+keywords.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+version.workspace = true
 
 [dependencies]
 tokio = { version = "1.39", features = ["macros"] }

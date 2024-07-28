@@ -1,3 +1,14 @@
+[workspace.package]
+authors = ["Clément Joly <foss@131719.xyz>"]
+categories = ["database"]
+description = "Simple schema migration library for rusqlite using user_version instead of an SQL table to maintain the current schema version."
+homepage = "https://cj.rs/rusqlite_migration"
+keywords = ["rusqlite", "sqlite", "user_version", "database", "migration"]
+license = "Apache-2.0"
+repository = "https://github.com/cljoly/rusqlite_migration"
+rust-version = "1.70"
+version = "1.3.0-alpha.1"
+
 [workspace]
 members = [
   "rusqlite_migration",
