@@ -634,6 +634,30 @@ impl<'m> Migrations<'m> {
     /// # Errors
     ///
     /// Returns [`Error::MigrationDefinition`] if no migration is defined.
+    ///
+    /// Returns [`Error::RusqliteError`] if rusqlite returns an error when executing a migration
+    /// statement. Note that this immediatley stops applying migrations.
+    /// ```rust
+    /// # use rusqlite_migration::{Migrations, M};
+    /// let mut conn = rusqlite::Connection::open_in_memory().unwrap();
+    ///
+    /// let migrations = Migrations::new(vec![
+    ///     M::up("CREATE TABLE t1 (c);"),
+    ///     M::up("SYNTAX ERROR"),         // This won’t be applied
+    ///     M::up("CREATE TABLE t2 (c);"), // This won’t be applied either because the migration above
+    ///                                    // failed
+    /// ]);
+    ///
+    /// assert!(matches!(
+    ///     migrations.to_latest(&mut conn),
+    ///     Err(rusqlite_migration::Error::RusqliteError {
+    ///         query: _,
+    ///         err: rusqlite::Error::SqliteFailure(_, _),
+    ///     })
+    /// ));
+    /// ```
+    /// If rusqlite `extra_check` feature is enabled, any migration that returns a value will error
+    /// and no further migrations will be applied.
     pub fn to_latest(&self, conn: &mut Connection) -> Result<()> {
         let v_max = self.max_schema_version();
         match v_max {
