@@ -42,7 +42,7 @@ features = ["macros"]
 optional = true
 
 [dependencies.rusqlite]
-version = "0.31.0"
+version = "0.32.0"
 default-features = false
 features = []
 
