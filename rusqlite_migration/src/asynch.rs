@@ -150,6 +150,23 @@ impl AsyncMigrations {
             .await?
     }
 
+    /// Proxy version of the same method in the
+    /// [Migrations](crate::Migrations::latest_schema_version) struct.
+    pub fn latest_schema_version(&self) -> usize {
+        self.migrations.latest_schema_version()
+    }
+
+    /// Asynchronous version of the same method in the
+    /// [Migrations](crate::Migrations::is_latest_schema_version) struct.
+    #[allow(clippy::missing_errors_doc)]
+    pub async fn is_latest_schema_version(&self, async_conn: &AsyncConnection) -> Result<bool> {
+        let m = Arc::clone(&self.migrations);
+
+        async_conn
+            .call(move |conn| Ok(m.is_latest_schema_version(conn)))
+            .await?
+    }
+
     /// Asynchronous version of the same method in the [Migrations](crate::Migrations::validate) struct.
     ///
     /// # Example
