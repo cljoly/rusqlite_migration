@@ -34,15 +34,11 @@ mod builder;
 #[cfg(feature = "from-directory")]
 pub use builder::MigrationsBuilder;
 
-#[cfg(feature = "alpha-async-tokio-rusqlite")]
-mod asynch;
 mod errors;
 
 #[cfg(test)]
 mod tests;
 
-#[cfg(feature = "alpha-async-tokio-rusqlite")]
-pub use asynch::AsyncMigrations;
 pub use errors::{
     Error, ForeignKeyCheckError, HookError, HookResult, MigrationDefinitionError, Result,
     SchemaVersionError,

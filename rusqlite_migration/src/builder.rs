@@ -51,8 +51,7 @@ impl<'u> MigrationsBuilder<'u> {
         self
     }
 
-    /// Finalizes the builder and creates either a [`crate::Migrations`] or a
-    /// [`crate::AsyncMigrations`] instance.
+    /// Finalizes the builder and creates a [`crate::Migrations`] instance.
     pub fn finalize<T: FromIterator<M<'u>>>(mut self) -> T {
         T::from_iter(self.migrations.drain(..).flatten())
     }
