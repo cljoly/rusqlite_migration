@@ -16,7 +16,6 @@ version.workspace = true
 
 [dependencies]
 tokio = { version = "1.39", features = ["macros"] }
-tokio-rusqlite = { version = "0.5.1" }
 log = "0.4"
 
 [dependencies.rusqlite_migration]
@@ -24,7 +23,7 @@ path = "../rusqlite_migration"
 features = ["from-directory"]
 
 [dependencies.rusqlite]
-version = "0.31.0"
+version = "0.32.1"
 features = ["extra_check"]
 
 [dev-dependencies]
