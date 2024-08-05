@@ -21,7 +21,7 @@ log = "0.4"
 
 [dependencies.rusqlite_migration]
 path = "../rusqlite_migration"
-features = ["alpha-async-tokio-rusqlite", "from-directory"]
+features = ["from-directory"]
 
 [dependencies.rusqlite]
 version = "0.31.0"

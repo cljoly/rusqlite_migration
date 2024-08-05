@@ -130,7 +130,5 @@ pub fn all_errors() -> Vec<(&'static str, crate::Error)> {
             "unrecognized",
             Unrecognized(Box::new(Hook("unknown".to_owned()))),
         ),
-        #[cfg(feature = "async-tokio-rusqlite")]
-        ("connection_closed", ConnectionClosed),
     ]
 }
