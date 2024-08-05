@@ -54,21 +54,6 @@ jobs:
           command: test
           args: --locked --all-features
 
-  test_async_tokio_rusqlite:
-    name: Test feature alpha-async-tokio-rusqlite
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --locked --features alpha-async-tokio-rusqlite
-
   test_from_directory:
     name: Test feature from-directory
     runs-on: ubuntu-latest
