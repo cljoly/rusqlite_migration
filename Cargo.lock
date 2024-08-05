@@ -301,22 +301,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "example-async"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "env_logger",
- "lazy_static",
- "log",
- "mktemp",
- "rusqlite",
- "rusqlite_migration",
- "simple-logging",
- "tokio",
- "tokio-rusqlite",
-]
-
-[[package]]
 name = "example-from-directory"
 version = "0.1.0"
 dependencies = [
@@ -784,7 +768,6 @@ dependencies = [
  "rusqlite",
  "simple-logging",
  "tokio",
- "tokio-rusqlite",
  "tokio-test",
 ]
 
