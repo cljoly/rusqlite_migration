@@ -16,9 +16,11 @@ members = [
   "rusqlite_migration_tests",
   "examples/*",
 ]
-
 # https://doc.rust-lang.org/cargo/reference/resolver.html#feature-resolver-version-2
 resolver = "2"
+
+[patch.crates-io]
+tokio-rusqlite = { git = "https://github.com/programatik29/tokio-rusqlite.git" }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
