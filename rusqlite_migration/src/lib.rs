@@ -658,6 +658,19 @@ impl<'m> Migrations<'m> {
     /// ```
     /// If rusqlite `extra_check` feature is enabled, any migration that returns a value will error
     /// and no further migrations will be applied.
+    ///
+    /// # Transaction Behavior
+    ///
+    /// Since rusqlite 0.33, a [default transaction behavior][default_behavior] can be set. For
+    /// now, when applying migrations, this setting will be respected.
+    ///
+    /// Please note that future minor versions of rusqlite_migration might decide to ignore the
+    /// setting and to instead use any transaction behavior deemed most appropriate.  You can read
+    /// more in the [corresponding page of the SQLite documentation][sqlite_doc].
+    ///
+    ///
+    /// [default_behavior]: https://github.com/rusqlite/rusqlite/pull/1532
+    /// [sqlite_doc]: https://sqlite.org/lang_transaction.html
     pub fn to_latest(&self, conn: &mut Connection) -> Result<()> {
         let v_max = self.max_schema_version();
         match v_max {
