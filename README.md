@@ -28,9 +28,11 @@ end_insert -->
 
 [![docs.rs](https://img.shields.io/docsrs/rusqlite_migration)][docs]
 [![Crates.io](https://img.shields.io/crates/v/rusqlite_migration)][cio]
-[![unsafe forbidden](https://img.shields.io/badge/unsafe-forbidden-success.svg)][safety-dance]
 [![dependency status](https://deps.rs/crate/rusqlite_migration/1.2.0/status.svg)][deps]
 [![Coveralls](https://img.shields.io/coverallsCoverage/github/cljoly/rusqlite_migration)][coveralls]
+
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/9405/badge)](https://www.bestpractices.dev/projects/9405)
+[![unsafe forbidden](https://img.shields.io/badge/unsafe-forbidden-success.svg)][safety-dance]
 
 <!-- insert
 {{< rawhtml >}}
