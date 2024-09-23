@@ -1091,8 +1091,9 @@ dependencies = [
 
 [[package]]
 name = "tokio-rusqlite"
-version = "0.5.1"
-source = "git+https://github.com/programatik29/tokio-rusqlite.git#d101d1cb32f462f76b7c639d351e6fcf56528004"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b65501378eb676f400c57991f42cbd0986827ab5c5200c53f206d710fb32a945"
 dependencies = [
  "crossbeam-channel",
  "rusqlite",
