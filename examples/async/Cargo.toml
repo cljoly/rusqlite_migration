@@ -19,6 +19,6 @@ path = "../../rusqlite_migration"
 features = ["alpha-async-tokio-rusqlite"]
 
 [dependencies.rusqlite]
-version = "=0.32.0"
+version = "=0.32.1"
 default-features = false
 features = []

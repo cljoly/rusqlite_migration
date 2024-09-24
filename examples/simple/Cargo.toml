@@ -14,5 +14,5 @@ lazy_static = "1.5.0"
 mktemp = "0.5"
 
 [dependencies.rusqlite]
-version = "0.32.0"
+version = "0.32.1"
 features = ["extra_check"] # A realistic use case
