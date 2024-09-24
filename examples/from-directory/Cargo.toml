@@ -18,6 +18,6 @@ path = "../../rusqlite_migration"
 features = ["from-directory"]
 
 [dependencies.rusqlite]
-version = "0.32.0"
+version = "0.32.1"
 default-features = false
 features = []
