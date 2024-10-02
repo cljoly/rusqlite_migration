@@ -1,5 +1,29 @@
 # Changelog
 
+## Version 1.3.0
+
+The code of this version is identical to [Version 1.3.0 Beta 1](#version-130-beta-1)
+
+Rusqlite was updated from 0.31.0 to 0.32.1.
+Please see [the release notes for 0.32.0](https://github.com/rusqlite/rusqlite/releases/tag/v0.32.0) and
+[for 0.32.1](https://github.com/rusqlite/rusqlite/releases/tag/v0.32.1).
+Tokio Rusqlite was updated from 0.5.1 to 0.6.0.
+Please see the [release notes](https://github.com/programatik29/tokio-rusqlite/releases/tag/v0.6.0).
+
+### Minimum Rust Version
+
+Rust 1.77
+
+### Documentation
+
+Various documentation improvements and clarification. In particular, call out that if a rusqlite error is encountered during a migration, the next migrations in the list are not applied.
+
+### Other
+
+- Apply minor or patch updates to the dependencies
+- Update development dependencies
+- Make CI testing more reproducible by forcing the use of Cargo.lock
+
 ## Version 1.3.0 Beta 1
 
 This reintroduces the async features temporarily removed from [Version 1.3.0 Alpha-Without-Tokio 1](#version-130-alpha-without-tokio-1)
