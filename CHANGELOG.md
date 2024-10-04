@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 1.3.1
+
+The only change is a fix to the deps.rs badge in the documentation.
+
 ## Version 1.3.0
 
 The code of this version is identical to [Version 1.3.0 Beta 1](#version-130-beta-1)
