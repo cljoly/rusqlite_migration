@@ -219,11 +219,8 @@ jobs:
       - run: cargo install --locked cargo-tarpaulin
       - name: Generate code coverage
         uses: actions-rs/cargo@v1
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
           command: tarpaulin
-          args: --locked --all-features --run-types AllTargets --workspace --timeout 120 --out Lcov --exclude-files '**/benches/*'
-      - name: Upload coverage to Coveralls
-        uses: coverallsapp/github-action@v1
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          path-to-lcov: lcov.info
+          args: --locked --all-features --run-types AllTargets --workspace --timeout 120 --coveralls "$env:CODECOV_TOKEN"
