@@ -371,7 +371,7 @@ impl<'m> Migrations<'m> {
     /// ]);
     /// ```
     #[must_use]
-    pub fn new(ms: Vec<M<'m>>) -> Self {
+    pub const fn new(ms: Vec<M<'m>>) -> Self {
         Self { ms }
     }
 
