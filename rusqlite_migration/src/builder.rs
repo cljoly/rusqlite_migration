@@ -66,7 +66,7 @@ impl<'u> FromIterator<M<'u>> for MigrationsBuilder<'u> {
     }
 }
 
-impl<'u> M<'u> {
+impl M<'_> {
     /// Replace the `up_hook` in the given migration with the provided one.
     ///
     /// # Warning
