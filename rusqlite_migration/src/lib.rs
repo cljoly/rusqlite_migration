@@ -99,7 +99,7 @@ pub struct M<'u> {
     comment: Option<&'u str>,
 }
 
-impl<'u> PartialEq for M<'u> {
+impl PartialEq for M<'_> {
     fn eq(&self, other: &Self) -> bool {
         let equal_up_hooks = match (self.up_hook.as_ref(), other.up_hook.as_ref()) {
             (None, None) => true,
@@ -121,7 +121,7 @@ impl<'u> PartialEq for M<'u> {
     }
 }
 
-impl<'u> Eq for M<'u> {}
+impl Eq for M<'_> {}
 
 impl<'u> M<'u> {
     /// Create a schema update. The SQL command will be executed only when the migration has not been

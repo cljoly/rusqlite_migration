@@ -83,7 +83,7 @@ impl TryFrom<&'static Dir<'static>> for MigrationFile {
     }
 }
 
-impl<'u> From<&MigrationFile> for M<'u> {
+impl From<&MigrationFile> for M<'_> {
     fn from(value: &MigrationFile) -> Self {
         M::up(value.up)
             .comment(value.name)
