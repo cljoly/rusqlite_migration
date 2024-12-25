@@ -1,4 +1,10 @@
-on: [push, pull_request]
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
 
 name: Continuous integration
 
@@ -11,7 +17,7 @@ env:
 jobs:
   check:
     name: Check
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
@@ -24,11 +30,16 @@ jobs:
           command: check
           args: --locked
 
-  test_no_features:
-    name: Test no features
-    runs-on: ubuntu-22.04
+  test_features_matrix:
+    name: Cargo test
+    strategy:
+      matrix:
+        args: ["", "--all-features", "--features alpha-async-tokio-rusqlite", "--features from-directory"]
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
+      - name: Install libsqlite
+        run: sudo apt-get install -y libsqlite3-dev
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -37,76 +48,15 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --locked
-
-  test_all_features:
-    name: Test all features
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --locked --all-features
-
-  test_async_tokio_rusqlite:
-    name: Test feature alpha-async-tokio-rusqlite
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --locked --features alpha-async-tokio-rusqlite
-
-  test_from_directory:
-    name: Test feature from-directory
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --locked --features from-directory
-
-  test_examples:
-    name: Test examples
-    runs-on: ubuntu-22.04
-    defaults:
-      run:
-        working-directory: ./examples
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --locked
+          args: --locked ${{ matrix.args }}
 
   min_rust_version:
     name: Check with minimal Rust version
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
+      - name: Install libsqlite
+        run: sudo apt-get install -y libsqlite3-dev
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -119,7 +69,7 @@ jobs:
 
   doc:
     name: Documentation
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
@@ -130,7 +80,7 @@ jobs:
 
   fmt:
     name: Rustfmt
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
@@ -146,12 +96,14 @@ jobs:
 
   mutation-tests:
     name: Mutation tests
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         shard: [0, 1, 2, 3]
     steps:
       - uses: actions/checkout@v3
+      - name: Install libsqlite
+        run: sudo apt-get install -y libsqlite3-dev
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -172,7 +124,7 @@ jobs:
 
   clippy_all:
     name: Clippy (all code)
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
@@ -189,7 +141,7 @@ jobs:
 
   clippy_main:
     name: Clippy (main package)
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
@@ -207,9 +159,11 @@ jobs:
 
   coverage:
     name: Code coverage
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
+      - name: Install libsqlite
+        run: sudo apt-get install -y libsqlite3-dev
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
