@@ -36,6 +36,9 @@ pub enum Error {
     },
     /// Error with the specified schema version
     SpecifiedSchemaVersion(SchemaVersionError),
+    /// Invalid [user version field](https://www.sqlite.org/fileformat.html#user_version_number) in
+    /// the SQLite database. The field was likely altered by another program or library.
+    InvalidUserVersion,
     /// Something wrong with migration definitions
     MigrationDefinition(MigrationDefinitionError),
     /// The foreign key check failed
@@ -94,8 +97,8 @@ impl std::error::Error for Error {
             Error::SpecifiedSchemaVersion(e) => Some(e),
             Error::MigrationDefinition(e) => Some(e),
             Error::ForeignKeyCheck(vec) => Some(vec.first()?),
-            Error::Hook(_) | Error::FileLoad(_) => None,
             Error::Unrecognized(ref e) => Some(&**e),
+            Error::Hook(_) | Error::FileLoad(_) | Error::InvalidUserVersion => None,
         }
     }
 }
@@ -121,6 +124,8 @@ pub enum SchemaVersionError {
         /// Highest version defined in the migration set
         highest: SchemaVersion,
     },
+    /// Schema version is so high that it is unsupported (higher than [`crate::MIGRATIONS_MAX`])
+    TooHigh,
 }
 
 impl fmt::Display for SchemaVersionError {
@@ -128,6 +133,9 @@ impl fmt::Display for SchemaVersionError {
         match self {
             SchemaVersionError::TargetVersionOutOfRange { specified, highest } => {
                 write!(f, "Attempt to migrate to version {specified}, which is higher than the highest version currently supported, {highest}.")
+            }
+            SchemaVersionError::TooHigh => {
+                write!(f, "Attempt to use a schema version higher than supported.")
             }
         }
     }

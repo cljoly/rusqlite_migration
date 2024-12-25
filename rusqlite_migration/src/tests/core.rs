@@ -27,6 +27,73 @@ use crate::{
 
 use super::helpers::{all_errors, m_invalid0, m_invalid1, m_valid20, m_valid21};
 
+fn raw_set_user_version(conn: &mut Connection, version: isize) {
+    conn.pragma_update(None, "user_version", version).unwrap()
+}
+
+#[test]
+fn max_migration_test() {
+    use crate::{set_user_version, user_version};
+
+    let mut conn = Connection::open_in_memory().unwrap();
+    let migrations_max = crate::MIGRATIONS_MAX;
+    set_user_version(&conn, migrations_max).unwrap();
+    assert_eq!(
+        user_version(&conn),
+        Ok(migrations_max),
+        "Migration max is too high, it’s not the actual limit",
+    );
+
+    // Unfortunately SQLite fails silently. But the internal set_user_version returns an error.
+    assert_eq!(
+        set_user_version(&conn, migrations_max + 1),
+        Err(Error::SpecifiedSchemaVersion(SchemaVersionError::TooHigh))
+    );
+    assert_eq!(
+        user_version(&conn),
+        Ok(migrations_max),
+        "set_user_version returned an error but user_version was changed",
+    );
+    raw_set_user_version(&mut conn, migrations_max as isize + 1);
+    assert_eq!(
+        user_version(&conn),
+        Ok(0),
+        "Migration max is too low, it’s not the actual limit",
+    );
+}
+
+// Weirdly, SQLite supports negative numbers, but let’s make sure we fail loudly in that case
+#[test]
+fn min_migrations_test() {
+    let mut conn = Connection::open_in_memory().unwrap();
+
+    crate::set_user_version(&conn, 0).unwrap();
+
+    // The rest of the test also ascertain the behavior of SQLite (and rusqlite)
+
+    raw_set_user_version(&mut conn, -3);
+    assert_eq!(
+        conn.query_row("PRAGMA user_version", [], |row| row.get(0)),
+        Ok(-3),
+    );
+    assert_eq!(crate::user_version(&conn), Err(Error::InvalidUserVersion));
+
+    // The minimum user version is a i32::MIN
+    raw_set_user_version(&mut conn, i32::MIN as isize);
+    assert_eq!(
+        conn.query_row("PRAGMA user_version", [], |row| row.get(0)),
+        Ok(i32::MIN),
+    );
+    assert_eq!(crate::user_version(&conn), Err(Error::InvalidUserVersion));
+
+    // Anything lower than i32::MIN is silently replaced by sqlite
+    raw_set_user_version(&mut conn, (i32::MIN as isize).checked_sub(1).unwrap());
+    assert_eq!(
+        conn.query_row("PRAGMA user_version", [], |row| row.get(0)),
+        Ok(0),
+    );
+}
+
 #[test]
 fn empty_migrations_test() {
     let mut conn = Connection::open_in_memory().unwrap();

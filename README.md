@@ -151,6 +151,12 @@ This crate extends rusqlite and as such is tightly integrated with it. Thus, it 
 
 > Latest stable Rust version at the time of release. It might compile with older versions.
 
+## Limits
+
+1. Since this crate uses the [`user_version`][uv_offset] field, if your program or any other library changes it, this library will behave in an unspecified way: it may return an error, apply the wrong set of migrations, do nothing at all...
+
+1. The [`user_version`][uv_offset] field is effectively a i32, so there is a theoretical limit (about two billion) on the number of migrations that can be applied by this library. You are likely to hit memory limits well before that though, so in practice, you can think of the number of migrations as limitless. And you would need to create 10 000 new migrations, every day, for over 5 centuries, before getting close to the limit.
+
 ## Contributing
 
 Contributions (documentation or code improvements in particular) are welcome, see [contributing][]!

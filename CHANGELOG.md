@@ -28,6 +28,10 @@ On a related note, now that we have removed the `AsyncMigrations` (see the secti
 
 This function has been deprecated for a while now, remove it as a part of the major version bump. You can use the standard `FromIter` trait implementation instead.
 
+## Behavior change
+
+* When the [user version field](https://www.sqlite.org/fileformat.html#user_version_number) is altered by other code in your application, we are now returning an explicit error (`Error::InvalidUserVersion`) when this can be detected. Previously, the library would silently misbehave.
+
 ### Minimum Rust Version
 
 Rust 1.84.

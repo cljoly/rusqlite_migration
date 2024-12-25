@@ -50,6 +50,11 @@ use std::{
     ptr::addr_of,
 };
 
+/// The number of migrations already applied is stored in a [4 bytes field][sqlite_doc], so the number of migrations is limited.
+///
+/// [sqlite_doc]: https://www.sqlite.org/fileformat.html#user_version_number
+pub const MIGRATIONS_MAX: usize = i32::MAX as usize;
+
 /// Helper trait to make hook functions cloneable.
 pub trait MigrationHook: Fn(&Transaction) -> HookResult + Send + Sync {
     /// Clone self.
@@ -456,9 +461,10 @@ impl<'m> Migrations<'m> {
     ///
     /// # Errors
     ///
-    /// Returns [`Error::RusqliteError`] in case the user version cannot be queried.
+    /// Returns [`Error::RusqliteError`] or [`Error::InvalidUserVersion`] in case the user
+    /// version cannot be queried.
     pub fn current_version(&self, conn: &Connection) -> Result<SchemaVersion> {
-        Ok(user_version(conn).map(|v| self.db_version_to_schema(v))?)
+        user_version(conn).map(|v| self.db_version_to_schema(v))
     }
 
     /// Migrate upward methods. This is rolled back on error.
@@ -772,19 +778,35 @@ impl<'m> Migrations<'m> {
 }
 
 // Read user version field from the SQLite db
-fn user_version(conn: &Connection) -> Result<usize, rusqlite::Error> {
+fn user_version(conn: &Connection) -> Result<usize> {
     // We can’t fix this without breaking API compatibility
-    #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
     conn.query_row("PRAGMA user_version", [], |row| row.get(0))
-        .map(|v: i64| v as usize)
+        .map_err(|e| Error::RusqliteError {
+            query: String::from("PRAGMA user_version;"),
+            err: e,
+        })
+        .and_then(|v: i32| {
+            if v >= 0 {
+                Ok(v as usize)
+            } else {
+                Err(Error::InvalidUserVersion)
+            }
+        })
 }
 
 // Set user version field from the SQLite db
 fn set_user_version(conn: &Connection, v: usize) -> Result<()> {
     trace!("set user version to: {}", v);
-    // We can’t fix this without breaking API compatibility
-    #[allow(clippy::cast_possible_truncation)]
-    let v = v as u32;
+    let v = if v > MIGRATIONS_MAX {
+        Err(Error::SpecifiedSchemaVersion(SchemaVersionError::TooHigh))
+    } else {
+        Ok(i32::try_from(v).unwrap_or_else(|e| {
+            unreachable!(
+                "Value {v} was checked to be convertible to a i32, but error {e} occured.\n\
+                This is a bug, please report it."
+            )
+        }))
+    }?;
     conn.pragma_update(None, "user_version", v)
         .map_err(|e| Error::RusqliteError {
             query: format!("PRAGMA user_version = {v}; -- Approximate query"),
