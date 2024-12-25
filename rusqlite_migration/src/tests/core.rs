@@ -28,6 +28,38 @@ use crate::{
 use super::helpers::{all_errors, m_invalid0, m_invalid1, m_valid20, m_valid21};
 
 #[test]
+fn max_migration_test() {
+    use crate::{set_user_version, user_version};
+
+    let mut conn = Connection::open_in_memory().unwrap();
+    let migrations_max = crate::MIGRATIONS_MAX as usize;
+    set_user_version(&conn, migrations_max).unwrap();
+    assert_eq!(
+        user_version(&conn),
+        Ok(migrations_max),
+        "Migration max is too high, it’s not the actual limit",
+    );
+
+    // SQLite fails silently, unfortunately.
+    set_user_version(&conn, migrations_max + 1).unwrap();
+    assert_eq!(
+        user_version(&conn),
+        Ok(0),
+        "Migration max is too low, it’s not the actual limit",
+    );
+
+    10000000000000000 as u8;
+
+    // Weirdly, SQLite supports negative numbers
+    //set_user_version(&conn, migrations_max * -1).unwrap();
+    //assert_eq!(
+    //    user_version(&conn),
+    //    Ok(migrations_max * -1),
+    //    "Migration max is too high, it’s not the actual limit",
+    //);
+}
+
+#[test]
 fn empty_migrations_test() {
     let mut conn = Connection::open_in_memory().unwrap();
     let m = Migrations::new(vec![]);

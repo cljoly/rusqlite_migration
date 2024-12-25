@@ -50,6 +50,11 @@ use std::{
     ptr::addr_of,
 };
 
+/// The number of migrations already applied is stored in a [4 bytes field][sqlite_doc], so the number of migrations is limited.
+///
+/// [sqlite_doc]: https://www.sqlite.org/fileformat.html#user_version_number
+pub const MIGRATIONS_MAX: usize = i32::MAX as usize;
+
 /// Helper trait to make hook functions cloneable.
 pub trait MigrationHook: Fn(&Transaction) -> HookResult + Send + Sync {
     /// Clone self.
@@ -459,6 +464,13 @@ impl<'m> Migrations<'m> {
     /// Returns [`Error::RusqliteError`] in case the user version cannot be queried.
     pub fn current_version(&self, conn: &Connection) -> Result<SchemaVersion> {
         Ok(user_version(conn).map(|v| self.db_version_to_schema(v))?)
+    }
+
+    /// May be negative
+    /// Returns isize max/min when hitting the bounds
+    /// TODO insert examples from other PR
+    pub fn migrations_to_apply(&self, conn: &Connection) -> Result<isize> {
+        Ok(self.ms.len() as isize - user_version(conn)? as isize)
     }
 
     /// Migrate upward methods. This is rolled back on error.
