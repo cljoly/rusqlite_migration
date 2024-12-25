@@ -1,10 +1,6 @@
 on:
-  push:
-    branches:
-    - master
-  pull_request:
-    branches:
-    - master
+  # Those checks only run against code changes
+  - push
 
 name: Continuous integration
 
@@ -34,7 +30,11 @@ jobs:
     name: Cargo test
     strategy:
       matrix:
-        args: ["", "--all-features", "--features alpha-async-tokio-rusqlite", "--features from-directory"]
+        args:
+        - ""
+        - "--all-features"
+        - "--features alpha-async-tokio-rusqlite"
+        - "--features from-directory"
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
