@@ -121,6 +121,8 @@ pub enum SchemaVersionError {
         /// Highest version defined in the migration set
         highest: SchemaVersion,
     },
+    /// Schema version is so high that it is unsupported (higher than [`crate::MIGRATIONS_MAX`])
+    TooHigh,
 }
 
 impl fmt::Display for SchemaVersionError {
@@ -128,6 +130,9 @@ impl fmt::Display for SchemaVersionError {
         match self {
             SchemaVersionError::TargetVersionOutOfRange { specified, highest } => {
                 write!(f, "Attempt to migrate to version {specified}, which is higher than the highest version currently supported, {highest}.")
+            }
+            SchemaVersionError::TooHigh => {
+                write!(f, "Attempt to use a schema version higher than supported.")
             }
         }
     }

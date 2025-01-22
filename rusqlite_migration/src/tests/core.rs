@@ -29,6 +29,9 @@ use super::helpers::{all_errors, m_invalid0, m_invalid1, m_valid20, m_valid21};
 
 #[test]
 fn max_migration_test() {
+    fn raw_set_user_version(conn: &mut Connection, version: isize) {
+        conn.pragma_update(None, "user_version", version).unwrap()
+    }
     use crate::{set_user_version, user_version};
 
     let mut conn = Connection::open_in_memory().unwrap();
@@ -40,23 +43,29 @@ fn max_migration_test() {
         "Migration max is too high, it’s not the actual limit",
     );
 
-    // SQLite fails silently, unfortunately.
-    set_user_version(&conn, migrations_max + 1).unwrap();
+    // Unfortunately SQLite fails silently. But the internal set_user_version returns an error.
+    assert_eq!(
+        set_user_version(&conn, migrations_max + 1),
+        Err(Error::SpecifiedSchemaVersion(SchemaVersionError::TooHigh))
+    );
+    assert_eq!(
+        user_version(&conn),
+        Ok(migrations_max),
+        "set_user_version returned an error but user_version was changed",
+    );
+    raw_set_user_version(&mut conn, migrations_max as isize + 1);
     assert_eq!(
         user_version(&conn),
         Ok(0),
         "Migration max is too low, it’s not the actual limit",
     );
 
-    10000000000000000 as u8;
-
     // Weirdly, SQLite supports negative numbers
-    //set_user_version(&conn, migrations_max * -1).unwrap();
-    //assert_eq!(
-    //    user_version(&conn),
-    //    Ok(migrations_max * -1),
-    //    "Migration max is too high, it’s not the actual limit",
-    //);
+    raw_set_user_version(&mut conn, -3);
+    assert_eq!(
+        conn.query_row("PRAGMA user_version", [], |row| row.get(0)),
+        Ok(-3),
+    );
 }
 
 #[test]
