@@ -56,7 +56,7 @@ use std::{
 };
 
 /// This is stored in a 4 bytes field, so the number of migrations is limited
-pub const MIGRATIONS_MAX: i32 = i32::MAX;
+pub const MIGRATIONS_MAX: usize = i32::MAX as usize;
 
 /// Helper trait to make hook functions cloneable.
 pub trait MigrationHook: Fn(&Transaction) -> HookResult + Send + Sync {
@@ -805,6 +805,9 @@ fn user_version(conn: &Connection) -> Result<usize, rusqlite::Error> {
 // Set user version field from the SQLite db
 fn set_user_version(conn: &Connection, v: usize) -> Result<()> {
     trace!("set user version to: {}", v);
+    if v > MIGRATIONS_MAX {
+        return Err(Error::SpecifiedSchemaVersion(SchemaVersionError::TooHigh));
+    }
     // We can’t fix this without breaking API compatibility
     #[allow(clippy::cast_possible_truncation)]
     let v = v as u32;
