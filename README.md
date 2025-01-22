@@ -42,7 +42,7 @@ end_insert -->
 
 <!-- rustdoc start -->
 
-Rusqlite Migration is a simple and performant schema migration library for [rusqlite](https://crates.io/crates/rusqlite).
+Rusqlite Migration is a performant and simple schema migration library for [rusqlite](https://crates.io/crates/rusqlite).
 
 * **Performance**:
     * *Fast database opening*: to keep track of the current migration state, most tools create one or more tables in the database. These tables require parsing by SQLite and are queried with SQL statements. This library uses the [`user_version`][uv] value instead. It’s much lighter as it is just an integer at a [fixed offset][uv_offset] in the SQLite file.
@@ -84,11 +84,13 @@ Please see the [examples](https://github.com/cljoly/rusqlite_migrate/tree/master
 - `async` migrations in the [`quick_start_async.rs`][quick_start_async] file
 - migrations with multiple SQL statements (using for instance `r#"…"` or `include_str!(…)`)
 - migrations defined [from a directory][from_dir] with SQL files
-- use of lazy_static
-- migrations to previous versions (downward migrations)
+- use of [lazy_static][]
+- migrations to [previous versions (downward migrations)][generic_example]
 
 [quick_start_async]: https://github.com/cljoly/rusqlite_migration/blob/master/examples/async/src/main.rs
 [from_dir]: https://github.com/cljoly/rusqlite_migration/tree/master/examples/from-directory
+[lazy_static]: https://github.com/cljoly/rusqlite_migration/blob/f3d19847065b890efe73c27393b2980d1571f871/examples/simple/src/main.rs#L18
+[generic_example]: https://github.com/cljoly/rusqlite_migration/blob/master/examples/simple/src/main.rs
 
 I’ve also made a [cheatsheet of SQLite pragma for improved performance and consistency][cheat].
 
