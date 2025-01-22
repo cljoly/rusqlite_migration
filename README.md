@@ -149,6 +149,12 @@ This crate is actively used in a number of projects. You can find up-to-date lis
 
 A number of contributors are also reporting issues as they arise, another indicator of active use.
 
+## Minimum Supported Rust Version (MSRV)
+
+This crate extends rusqlite and as such is tightly integrated with it. Thus, it supports the [same MSRV][msrv] as rusqlite. At the time of writing, this means:
+
+> Latest stable Rust version at the time of release. It might compile with older versions.
+
 ## Contributing
 
 Contributions (documentation or code improvements in particular) are welcome, see [contributing][]!
@@ -181,3 +187,4 @@ Thanks to [Migadu](https://www.migadu.com/) for offering a discounted service to
 [cargo-mutants]: https://mutants.rs/installation.html
 [cheat]: https://cj.rs/blog/sqlite-pragma-cheatsheet-for-performance-and-consistency/
 [docs]: https://docs.rs/rusqlite_migration
+[msrv]: https://github.com/rusqlite/rusqlite?tab=readme-ov-file#minimum-supported-rust-version-msrv
