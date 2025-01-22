@@ -1,5 +1,13 @@
 # Changelog
 
+## Version 1.4.0
+
+### Minimum Rust Version
+
+Rust 1.84.
+
+Moving forward, we expect to keep this aligned with rusqlite itself, now that it has a [policy](https://github.com/rusqlite/rusqlite?tab=readme-ov-file#minimum-supported-rust-version-msrv) (introduced in [october 2024](https://github.com/rusqlite/rusqlite/pull/1576)).
+
 ## Version 1.3.1
 
 The only change is a fix to the deps.rs badge in the documentation.
