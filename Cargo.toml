@@ -7,12 +7,11 @@ keywords = ["rusqlite", "sqlite", "user_version", "database", "migration"]
 license = "Apache-2.0"
 repository = "https://github.com/cljoly/rusqlite_migration"
 rust-version = "1.84"
-version = "1.3.1"
+version = "2.0.0-alpha.1"
 
 [workspace]
 members = [
   "rusqlite_migration",
-  "rusqlite_migration_tokio_async",
   "rusqlite_migration_tests",
   "examples/*",
 ]
