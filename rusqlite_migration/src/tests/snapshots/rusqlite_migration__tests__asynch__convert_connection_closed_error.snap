@@ -1,5 +1,0 @@
----
-source: rusqlite_migration/src/tests/asynch.rs
-expression: "crate::Error::from(TError::ConnectionClosed)"
----
-ConnectionClosed
