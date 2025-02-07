@@ -18,7 +18,7 @@ use std::sync::LazyLock;
 use anyhow::Result;
 use rusqlite::params;
 use rusqlite_migration::{Migrations, M};
-use tokio_rusqlite::Connection;
+use tokio_rusqlite_new::Connection;
 
 /// The general idea with this example is to use [`Connection::call`][call] and
 /// [`Connection::call_unwrap`][call_unwrap] to run the migration in a sync context.
