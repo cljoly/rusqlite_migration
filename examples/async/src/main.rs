@@ -3,7 +3,7 @@ use std::sync::LazyLock;
 use anyhow::Result;
 use rusqlite::params;
 use rusqlite_migration::{AsyncMigrations, M};
-use tokio_rusqlite::Connection;
+use tokio_rusqlite_new::Connection;
 
 // Test that migrations are working
 #[cfg(test)]

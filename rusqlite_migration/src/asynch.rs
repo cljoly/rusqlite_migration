@@ -1,6 +1,6 @@
 use std::{iter::FromIterator, sync::Arc};
 
-use tokio_rusqlite::Connection as AsyncConnection;
+use tokio_rusqlite_new::Connection as AsyncConnection;
 
 use crate::errors::Result;
 use crate::{Migrations, SchemaVersion, M};
@@ -62,7 +62,7 @@ impl AsyncMigrations {
     /// use rusqlite_migration::{Migrations, AsyncMigrations, M, SchemaVersion};
     /// use std::num::NonZeroUsize;
     ///
-    /// let mut conn = tokio_rusqlite::Connection::open_in_memory().await.unwrap();
+    /// let mut conn = tokio_rusqlite_new::Connection::open_in_memory().await.unwrap();
     ///
     /// let migrations = AsyncMigrations::new(vec![
     ///     M::up("CREATE TABLE animals (name TEXT);"),
@@ -92,7 +92,7 @@ impl AsyncMigrations {
     /// ```rust
     /// # tokio_test::block_on(async {
     /// use rusqlite_migration::{Migrations, AsyncMigrations, M};
-    /// let mut conn = tokio_rusqlite::Connection::open_in_memory().await.unwrap();
+    /// let mut conn = tokio_rusqlite_new::Connection::open_in_memory().await.unwrap();
     ///
     /// let migrations = AsyncMigrations::new(vec![
     ///     M::up("CREATE TABLE animals (name TEXT);"),
@@ -120,7 +120,7 @@ impl AsyncMigrations {
     /// ```rust
     /// # tokio_test::block_on(async {
     /// use rusqlite_migration::{Migrations, AsyncMigrations, M};
-    /// let mut conn = tokio_rusqlite::Connection::open_in_memory().await.unwrap();
+    /// let mut conn = tokio_rusqlite_new::Connection::open_in_memory().await.unwrap();
     /// let migrations = AsyncMigrations::new(vec![
     ///     // 0: version 0, before having run any migration
     ///     M::up("CREATE TABLE animals (name TEXT);").down("DROP TABLE animals;"),
