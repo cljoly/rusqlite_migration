@@ -2,7 +2,7 @@ use std::num::NonZeroUsize;
 
 use rusqlite::params;
 use rusqlite_migration::{AsyncMigrations, MigrationDefinitionError, SchemaVersion, M};
-use tokio_rusqlite::Connection;
+use tokio_rusqlite_new::Connection;
 
 #[tokio::test]
 async fn main_test() {
