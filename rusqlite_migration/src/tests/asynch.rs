@@ -7,7 +7,7 @@ use crate::{
     },
     AsyncMigrations, Error, MigrationDefinitionError,
 };
-use tokio_rusqlite::Connection as AsyncConnection;
+use tokio_rusqlite_new::Connection as AsyncConnection;
 
 #[tokio::test]
 async fn invalid_migration_statement_test() {
@@ -121,7 +121,7 @@ async fn test_from_iter() {
 
 #[tokio::test]
 async fn test_tokio_rusqlite_conversion() {
-    use tokio_rusqlite::Error as TError;
+    use tokio_rusqlite_new::Error as TError;
 
     insta::assert_debug_snapshot!(
         "convert_connection_closed_error",
