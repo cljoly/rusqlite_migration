@@ -556,6 +556,7 @@ fn test_missing_down_migration() {
 
 #[test]
 fn test_deprecated_new_iter() {
+    #[allow(deprecated)]
     let migrations = Migrations::new_iter(all_valid().into_iter());
     assert_eq!(Ok(()), migrations.validate());
 }

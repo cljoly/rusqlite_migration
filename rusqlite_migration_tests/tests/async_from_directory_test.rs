@@ -4,7 +4,7 @@ use include_dir::{include_dir, Dir};
 
 use rusqlite::params;
 use rusqlite_migration::{AsyncMigrations, SchemaVersion};
-use tokio_rusqlite::Connection;
+use tokio_rusqlite_new::Connection;
 
 static MIGRATIONS_DIR: Dir =
     include_dir!("$CARGO_MANIFEST_DIR/../examples/from-directory/migrations");
