@@ -1,0 +1,22 @@
+[package]
+name = "example-async"
+version = "0.1.0"
+edition = "2018"
+publish = false
+
+[dependencies]
+log = "0.4"
+simple-logging = "2.0.2"
+env_logger = "0.11"
+anyhow = "1"
+mktemp = "0.5"
+tokio-rusqlite = "0.6.0"
+tokio = { version = "1.43.0", features = ["full"] }
+
+[dependencies.rusqlite_migration]
+path = "../../rusqlite_migration"
+
+[dependencies.rusqlite]
+version = "=0.32.1"
+default-features = false
+features = []
