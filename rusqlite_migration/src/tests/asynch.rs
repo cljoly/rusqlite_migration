@@ -129,6 +129,6 @@ async fn test_tokio_rusqlite_conversion() {
     );
     insta::assert_debug_snapshot!(
         "convert_rusqlite_error",
-        crate::Error::from(TError::Rusqlite(rusqlite::Error::InvalidQuery))
+        crate::Error::from(TError::Error(rusqlite::Error::InvalidQuery))
     );
 }

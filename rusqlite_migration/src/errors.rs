@@ -104,7 +104,7 @@ impl From<tokio_rusqlite_new::Error> for Error {
     fn from(e: tokio_rusqlite_new::Error) -> Self {
         match e {
             tokio_rusqlite_new::Error::ConnectionClosed => Error::ConnectionClosed,
-            tokio_rusqlite_new::Error::Rusqlite(e) | tokio_rusqlite_new::Error::Close((_, e)) => {
+            tokio_rusqlite_new::Error::Error(e) | tokio_rusqlite_new::Error::Close((_, e)) => {
                 Error::RusqliteError {
                     err: e,
                     query: Default::default(),

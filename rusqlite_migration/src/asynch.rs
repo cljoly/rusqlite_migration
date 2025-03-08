@@ -133,13 +133,13 @@ impl AsyncMigrations {
     ///
     /// // Go back to version 1, i.e. after running the first migration
     /// migrations.to_version(&mut conn, 1).await;
-    /// conn.call(|conn| Ok(conn.execute("INSERT INTO animals (name) VALUES (?)", ["dog"]))).await.unwrap();
-    /// conn.call(|conn| Ok(conn.execute("INSERT INTO food (name) VALUES (?)", ["carrot"]).unwrap_err())).await;
+    /// conn.call::<_, _, rusqlite::Error>(|conn| Ok(conn.execute("INSERT INTO animals (name) VALUES (?)", ["dog"]))).await.unwrap();
+    /// conn.call::<_, _, rusqlite::Error>(|conn| Ok(conn.execute("INSERT INTO food (name) VALUES (?)", ["carrot"]).unwrap_err())).await;
     ///
     /// // Go back to an empty database
     /// migrations.to_version(&mut conn, 0).await;
-    /// conn.call(|conn| Ok(conn.execute("INSERT INTO animals (name) VALUES (?)", ["cat"]).unwrap_err())).await;
-    /// conn.call(|conn| Ok(conn.execute("INSERT INTO food (name) VALUES (?)", ["milk"]).unwrap_err())).await;
+    /// conn.call::<_, _, rusqlite::Error>(|conn| Ok(conn.execute("INSERT INTO animals (name) VALUES (?)", ["cat"]).unwrap_err())).await;
+    /// conn.call::<_, _, rusqlite::Error>(|conn| Ok(conn.execute("INSERT INTO food (name) VALUES (?)", ["milk"]).unwrap_err())).await;
     /// # })
     /// ```
     #[allow(clippy::missing_errors_doc)]
