@@ -3,7 +3,7 @@ use std::sync::LazyLock;
 use anyhow::Result;
 use rusqlite::params;
 use rusqlite_migration::{AsyncMigrations, M};
-use tokio_rusqlite::Connection;
+use tokio_rusqlite_new::Connection;
 
 // Test that migrations are working
 #[cfg(test)]
@@ -54,19 +54,19 @@ async fn main() {
     // executed for each connection (like `foreign_keys`) or to be executed outside transactions
     // (`journal_mode` is a noop in a transaction).
     async_conn
-        .call(|conn| Ok(conn.pragma_update(None, "journal_mode", "WAL")))
+        .call::<_, _, rusqlite::Error>(|conn| Ok(conn.pragma_update(None, "journal_mode", "WAL")))
         .await
         .unwrap()
         .unwrap();
     async_conn
-        .call(|conn| Ok(conn.pragma_update(None, "foreign_keys", "ON")))
+        .call::<_, _, rusqlite::Error>(|conn| Ok(conn.pragma_update(None, "foreign_keys", "ON")))
         .await
         .unwrap()
         .unwrap();
 
     // Use the db 🥳
     async_conn
-        .call(|conn| {
+        .call::<_, _, rusqlite::Error>(|conn| {
             Ok(conn.execute(
                 "INSERT INTO friend (name, birthday) VALUES (?1, ?2)",
                 params!["John", "1970-01-01"],
@@ -77,7 +77,7 @@ async fn main() {
         .unwrap();
 
     async_conn
-        .call(|conn| Ok(conn.execute("INSERT INTO animal (name) VALUES (?1)", params!["dog"])))
+        .call::<_, _, rusqlite::Error>(|conn| Ok(conn.execute("INSERT INTO animal (name) VALUES (?1)", params!["dog"])))
         .await
         .unwrap()
         .unwrap();
@@ -87,7 +87,7 @@ async fn main() {
 
     // The table was removed
     async_conn
-        .call(|conn| Ok(conn.execute("INSERT INTO animal (name) VALUES (?1)", params!["cat"])))
+        .call::<_, _, rusqlite::Error>(|conn| Ok(conn.execute("INSERT INTO animal (name) VALUES (?1)", params!["cat"])))
         .await
         .unwrap_err();
 }

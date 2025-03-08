@@ -2,7 +2,7 @@ use std::num::NonZeroUsize;
 
 use rusqlite::params;
 use rusqlite_migration::{AsyncMigrations, MigrationDefinitionError, SchemaVersion, M};
-use tokio_rusqlite::Connection;
+use tokio_rusqlite_new::Connection;
 
 #[tokio::test]
 async fn main_test() {
@@ -35,7 +35,7 @@ async fn main_test() {
 
         migrations.to_version(&mut conn, 1).await.unwrap();
 
-        conn.call(|conn| {
+        conn.call::<_, _, rusqlite::Error>(|conn| {
             Ok(conn
                 .execute("INSERT INTO animals (name) VALUES (?1)", params!["Dog"])
                 .unwrap())
@@ -52,7 +52,7 @@ async fn main_test() {
         migrations.to_version(&mut conn, 0).await.unwrap();
 
         // the table is gone now
-        conn.call(|conn| {
+        conn.call::<_, _, rusqlite::Error>(|conn| {
             Ok(conn
                 .execute("INSERT INTO animals (name) VALUES (?1)", params!["Dog"])
                 .unwrap_err())
@@ -96,7 +96,7 @@ async fn main_test() {
         .await
         .unwrap();
 
-        conn.call(|conn| {
+        conn.call::<_, _, rusqlite::Error>(|conn| {
             conn.execute(
                 "INSERT INTO animals (id, name) VALUES (?1, ?2)",
                 params![15, "Fox"],
@@ -125,7 +125,7 @@ async fn main_test() {
             .await
             .is_err());
 
-        conn.call(|conn| {
+        conn.call::<_, _, rusqlite::Error>(|conn| {
             conn.execute("INSERT INTO food (name) VALUES (?1)", params!["Cheese"])
                 .unwrap();
 
@@ -170,7 +170,7 @@ async fn test_errors() {
             migrations.current_version(&conn).await
         );
 
-        conn.call(|conn| {
+        conn.call::<_, _, rusqlite::Error>(|conn| {
             conn.execute("INSERT INTO animals (name) VALUES (?1)", params!["Dog"])
                 .unwrap();
             Ok(())

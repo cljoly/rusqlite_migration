@@ -100,11 +100,11 @@ impl From<rusqlite::Error> for Error {
 }
 
 #[cfg(feature = "alpha-async-tokio-rusqlite")]
-impl From<tokio_rusqlite::Error> for Error {
-    fn from(e: tokio_rusqlite::Error) -> Self {
+impl From<tokio_rusqlite_new::Error> for Error {
+    fn from(e: tokio_rusqlite_new::Error) -> Self {
         match e {
-            tokio_rusqlite::Error::ConnectionClosed => Error::ConnectionClosed,
-            tokio_rusqlite::Error::Rusqlite(e) | tokio_rusqlite::Error::Close((_, e)) => {
+            tokio_rusqlite_new::Error::ConnectionClosed => Error::ConnectionClosed,
+            tokio_rusqlite_new::Error::Error(e) | tokio_rusqlite_new::Error::Close((_, e)) => {
                 Error::RusqliteError {
                     err: e,
                     query: Default::default(),

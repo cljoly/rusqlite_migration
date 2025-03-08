@@ -13,5 +13,5 @@ anyhow = "1"
 mktemp = "0.5"
 
 [dependencies.rusqlite]
-version = "0.32.1"
+version = "0.34.0"
 features = ["extra_check"] # A realistic use case

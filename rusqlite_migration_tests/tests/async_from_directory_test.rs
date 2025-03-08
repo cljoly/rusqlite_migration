@@ -4,7 +4,7 @@ use include_dir::{include_dir, Dir};
 
 use rusqlite::params;
 use rusqlite_migration::{AsyncMigrations, SchemaVersion};
-use tokio_rusqlite::Connection;
+use tokio_rusqlite_new::Connection;
 
 static MIGRATIONS_DIR: Dir =
     include_dir!("$CARGO_MANIFEST_DIR/../examples/from-directory/migrations");
@@ -22,7 +22,7 @@ async fn main_test() {
             migrations.current_version(&conn).await
         );
 
-        conn.call(|conn| {
+        conn.call::<_, _, rusqlite::Error>(|conn| {
             conn.execute(
                 "INSERT INTO friend (name, birthday) VALUES (?1, ?2)",
                 params!["John", "1970-01-01"],
