@@ -487,13 +487,14 @@ dependencies = [
 
 [[package]]
 name = "insta"
-version = "1.41.1"
+version = "1.42.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7e9ffc4d4892617c50a928c52b2961cb5174b6fc6ebf252b2fac9d21955c48b8"
+checksum = "50259abbaa67d11d2bcafc7ba1d094ed7a0c70e3ce893f0d0997f73558cb3084"
 dependencies = [
  "console",
- "lazy_static",
  "linked-hash-map",
+ "once_cell",
+ "pin-project",
  "similar",
 ]
 
@@ -552,9 +553,9 @@ checksum = "b5aba8db14291edd000dfcc4d620c7ebfb122c613afb886ca8803fa4e128a20a"
 
 [[package]]
 name = "libsqlite3-sys"
-version = "0.31.0"
+version = "0.32.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ad8935b44e7c13394a179a438e0cebba0fe08fe01b54f152e29a93b5cf993fd4"
+checksum = "fbb8270bb4060bd76c6e96f20c52d80620f1d82a3470885694e41e0f81ef6fe7"
 dependencies = [
  "pkg-config",
  "vcpkg",
@@ -659,9 +660,9 @@ dependencies = [
 
 [[package]]
 name = "once_cell"
-version = "1.18.0"
+version = "1.20.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dd8b5dd2ae5ed71462c540258bedcb51965123ad7e7ccf4b9a8cafaa4a63576d"
+checksum = "945462a4b81e43c4e3ba96bd7b49d834c6f61198356aa858733bc4acf3cbe62e"
 
 [[package]]
 name = "oorandom"
@@ -690,6 +691,26 @@ dependencies = [
  "redox_syscall 0.4.1",
  "smallvec",
  "windows-targets 0.48.5",
+]
+
+[[package]]
+name = "pin-project"
+version = "1.1.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "677f1add503faace112b9f1373e43e9e054bfdd22ff1a63c1bc485eaec6a6a8a"
+dependencies = [
+ "pin-project-internal",
+]
+
+[[package]]
+name = "pin-project-internal"
+version = "1.1.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6e918e4ff8c4549eb882f14b3a4bc8c8bc93de829416eacf579f1207a8fbf861"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
@@ -816,9 +837,9 @@ checksum = "c08c74e62047bb2de4ff487b251e4a92e24f48745648451635cec7d591162d9f"
 
 [[package]]
 name = "rusqlite"
-version = "0.33.0"
+version = "0.34.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1c6d5e5acb6f6129fe3f7ba0a7fc77bca1942cb568535e18e7bc40262baf3110"
+checksum = "37e34486da88d8e051c7c0e23c3f15fd806ea8546260aa2fec247e97242ec143"
 dependencies = [
  "bitflags 2.6.0",
  "fallible-iterator",
@@ -1035,9 +1056,9 @@ dependencies = [
 
 [[package]]
 name = "tokio-rusqlite-new"
-version = "0.7.0"
+version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c8c523bce6771c8e222affb9332bf7fad7753f7611ee2e3f41fbcf955c1b2a57"
+checksum = "28fefb7831617a21ef3c6291a9307acc3abd37be71869335aafa6aa61cff1a91"
 dependencies = [
  "crossbeam-channel",
  "rusqlite",
