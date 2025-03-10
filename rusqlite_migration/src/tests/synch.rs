@@ -553,9 +553,3 @@ fn test_missing_down_migration() {
         m.to_version(&mut conn, 2)
     );
 }
-
-#[test]
-fn test_deprecated_new_iter() {
-    let migrations = Migrations::new_iter(all_valid().into_iter());
-    assert_eq!(Ok(()), migrations.validate());
-}

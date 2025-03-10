@@ -24,6 +24,9 @@ On a related note, now that we have removed the `AsyncMigrations` (see the secti
 -        .finalize::<Migrations>());
 +        .finalize());
 ```
+#### Remove `Migrations::new_iter`
+
+This function has been deprecated for a while now, remove it as a part of the major version bump. You can use the standard `FromIter` trait implementation instead.
 
 ### Minimum Rust Version
 
