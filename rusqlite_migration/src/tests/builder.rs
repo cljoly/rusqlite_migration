@@ -27,7 +27,7 @@ fn test_valid_index() {
     insta::assert_debug_snapshot!(MigrationsBuilder::from_iter(ms)
         .edit(1, move |m| m.down("DROP TABLE t1;"))
         .edit(2, move |m| m.down("DROP TABLE t2;"))
-        .finalize::<Migrations>());
+        .finalize());
 }
 
 #[test]
