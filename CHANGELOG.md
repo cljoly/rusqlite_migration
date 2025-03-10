@@ -1,6 +1,29 @@
 # Changelog
 
-## Version 1.4.0
+## Version 2.0.0
+
+### Breaking changes
+
+#### Remove the `alpha-async-tokio-rusqlite` Feature
+
+As the name of the feature suggest, we have had experimental support for async using tokio for a while now. Supporting that feature has been quite a big burden, introducing some duplicated code in the `AsyncMigrations` struct in particular, as well as a whole set of very similar tests. Plus the benefit of async is limited here, because everything gets executed in a blocking fashion in sqlite anyway.
+
+It turns out that we don’t need the async support in rusqlite_migration for folks to use async libraries. For instance, with tokio-rusqlite, you can define migrations like in the sync context and run:
+```rust
+    async_conn
+        .call_unwrap(|conn| MIGRATIONS.to_latest(conn))
+        .await?;
+```
+
+See [the updated async example](https://github.com/cljoly/rusqlite_migration/blob/master/examples/async/src/main.rs) for details, in particular why it’s fine to call [a method](https://docs.rs/tokio-rusqlite/0.6.0/tokio_rusqlite/struct.Connection.html#method.call_unwrap) with unwrap in its name.
+
+#### Make the builder `finalizer` method not generic
+
+On a related note, now that we have removed the `AsyncMigrations` (see the section right above) struct, we only have `Migrations` so there is no need for the `MigrationsBuilder.finalize` method to be generic. Thus we removed the generic argument. To update your code, you can just do this:
+```diff
+-        .finalize::<Migrations>());
++        .finalize());
+```
 
 ### Minimum Rust Version
 
