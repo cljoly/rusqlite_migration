@@ -33,7 +33,6 @@ jobs:
         args:
         - ""
         - "--all-features"
-        - "--features alpha-async-tokio-rusqlite"
         - "--features from-directory"
     runs-on: ubuntu-24.04
     steps:
