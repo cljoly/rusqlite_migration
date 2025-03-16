@@ -109,7 +109,9 @@ async fn main() -> Result<()> {
         .unwrap();
 
     async_conn
-        .call::<_, _, rusqlite::Error>(|conn| Ok(conn.execute("INSERT INTO animal (name) VALUES (?1)", params!["dog"])))
+        .call::<_, _, rusqlite::Error>(|conn| {
+            Ok(conn.execute("INSERT INTO animal (name) VALUES (?1)", params!["dog"]))
+        })
         .await
         .unwrap()
         .unwrap();
@@ -124,7 +126,9 @@ async fn main() -> Result<()> {
 
     // The table was removed
     async_conn
-        .call::<_, _, rusqlite::Error>(|conn| Ok(conn.execute("INSERT INTO animal (name) VALUES (?1)", params!["cat"])))
+        .call::<_, _, rusqlite::Error>(|conn| {
+            Ok(conn.execute("INSERT INTO animal (name) VALUES (?1)", params!["cat"]))
+        })
         .await
         .unwrap_err();
 
