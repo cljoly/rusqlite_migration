@@ -18,7 +18,7 @@ use std::sync::LazyLock;
 use anyhow::Result;
 use rusqlite::params;
 use rusqlite_migration::{Migrations, M};
-use tokio_rusqlite::Connection;
+use tokio_rusqlite_new::Connection;
 
 /// The general idea with this example is to use [`Connection::call`][call] and
 /// [`Connection::call_unwrap`][call_unwrap] to run the migration in a sync context.
@@ -86,19 +86,19 @@ async fn main() -> Result<()> {
     // executed for each connection (like `foreign_keys`) or to be executed outside transactions
     // (`journal_mode` is a noop in a transaction).
     async_conn
-        .call(|conn| Ok(conn.pragma_update(None, "journal_mode", "WAL")))
+        .call::<_, _, rusqlite::Error>(|conn| Ok(conn.pragma_update(None, "journal_mode", "WAL")))
         .await
         .unwrap()
         .unwrap();
     async_conn
-        .call(|conn| Ok(conn.pragma_update(None, "foreign_keys", "ON")))
+        .call::<_, _, rusqlite::Error>(|conn| Ok(conn.pragma_update(None, "foreign_keys", "ON")))
         .await
         .unwrap()
         .unwrap();
 
     // Use the db 🥳
     async_conn
-        .call(|conn| {
+        .call::<_, _, rusqlite::Error>(|conn| {
             Ok(conn.execute(
                 "INSERT INTO friend (name, birthday) VALUES (?1, ?2)",
                 params!["John", "1970-01-01"],
@@ -109,7 +109,9 @@ async fn main() -> Result<()> {
         .unwrap();
 
     async_conn
-        .call(|conn| Ok(conn.execute("INSERT INTO animal (name) VALUES (?1)", params!["dog"])))
+        .call::<_, _, rusqlite::Error>(|conn| {
+            Ok(conn.execute("INSERT INTO animal (name) VALUES (?1)", params!["dog"]))
+        })
         .await
         .unwrap()
         .unwrap();
@@ -119,12 +121,14 @@ async fn main() -> Result<()> {
     // Notice how in effect, we have handle two `Result`s, one for the errors happening when we try
     // to use the connection and the other one when applying the migration proper.
     async_conn
-        .call(|conn| Ok(MIGRATIONS.to_version(conn, 2)))
+        .call::<_, _, rusqlite::Error>(|conn| Ok(MIGRATIONS.to_version(conn, 2)))
         .await??;
 
     // The table was removed
     async_conn
-        .call(|conn| Ok(conn.execute("INSERT INTO animal (name) VALUES (?1)", params!["cat"])))
+        .call::<_, _, rusqlite::Error>(|conn| {
+            Ok(conn.execute("INSERT INTO animal (name) VALUES (?1)", params!["cat"]))
+        })
         .await
         .unwrap_err();
 
