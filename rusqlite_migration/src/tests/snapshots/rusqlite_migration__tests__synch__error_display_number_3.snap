@@ -1,5 +1,0 @@
----
-source: rusqlite_migration/src/tests/synch.rs
-expression: e
----
-rusqlite_migrate error: ForeignKeyCheck([ForeignKeyCheckError { table: "t1", rowid: 1, parent: "t2", fkid: 2 }, ForeignKeyCheckError { table: "t3", rowid: 2, parent: "t4", fkid: 3 }])
