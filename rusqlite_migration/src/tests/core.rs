@@ -59,12 +59,41 @@ fn max_migration_test() {
         Ok(0),
         "Migration max is too low, it’s not the actual limit",
     );
+}
 
-    // Weirdly, SQLite supports negative numbers
+// Weirdly, SQLite supports negative numbers, but let’s make sure we fail loudly in that case
+#[test]
+fn min_migrations_test() {
+    let mut conn = Connection::open_in_memory().unwrap();
+
+    crate::set_user_version(&conn, 0).unwrap();
+    //assert_eq!(
+    //    crate::set_user_version(&conn, -3),
+    //    Err(Error::SpecifiedSchemaVersion(SchemaVersionError::TooLow))
+    //);
+
+    // The rest of the test is to ascertain the behavior of SQLite (and rusqlite)
+
+    fn raw_set_user_version(conn: &mut Connection, version: isize) {
+        conn.pragma_update(None, "user_version", version).unwrap()
+    }
     raw_set_user_version(&mut conn, -3);
     assert_eq!(
         conn.query_row("PRAGMA user_version", [], |row| row.get(0)),
         Ok(-3),
+    );
+
+    raw_set_user_version(&mut conn, i32::MIN as isize);
+    assert_eq!(
+        conn.query_row("PRAGMA user_version", [], |row| row.get(0)),
+        Ok(i32::MIN),
+    );
+
+    // But only up to i32::MIN
+    raw_set_user_version(&mut conn, (i32::MIN as isize).checked_sub(1).unwrap());
+    assert_eq!(
+        conn.query_row("PRAGMA user_version", [], |row| row.get(0)),
+        Ok(0),
     );
 }
 

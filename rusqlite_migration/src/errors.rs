@@ -123,6 +123,8 @@ pub enum SchemaVersionError {
     },
     /// Schema version is so high that it is unsupported (higher than [`crate::MIGRATIONS_MAX`])
     TooHigh,
+    /// Schema version is so low that it is unsupported. It needs to be a positive intger (>= 0)
+    TooLow,
 }
 
 impl fmt::Display for SchemaVersionError {
@@ -133,6 +135,9 @@ impl fmt::Display for SchemaVersionError {
             }
             SchemaVersionError::TooHigh => {
                 write!(f, "Attempt to use a schema version higher than supported.")
+            }
+            SchemaVersionError::TooLow => {
+                write!(f, "Attempt to use a schema version lower than supported.")
             }
         }
     }
