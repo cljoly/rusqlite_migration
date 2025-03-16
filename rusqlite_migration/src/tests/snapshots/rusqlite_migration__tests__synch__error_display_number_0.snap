@@ -1,5 +1,0 @@
----
-source: rusqlite_migration/src/tests/synch.rs
-expression: e
----
-rusqlite_migrate error: RusqliteError { query: "SELECT * FROM table42;", err: InvalidQuery }

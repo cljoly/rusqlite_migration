@@ -16,5 +16,5 @@
 // For feature "from-directory"
 mod builder;
 
+mod core;
 mod helpers;
-mod synch;
