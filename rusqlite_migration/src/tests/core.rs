@@ -316,7 +316,7 @@ fn current_version_gt_max_schema_version_test() {
         migrations.to_latest(&mut conn).unwrap();
     }
 
-    // We now have less migrations
+    // We now have fewer migrations
     let migrations = Migrations::new(vec![m_valid0()]);
 
     // We should get an error
@@ -491,4 +491,36 @@ fn test_missing_down_migration() {
         )),
         m.to_version(&mut conn, 2)
     );
+}
+
+#[test]
+fn test_migrations_to_apply() -> Result<(), Box<dyn std::error::Error>> {
+    let ms = vec![
+        m_valid0(),
+        m_valid10(),
+        m_valid11(),
+        m_valid20(),
+        m_valid21(),
+        m_valid_fk(),
+    ];
+    let migrations_1: Migrations = ms.clone().into_iter().take(1).collect();
+    let migrations_2: Migrations = ms.clone().into_iter().take(3).collect();
+    let migrations_3: Migrations = ms.clone().into_iter().take(6).collect();
+
+    let mut conn = Connection::open_in_memory()?;
+    // Apply until the middle
+    migrations_2.to_latest(&mut conn)?;
+
+    assert_eq!(migrations_1.migrations_to_apply(&conn), Ok(-2));
+    assert_eq!(migrations_2.migrations_to_apply(&conn), Ok(0));
+    assert_eq!(migrations_3.migrations_to_apply(&conn), Ok(3));
+
+    // If the database is somehow corrupted, this returns an error
+    raw_set_user_version(&mut conn, -325);
+    assert_eq!(
+        migrations_1.migrations_to_apply(&conn),
+        Err(Error::InvalidUserVersion)
+    );
+
+    Ok(())
 }
