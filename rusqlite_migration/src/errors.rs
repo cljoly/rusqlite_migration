@@ -85,8 +85,11 @@ impl Error {
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        // TODO Format the error with fmt instead of debug
-        write!(f, "rusqlite_migrate error: {self:?}")
+        match self {
+            Error::SpecifiedSchemaVersion(e) => write!(f, "rusqlite_migrate error: {e}"),
+            // TODO Format the error with fmt instead of debug
+            _ => write!(f, "rusqlite_migrate error: {self:?}"),
+        }
     }
 }
 

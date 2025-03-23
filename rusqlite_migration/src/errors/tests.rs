@@ -17,6 +17,63 @@ use std::num::NonZeroUsize;
 
 use super::*;
 
+fn all_errors() -> Vec<(&'static str, crate::Error)> {
+    use crate::Error::*;
+    use crate::ForeignKeyCheckError;
+    use crate::MigrationDefinitionError;
+    use crate::SchemaVersion;
+    use crate::SchemaVersionError;
+
+    vec![
+        (
+            "rusqlite_error",
+            RusqliteError {
+                query: "SELECT * FROM table42;".to_owned(),
+                err: rusqlite::Error::InvalidQuery,
+            },
+        ),
+        (
+            "specified_schema_version",
+            SpecifiedSchemaVersion(SchemaVersionError::TargetVersionOutOfRange {
+                specified: SchemaVersion::NoneSet,
+                highest: SchemaVersion::NoneSet,
+            }),
+        ),
+        (
+            "too_high_schema_version",
+            SpecifiedSchemaVersion(SchemaVersionError::TooHigh),
+        ),
+        ("invalid_user_version", InvalidUserVersion),
+        (
+            "migration_definition",
+            MigrationDefinition(MigrationDefinitionError::NoMigrationsDefined),
+        ),
+        (
+            "foreign_key_check",
+            ForeignKeyCheck(vec![
+                ForeignKeyCheckError {
+                    table: "t1".to_owned(),
+                    rowid: 1,
+                    parent: "t2".to_owned(),
+                    fkid: 2,
+                },
+                ForeignKeyCheckError {
+                    table: "t3".to_owned(),
+                    rowid: 2,
+                    parent: "t4".to_owned(),
+                    fkid: 3,
+                },
+            ]),
+        ),
+        ("hook", Hook("in hook".to_owned())),
+        ("file_load", FileLoad("file causing problem".to_owned())),
+        (
+            "unrecognized",
+            Unrecognized(Box::new(Hook("unknown".to_owned()))),
+        ),
+    ]
+}
+
 // We should be able to convert rusqlite errors transparently
 #[test]
 fn test_rusqlite_error_conversion() {
@@ -137,4 +194,143 @@ fn test_hook_conversion_msg() {
     let hook_error = HookError::Hook(msg.clone());
 
     assert_eq!(Error::from(hook_error), Error::Hook(msg))
+}
+
+#[test]
+fn test_schema_version_error_display() {
+    let err = SchemaVersionError::TargetVersionOutOfRange {
+        specified: SchemaVersion::NoneSet,
+        highest: SchemaVersion::NoneSet,
+    };
+    assert_eq!("Attempt to migrate to version 0 (no version set), which is higher than the highest version currently supported, 0 (no version set).", format!("{err}"))
+}
+
+#[test]
+fn test_foreign_key_check_error_display() {
+    let err = ForeignKeyCheckError {
+        table: "a".to_string(),
+        rowid: 1,
+        parent: "b".to_string(),
+        fkid: 2,
+    };
+    assert_eq!("Foreign key check found row with id 1 in table 'a' missing from table 'b' but required by foreign key with id 2", format!("{err}"))
+}
+
+#[test]
+fn test_migration_definition_error_display() {
+    let err = MigrationDefinitionError::DownNotDefined { migration_index: 1 };
+    assert_eq!(
+        "Migration 1 (version 1 -> 2) cannot be reverted",
+        format!("{err}")
+    );
+
+    let err = MigrationDefinitionError::DatabaseTooFarAhead;
+    assert_eq!(
+        "Attempt to migrate a database with a migration number that is too high",
+        format!("{err}")
+    );
+
+    let err = MigrationDefinitionError::NoMigrationsDefined;
+    assert_eq!(
+        "Attempt to migrate with no migrations defined",
+        format!("{err}")
+    )
+}
+
+#[test]
+fn test_error_display() {
+    for (name, e) in all_errors() {
+        insta::assert_snapshot!(format!("error_display__{name}"), e);
+    }
+}
+
+#[test]
+fn test_error_source() {
+    use std::error::Error;
+
+    for (name, e) in all_errors() {
+        // For API stability reasons (if that changes, we must change the major version)
+        insta::assert_debug_snapshot!(format!("error_source_number_{name}"), e.source());
+    }
+}
+
+#[test]
+fn schema_version_partial_display_test() {
+    assert_eq!("0 (no version set)", format!("{}", SchemaVersion::NoneSet));
+    assert_eq!(
+        "1 (inside)",
+        format!("{}", SchemaVersion::Inside(NonZeroUsize::new(1).unwrap()))
+    );
+    assert_eq!(
+        "32 (inside)",
+        format!("{}", SchemaVersion::Inside(NonZeroUsize::new(32).unwrap()))
+    );
+    assert_eq!(
+        "1 (outside)",
+        format!("{}", SchemaVersion::Outside(NonZeroUsize::new(1).unwrap()))
+    );
+    assert_eq!(
+        "32 (outside)",
+        format!("{}", SchemaVersion::Outside(NonZeroUsize::new(32).unwrap()))
+    );
+}
+
+#[test]
+fn error_test_source() {
+    let err = Error::RusqliteError {
+        query: String::new(),
+        err: rusqlite::Error::InvalidQuery,
+    };
+    assert_eq!(
+        std::error::Error::source(&err)
+            .and_then(|e| e.downcast_ref::<rusqlite::Error>())
+            .unwrap(),
+        &rusqlite::Error::InvalidQuery
+    );
+
+    let err = Error::SpecifiedSchemaVersion(SchemaVersionError::TargetVersionOutOfRange {
+        specified: SchemaVersion::NoneSet,
+        highest: SchemaVersion::NoneSet,
+    });
+    assert_eq!(
+        std::error::Error::source(&err)
+            .and_then(|e| e.downcast_ref::<SchemaVersionError>())
+            .unwrap(),
+        &SchemaVersionError::TargetVersionOutOfRange {
+            specified: SchemaVersion::NoneSet,
+            highest: SchemaVersion::NoneSet
+        }
+    );
+
+    let err = Error::MigrationDefinition(MigrationDefinitionError::NoMigrationsDefined);
+    assert_eq!(
+        std::error::Error::source(&err)
+            .and_then(|e| e.downcast_ref::<MigrationDefinitionError>())
+            .unwrap(),
+        &MigrationDefinitionError::NoMigrationsDefined
+    );
+
+    let err = Error::ForeignKeyCheck(vec![ForeignKeyCheckError {
+        table: String::new(),
+        rowid: 1i64,
+        parent: String::new(),
+        fkid: 1i64,
+    }]);
+    assert_eq!(
+        std::error::Error::source(&err)
+            .and_then(|e| e.downcast_ref::<ForeignKeyCheckError>())
+            .unwrap(),
+        &ForeignKeyCheckError {
+            table: String::new(),
+            rowid: 1i64,
+            parent: String::new(),
+            fkid: 1i64,
+        }
+    );
+
+    let err = Error::Hook(String::new());
+    assert!(std::error::Error::source(&err).is_none());
+
+    let err = Error::FileLoad(String::new());
+    assert!(std::error::Error::source(&err).is_none());
 }
