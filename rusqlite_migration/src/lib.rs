@@ -491,6 +491,88 @@ impl<'m> Migrations<'m> {
         user_version(conn).map(|v| self.db_version_to_schema(v))
     }
 
+    /// Returns the number of migrations that would be applied by [`Migrations::to_latest`]. For
+    /// instance, if one migration has not been applied yet, the number returned will be 1.
+    ///
+    /// The number returned may be negative. This happens when more migrations were applied than
+    /// the current version of the program knows about. It then represent the number of migrations
+    /// applied beyond that point. You can also see it as the number of migrations that would need
+    /// to be undone.
+    ///
+    /// <div class="warning">
+    ///
+    /// For most common scenarios, you should be able to just call [`Migrations::to_latest`], which
+    /// already checks the schema version.
+    ///
+    /// </div>
+    ///
+    /// # Examples
+    ///
+    /// ## Backup before applying migrations
+    ///
+    /// One common use case for this function is ta take a backup of the database before applying
+    /// migrations, if any migrations would run.
+    ///
+    /// ```
+    /// use rusqlite_migration::{Migrations, M};
+    ///
+    /// let mut conn = rusqlite::Connection::open_in_memory().unwrap();
+    /// let mut migrations: Migrations = Migrations::new(vec![
+    ///     M::up("CREATE TABLE animals (name TEXT);"),
+    ///     M::up("CREATE TABLE food (name TEXT);"),
+    /// ]);
+    ///
+    /// if migrations.pending_migrations(&conn).unwrap() != 0 {
+    ///     // Backup the database
+    ///
+    ///     migrations.to_latest(&mut conn).unwrap()
+    /// }
+    /// ```
+    ///
+    ///
+    /// ## Negative numbers
+    ///
+    /// This demonstrate how negative numbers are returned on a database modified by a newer
+    /// version of the program and then that same database is opened again by the older version.
+    ///
+    /// ```rust
+    /// use rusqlite_migration::{Error, Migrations, M, MigrationDefinitionError};
+    ///
+    /// let mut conn = rusqlite::Connection::open_in_memory().unwrap();
+    ///
+    /// // Initial set of migrations in, say, version 1 of the program
+    /// let mut ms = vec![
+    ///     M::up("CREATE TABLE animals (name TEXT);"),
+    ///     M::up("CREATE TABLE food (name TEXT);"),
+    /// ];
+    /// let migrations_v1 = Migrations::new(ms.clone());
+    ///
+    /// migrations_v1.to_latest(&mut conn).unwrap();
+    /// assert_eq!(migrations_v1.pending_migrations(&conn), Ok(0));
+    ///
+    /// // More migrations are added in, say, version 2
+    /// ms.push(M::up("CREATE TABLE plants (name TEXT);"));
+    /// let migrations_v2 =  Migrations::new(ms);
+    ///
+    /// migrations_v2.to_latest(&mut conn).unwrap();
+    /// // From the perspective of the old version of the program, one migration would need to be
+    /// // reversed.
+    /// assert_eq!(migrations_v1.pending_migrations(&conn), Ok(-1));
+    /// // Note that in this situation, to_latest will return an error, which you can handle how
+    /// // you see fit (maybe restoring one of those backups or prompting the user)
+    /// assert_eq!(migrations_v1.to_latest(&mut conn), Err(Error::MigrationDefinition(
+    ///     MigrationDefinitionError::DatabaseTooFarAhead
+    /// )));
+    /// ```
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::RusqliteError`] or [`Error::InvalidUserVersion`] in case the user
+    /// version cannot be queried.
+    pub fn pending_migrations(&self, conn: &Connection) -> Result<i32> {
+        Ok(self.ms.len() as i32 - user_version(conn)? as i32)
+    }
+
     /// Migrate upward methods. This is rolled back on error.
     /// On success, returns the number of update performed
     /// All versions are db versions
