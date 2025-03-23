@@ -316,7 +316,7 @@ fn current_version_gt_max_schema_version_test() {
         migrations.to_latest(&mut conn).unwrap();
     }
 
-    // We now have less migrations
+    // We now have fewer migrations
     let migrations = Migrations::new(vec![m_valid0()]);
 
     // We should get an error
@@ -499,4 +499,68 @@ fn test_build_from_cow() {
     use std::borrow::Cow;
 
     let _ = Migrations::from_slice(&Cow::from(vec![m_valid0()]));
+}
+
+#[test]
+fn test_pending_migrations() -> Result<(), Box<dyn std::error::Error>> {
+    let ms = vec![
+        m_valid0(),
+        m_valid10(),
+        m_valid11(),
+        m_valid20(),
+        m_valid21(),
+        m_valid_fk(),
+    ];
+    let migrations_0 = Migrations::from_slice(&[]);
+    let migrations_1 = Migrations::from_slice(&ms[..1]);
+    let migrations_2 = Migrations::from_slice(&ms[..3]);
+    let migrations_3 = Migrations::from_slice(&ms[..]);
+
+    {
+        let mut conn = Connection::open_in_memory()?;
+        // Apply the first one
+        migrations_1.to_latest(&mut conn)?;
+
+        assert_eq!(migrations_0.pending_migrations(&conn), Ok(-1));
+        assert_eq!(migrations_1.pending_migrations(&conn), Ok(0));
+        assert_eq!(migrations_2.pending_migrations(&conn), Ok(2));
+        assert_eq!(migrations_3.pending_migrations(&conn), Ok(5));
+    }
+    {
+        let mut conn = Connection::open_in_memory()?;
+        // Apply until the middle
+        migrations_2.to_latest(&mut conn)?;
+
+        assert_eq!(migrations_1.pending_migrations(&conn), Ok(-2));
+        assert_eq!(migrations_2.pending_migrations(&conn), Ok(0));
+        assert_eq!(migrations_3.pending_migrations(&conn), Ok(3));
+    }
+    {
+        let mut conn = Connection::open_in_memory()?;
+        // Apply until the last one
+        migrations_3.to_latest(&mut conn)?;
+
+        assert_eq!(migrations_0.pending_migrations(&conn), Ok(-6));
+        assert_eq!(migrations_1.pending_migrations(&conn), Ok(-5));
+        assert_eq!(migrations_2.pending_migrations(&conn), Ok(-3));
+        assert_eq!(migrations_3.pending_migrations(&conn), Ok(0));
+    }
+
+    Ok(())
+}
+
+#[test]
+fn test_pending_migrations_errors() -> Result<(), Box<dyn std::error::Error>> {
+    let mut conn = Connection::open_in_memory()?;
+
+    let migrations = Migrations::new(vec![m_valid0(), m_valid10()]);
+
+    // If the database is somehow corrupted, this returns an error
+    raw_set_user_version(&mut conn, -325);
+    assert_eq!(
+        migrations.pending_migrations(&conn),
+        Err(Error::InvalidUserVersion)
+    );
+
+    Ok(())
 }
