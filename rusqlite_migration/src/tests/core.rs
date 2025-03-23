@@ -21,11 +21,78 @@ use crate::{
     tests::helpers::{
         all_valid, m_invalid_down_fk, m_invalid_fk, m_valid0, m_valid10, m_valid11, m_valid_fk,
     },
-    user_version, Error, ForeignKeyCheckError, MigrationDefinitionError, Migrations, SchemaVersion,
-    SchemaVersionError, M,
+    user_version, Error, MigrationDefinitionError, Migrations, SchemaVersion, SchemaVersionError,
+    M,
 };
 
-use super::helpers::{all_errors, m_invalid0, m_invalid1, m_valid20, m_valid21};
+use super::helpers::{m_invalid0, m_invalid1, m_valid20, m_valid21};
+
+fn raw_set_user_version(conn: &mut Connection, version: isize) {
+    conn.pragma_update(None, "user_version", version).unwrap()
+}
+
+#[test]
+fn max_migration_test() {
+    use crate::{set_user_version, user_version};
+
+    let mut conn = Connection::open_in_memory().unwrap();
+    let migrations_max = crate::MIGRATIONS_MAX;
+    set_user_version(&conn, migrations_max).unwrap();
+    assert_eq!(
+        user_version(&conn),
+        Ok(migrations_max),
+        "Migration max is too high, it’s not the actual limit",
+    );
+
+    // Unfortunately SQLite fails silently. But the internal set_user_version returns an error.
+    assert_eq!(
+        set_user_version(&conn, migrations_max + 1),
+        Err(Error::SpecifiedSchemaVersion(SchemaVersionError::TooHigh))
+    );
+    assert_eq!(
+        user_version(&conn),
+        Ok(migrations_max),
+        "set_user_version returned an error but user_version was changed",
+    );
+    raw_set_user_version(&mut conn, migrations_max as isize + 1);
+    assert_eq!(
+        user_version(&conn),
+        Ok(0),
+        "Migration max is too low, it’s not the actual limit",
+    );
+}
+
+// Weirdly, SQLite supports negative numbers, but let’s make sure we fail loudly in that case
+#[test]
+fn min_migrations_test() {
+    let mut conn = Connection::open_in_memory().unwrap();
+
+    crate::set_user_version(&conn, 0).unwrap();
+
+    // The rest of the test also ascertain the behavior of SQLite (and rusqlite)
+
+    raw_set_user_version(&mut conn, -3);
+    assert_eq!(
+        conn.query_row("PRAGMA user_version", [], |row| row.get(0)),
+        Ok(-3),
+    );
+    assert_eq!(crate::user_version(&conn), Err(Error::InvalidUserVersion));
+
+    // The minimum user version is a i32::MIN
+    raw_set_user_version(&mut conn, i32::MIN as isize);
+    assert_eq!(
+        conn.query_row("PRAGMA user_version", [], |row| row.get(0)),
+        Ok(i32::MIN),
+    );
+    assert_eq!(crate::user_version(&conn), Err(Error::InvalidUserVersion));
+
+    // Anything lower than i32::MIN is silently replaced by sqlite
+    raw_set_user_version(&mut conn, (i32::MIN as isize).checked_sub(1).unwrap());
+    assert_eq!(
+        conn.query_row("PRAGMA user_version", [], |row| row.get(0)),
+        Ok(0),
+    );
+}
 
 #[test]
 fn empty_migrations_test() {
@@ -118,145 +185,6 @@ fn schema_version_partial_cmp_test() {
 fn test_migration_hook_debug() {
     let m = M::up_with_hook("", |_: &Transaction| Ok(()));
     insta::assert_debug_snapshot!(m);
-}
-
-#[test]
-fn test_schema_version_error_display() {
-    let err = SchemaVersionError::TargetVersionOutOfRange {
-        specified: SchemaVersion::NoneSet,
-        highest: SchemaVersion::NoneSet,
-    };
-    assert_eq!("Attempt to migrate to version 0 (no version set), which is higher than the highest version currently supported, 0 (no version set).", format!("{err}"))
-}
-
-#[test]
-fn test_foreign_key_check_error_display() {
-    let err = ForeignKeyCheckError {
-        table: "a".to_string(),
-        rowid: 1,
-        parent: "b".to_string(),
-        fkid: 2,
-    };
-    assert_eq!("Foreign key check found row with id 1 in table 'a' missing from table 'b' but required by foreign key with id 2", format!("{err}"))
-}
-
-#[test]
-fn test_migration_definition_error_display() {
-    let err = MigrationDefinitionError::DownNotDefined { migration_index: 1 };
-    assert_eq!(
-        "Migration 1 (version 1 -> 2) cannot be reverted",
-        format!("{err}")
-    );
-
-    let err = MigrationDefinitionError::DatabaseTooFarAhead;
-    assert_eq!(
-        "Attempt to migrate a database with a migration number that is too high",
-        format!("{err}")
-    );
-
-    let err = MigrationDefinitionError::NoMigrationsDefined;
-    assert_eq!(
-        "Attempt to migrate with no migrations defined",
-        format!("{err}")
-    )
-}
-
-#[test]
-fn test_error_display() {
-    for (name, e) in all_errors() {
-        insta::assert_snapshot!(format!("error_display__{name}"), e);
-    }
-}
-
-#[test]
-fn test_error_source() {
-    use std::error::Error;
-
-    for (name, e) in all_errors() {
-        // For API stability reasons (if that changes, we must change the major version)
-        insta::assert_debug_snapshot!(format!("error_source_number_{name}"), e.source());
-    }
-}
-
-#[test]
-fn schema_version_partial_display_test() {
-    assert_eq!("0 (no version set)", format!("{}", SchemaVersion::NoneSet));
-    assert_eq!(
-        "1 (inside)",
-        format!("{}", SchemaVersion::Inside(NonZeroUsize::new(1).unwrap()))
-    );
-    assert_eq!(
-        "32 (inside)",
-        format!("{}", SchemaVersion::Inside(NonZeroUsize::new(32).unwrap()))
-    );
-    assert_eq!(
-        "1 (outside)",
-        format!("{}", SchemaVersion::Outside(NonZeroUsize::new(1).unwrap()))
-    );
-    assert_eq!(
-        "32 (outside)",
-        format!("{}", SchemaVersion::Outside(NonZeroUsize::new(32).unwrap()))
-    );
-}
-
-#[test]
-fn error_test_source() {
-    let err = Error::RusqliteError {
-        query: String::new(),
-        err: rusqlite::Error::InvalidQuery,
-    };
-    assert_eq!(
-        std::error::Error::source(&err)
-            .and_then(|e| e.downcast_ref::<rusqlite::Error>())
-            .unwrap(),
-        &rusqlite::Error::InvalidQuery
-    );
-
-    let err = Error::SpecifiedSchemaVersion(SchemaVersionError::TargetVersionOutOfRange {
-        specified: SchemaVersion::NoneSet,
-        highest: SchemaVersion::NoneSet,
-    });
-    assert_eq!(
-        std::error::Error::source(&err)
-            .and_then(|e| e.downcast_ref::<SchemaVersionError>())
-            .unwrap(),
-        &SchemaVersionError::TargetVersionOutOfRange {
-            specified: SchemaVersion::NoneSet,
-            highest: SchemaVersion::NoneSet
-        }
-    );
-
-    let err = Error::MigrationDefinition(MigrationDefinitionError::NoMigrationsDefined);
-    assert_eq!(
-        std::error::Error::source(&err)
-            .and_then(|e| e.downcast_ref::<MigrationDefinitionError>())
-            .unwrap(),
-        &MigrationDefinitionError::NoMigrationsDefined
-    );
-
-    let err = Error::ForeignKeyCheck(vec![ForeignKeyCheckError {
-        table: String::new(),
-        rowid: 1i64,
-        parent: String::new(),
-        fkid: 1i64,
-    }]);
-    assert_eq!(
-        std::error::Error::source(&err)
-            .and_then(|e| e.downcast_ref::<ForeignKeyCheckError>())
-            .unwrap(),
-        &ForeignKeyCheckError {
-            table: String::new(),
-            rowid: 1i64,
-            parent: String::new(),
-            fkid: 1i64,
-        }
-    );
-
-    let err = Error::Hook(String::new());
-    assert!(std::error::Error::source(&err).is_none());
-
-    let err = Error::FileLoad(String::new());
-    assert!(std::error::Error::source(&err).is_none());
 }
 
 #[test]

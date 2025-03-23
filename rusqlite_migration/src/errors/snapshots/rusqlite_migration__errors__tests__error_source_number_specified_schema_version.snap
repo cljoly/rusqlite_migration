@@ -1,6 +1,7 @@
 ---
-source: rusqlite_migration/src/tests/synch.rs
+source: rusqlite_migration/src/errors/tests.rs
 expression: e.source()
+snapshot_kind: text
 ---
 Some(
     TargetVersionOutOfRange {
