@@ -18,7 +18,7 @@ Release notes for the [rusqlite_migration library](https://cj.rs/rusqlite_migrat
 end_insert -->
 
 
-## Version 2.0.0
+## Version 2.0.0 Alpha 1
 
 ### Breaking changes
 
@@ -35,7 +35,7 @@ It turns out that we don’t need the async support in rusqlite_migration for fo
 
 See [the updated async example](https://github.com/cljoly/rusqlite_migration/blob/master/examples/async/src/main.rs) for details, in particular why it’s fine to call [a method](https://docs.rs/tokio-rusqlite/0.6.0/tokio_rusqlite/struct.Connection.html#method.call_unwrap) with unwrap in its name.
 
-#### Make the builder `finalizer` method not generic
+#### Make the Builder `Finalizer` Method Not Generic
 
 On a related note, now that we have removed the `AsyncMigrations` (see the section right above) struct, we only have `Migrations` so there is no need for the `MigrationsBuilder.finalize` method to be generic. Thus we removed the generic argument. To update your code, you can just do this:
 ```diff
@@ -46,7 +46,7 @@ On a related note, now that we have removed the `AsyncMigrations` (see the secti
 
 This function has been deprecated for a while now, remove it as a part of the major version bump. You can use the standard `FromIter` trait implementation instead.
 
-### Behavior change
+### Behavior Change
 
 * When the [user version field](https://www.sqlite.org/fileformat.html#user_version_number) is altered by other code in your application, we are now returning an explicit error (`Error::InvalidUserVersion`) when this can be detected. Previously, the library would silently misbehave.
 
