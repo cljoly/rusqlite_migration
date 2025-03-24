@@ -25,11 +25,7 @@ use crate::{
     M,
 };
 
-use super::helpers::{m_invalid0, m_invalid1, m_valid20, m_valid21};
-
-fn raw_set_user_version(conn: &mut Connection, version: isize) {
-    conn.pragma_update(None, "user_version", version).unwrap()
-}
+use super::helpers::{m_invalid0, m_invalid1, m_valid20, m_valid21, raw_set_user_version};
 
 #[test]
 fn max_migration_test() {

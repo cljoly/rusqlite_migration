@@ -15,6 +15,14 @@
 
 use crate::M;
 
+use rusqlite::Connection;
+
+/// Attempt to set the user version in the whole possible range of values (even negative ones or
+/// values that don’t fit in the underlying 4 bytes field)
+pub fn raw_set_user_version(conn: &mut Connection, version: isize) {
+    conn.pragma_update(None, "user_version", version).unwrap()
+}
+
 pub fn m_valid0() -> M<'static> {
     M::up("CREATE TABLE m1(a, b); CREATE TABLE m2(a, b, c);")
 }
