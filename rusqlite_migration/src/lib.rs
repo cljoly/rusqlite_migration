@@ -746,7 +746,10 @@ impl<'m> Migrations<'m> {
 
                 self.goto(conn, target_version.into())
             }
-            SchemaVersion::Outside(_) => unreachable!(),
+            SchemaVersion::Outside(_) => unreachable!(
+                "max_schema_version should not return SchemaVersion::Outside.
+                This is a bug, please report it."
+            ),
         }
     }
 
