@@ -28,6 +28,7 @@ end_insert -->
 
 [![docs.rs](https://img.shields.io/docsrs/rusqlite_migration)][docs]
 [![Crates.io](https://img.shields.io/crates/v/rusqlite_migration)][cio]
+[(![Changelog](https://img.shields.io/badge/-Changelog-purple)][changelog]
 [![unsafe forbidden](https://img.shields.io/badge/unsafe-forbidden-success.svg)][safety-dance]
 [![dependency status](https://deps.rs/crate/rusqlite_migration/latest/status.svg)][deps]
 [![Coveralls](https://img.shields.io/coverallsCoverage/github/cljoly/rusqlite_migration)][coveralls]
@@ -172,6 +173,7 @@ I would like to thank all the contributors, as well as the authors of the depend
 Thanks to [Migadu](https://www.migadu.com/) for offering a discounted service to support this project. It is not an endorsement by Migadu though.
 
 [deps]: https://deps.rs/crate/rusqlite_migration
+[changelog]: https://cj.rs/rusqlite_migration/changelog
 [coveralls]: https://coveralls.io/github/cljoly/rusqlite_migration
 [safety-dance]: https://github.com/rust-secure-code/safety-dance/
 [cio]: https://crates.io/crates/rusqlite_migration

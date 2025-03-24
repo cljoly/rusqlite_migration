@@ -1,4 +1,22 @@
+<!-- insert
+---
+title: "Rusqlite Changelog"
+date: 2025-03-24T20:32:05
+tags:
+- Rust
+- SQLite
+- Library
+---
+end_insert -->
+
+<!-- remove -->
 # Changelog
+<!-- end_remove -->
+
+<!-- insert
+Release notes for the [rusqlite_migration library](https://cj.rs/rusqlite_migration).
+end_insert -->
+
 
 ## Version 2.0.0
 
@@ -28,9 +46,20 @@ On a related note, now that we have removed the `AsyncMigrations` (see the secti
 
 This function has been deprecated for a while now, remove it as a part of the major version bump. You can use the standard `FromIter` trait implementation instead.
 
-## Behavior change
+### Behavior change
 
 * When the [user version field](https://www.sqlite.org/fileformat.html#user_version_number) is altered by other code in your application, we are now returning an explicit error (`Error::InvalidUserVersion`) when this can be detected. Previously, the library would silently misbehave.
+
+### Dependencies
+
+Rusqlite was updated from 0.32.1 to 0.34.0.
+Please see [the release notes for 0.34.0](https://github.com/rusqlite/rusqlite/releases/tag/v0.34.0) and
+[the release notes for 0.33.0](https://github.com/rusqlite/rusqlite/releases/tag/v0.33.0).
+Tokio Rusqlite was removed as a dependency.
+
+### Features
+
+- `Migrations::new` is now `const`
 
 ### Minimum Rust Version
 
