@@ -66,7 +66,7 @@ let migrations = Migrations::new(vec![
     M::up("CREATE TABLE friend(name TEXT NOT NULL);"),
     // In the future, add more migrations here:
     //M::up("ALTER TABLE friend ADD COLUMN email TEXT;"),
-]);
+].into());
 
 let mut conn = Connection::open_in_memory().unwrap();
 
@@ -108,7 +108,7 @@ The migrations object is also suitable for serialisation with [insta][], using t
 fn migrations_insta_snapshot() {
     let migrations = Migrations::new(vec![
         // ...
-    ]);
+    ].into());
     insta::assert_debug_snapshot!(migrations);
 }
 ```

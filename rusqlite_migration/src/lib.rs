@@ -17,6 +17,8 @@
 // The doc is extracted from the README.md file at build time
 #![doc = include_str!(concat!(env!("OUT_DIR"), "/readme_for_rustdoc.md"))]
 
+use std::borrow::Cow;
+
 use log::{debug, info, trace, warn};
 use rusqlite::{Connection, Transaction};
 
@@ -215,7 +217,7 @@ impl<'u> M<'u> {
     ///             Ok(())
     ///         },
     ///     ),
-    /// ]);
+    /// ].into());
     /// ```
     pub fn up_with_hook(sql: &'u str, hook: impl MigrationHook + 'static) -> Self {
         let mut m = Self::up(sql);
@@ -279,7 +281,7 @@ impl<'u> M<'u> {
     /// let migrations = Migrations::new(vec![
     ///     M::up("CREATE TABLE animals (name TEXT);")
     ///         .foreign_key_check(), // Let’s pretend this is necessary here
-    /// ]);
+    /// ].into());
     ///
     /// let mut conn = Connection::open_in_memory().unwrap();
     ///
@@ -354,7 +356,7 @@ impl cmp::PartialOrd for SchemaVersion {
 /// Set of migrations
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Migrations<'m> {
-    ms: Vec<M<'m>>,
+    ms: Cow<'m, [M<'m>]>,
 }
 
 impl<'m> Migrations<'m> {
@@ -368,10 +370,10 @@ impl<'m> Migrations<'m> {
     /// let migrations = Migrations::new(vec![
     ///     M::up("CREATE TABLE animals (name TEXT);"),
     ///     M::up("CREATE TABLE food (name TEXT);"),
-    /// ]);
+    /// ].into());
     /// ```
     #[must_use]
-    pub const fn new(ms: Vec<M<'m>>) -> Self {
+    pub const fn new(ms: Cow<'m, [M<'m>]>) -> Self {
         Self { ms }
     }
 
@@ -419,7 +421,8 @@ impl<'m> Migrations<'m> {
         let migrations = from_directory(dir)?
             .into_iter()
             .collect::<Option<Vec<_>>>()
-            .ok_or(Error::FileLoad("Could not load migrations".to_string()))?;
+            .ok_or(Error::FileLoad("Could not load migrations".to_string()))?
+            .into();
 
         Ok(Self { ms: migrations })
     }
@@ -449,7 +452,7 @@ impl<'m> Migrations<'m> {
     /// let migrations = Migrations::new(vec![
     ///     M::up("CREATE TABLE animals (name TEXT);"),
     ///     M::up("CREATE TABLE food (name TEXT);"),
-    /// ]);
+    /// ].into());
     ///
     /// assert_eq!(SchemaVersion::NoneSet, migrations.current_version(&conn).unwrap());
     ///
@@ -614,7 +617,7 @@ impl<'m> Migrations<'m> {
     /// let migrations = Migrations::new(vec![
     ///     M::up("CREATE TABLE animals (name TEXT);"),
     ///     M::up("CREATE TABLE food (name TEXT);"),
-    /// ]);
+    /// ].into());
     ///
     /// // Go to the latest version
     /// migrations.to_latest(&mut conn).unwrap();
@@ -639,7 +642,7 @@ impl<'m> Migrations<'m> {
     ///     M::up("SYNTAX ERROR"),         // This won’t be applied
     ///     M::up("CREATE TABLE t2 (c);"), // This won’t be applied either because the migration above
     ///                                    // failed
-    /// ]);
+    /// ].into());
     ///
     /// assert!(matches!(
     ///     migrations.to_latest(&mut conn),
@@ -701,7 +704,7 @@ impl<'m> Migrations<'m> {
     ///     // 1: version 1, after having created the “animals” table
     ///     M::up("CREATE TABLE food (name TEXT);").down("DROP TABLE food;"),
     ///     // 2: version 2, after having created the food table
-    /// ]);
+    /// ].into());
     ///
     /// migrations.to_latest(&mut conn).unwrap(); // Create all tables
     ///
@@ -845,7 +848,7 @@ fn validate_foreign_keys(conn: &Connection) -> Result<()> {
 impl<'u> FromIterator<M<'u>> for Migrations<'u> {
     fn from_iter<T: IntoIterator<Item = M<'u>>>(iter: T) -> Self {
         Self {
-            ms: Vec::from_iter(iter),
+            ms: Cow::Owned(Vec::from_iter(iter)),
         }
     }
 }

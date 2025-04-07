@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::borrow::Cow;
+
 use crate::M;
 
 use rusqlite::Connection;
@@ -71,7 +73,7 @@ pub fn m_invalid_down_fk() -> M<'static> {
 }
 
 // All valid Ms in the right order
-pub fn all_valid() -> Vec<M<'static>> {
+pub fn all_valid() -> Cow<'static, [M<'static>]> {
     vec![
         m_valid0(),
         m_valid10(),
@@ -80,6 +82,7 @@ pub fn all_valid() -> Vec<M<'static>> {
         m_valid21(),
         m_valid_fk(),
     ]
+    .into()
 }
 
 pub fn m_invalid0() -> M<'static> {

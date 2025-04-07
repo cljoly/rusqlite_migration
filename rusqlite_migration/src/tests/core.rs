@@ -93,7 +93,7 @@ fn min_migrations_test() {
 #[test]
 fn empty_migrations_test() {
     let mut conn = Connection::open_in_memory().unwrap();
-    let m = Migrations::new(vec![]);
+    let m = Migrations::new(vec![].into());
 
     assert_eq!(
         Err(Error::MigrationDefinition(
@@ -114,7 +114,7 @@ fn empty_migrations_test() {
 
 #[test]
 fn test_db_version_to_schema_empty() {
-    let m = Migrations::new(vec![]);
+    let m = Migrations::new(vec![].into());
 
     assert_eq!(m.db_version_to_schema(0), SchemaVersion::NoneSet);
     assert_eq!(
@@ -129,7 +129,7 @@ fn test_db_version_to_schema_empty() {
 
 #[test]
 fn test_db_version_to_schema_two() {
-    let m = Migrations::new(vec![m_valid10(), m_valid11()]);
+    let m = Migrations::new(vec![m_valid10(), m_valid11()].into());
 
     assert_eq!(m.db_version_to_schema(0), SchemaVersion::NoneSet);
     assert_eq!(
@@ -186,7 +186,7 @@ fn test_migration_hook_debug() {
 #[test]
 fn user_version_convert_test() {
     let mut conn = Connection::open_in_memory().unwrap();
-    let migrations = Migrations::new(vec![m_valid10()]);
+    let migrations = Migrations::new(vec![m_valid10()].into());
     assert_eq!(Ok(()), migrations.to_latest(&mut conn));
     assert_eq!(Ok(1), user_version(&conn));
     assert_eq!(
@@ -199,7 +199,7 @@ fn user_version_convert_test() {
 #[test]
 fn user_version_migrate_test() {
     let mut conn = Connection::open_in_memory().unwrap();
-    let migrations = Migrations::new(vec![m_valid10()]);
+    let migrations = Migrations::new(vec![m_valid10()].into());
 
     assert_eq!(Ok(0), user_version(&conn));
 
@@ -210,7 +210,7 @@ fn user_version_migrate_test() {
         migrations.current_version(&conn)
     );
 
-    let migrations = Migrations::new(vec![m_valid10(), m_valid11()]);
+    let migrations = Migrations::new(vec![m_valid10(), m_valid11()].into());
     assert_eq!(Ok(()), migrations.to_latest(&mut conn));
     assert_eq!(Ok(2), user_version(&conn));
     assert_eq!(
@@ -238,14 +238,14 @@ fn user_version_start_0_test() {
 #[test]
 fn invalid_migration_statement_test() {
     for m in &[m_invalid0(), m_invalid1(), m_valid11(), m_valid21()] {
-        let migrations = Migrations::new(vec![m.clone()]);
+        let migrations = Migrations::new(vec![m.clone()].into());
         assert_ne!(Ok(()), migrations.validate())
     }
 }
 
 #[test]
 fn invalid_migration_multiple_statement_test() {
-    let migrations = Migrations::new(vec![m_valid0(), m_invalid1()]);
+    let migrations = Migrations::new(vec![m_valid0(), m_invalid1()].into());
     assert!(matches!(
         dbg!(migrations.validate()),
         Err(Error::RusqliteError { query: _, err: _ })
@@ -255,25 +255,28 @@ fn invalid_migration_multiple_statement_test() {
 #[test]
 fn valid_migration_multiple_statement_test() {
     for m in &[m_valid0(), m_valid10(), m_valid20()] {
-        let migrations = Migrations::new(vec![m.clone()]);
+        let migrations = Migrations::new(vec![m.clone()].into());
         assert_eq!(Ok(()), migrations.validate())
     }
 }
 
 #[test]
 fn valid_fk_check_test() {
-    assert_eq!(Ok(()), Migrations::new(vec![m_valid_fk()]).validate())
+    assert_eq!(
+        Ok(()),
+        Migrations::new(vec![m_valid_fk()].into()).validate()
+    )
 }
 
 #[test]
 fn invalid_fk_check_test() {
-    let migrations = Migrations::new(vec![m_invalid_fk()]);
+    let migrations = Migrations::new(vec![m_invalid_fk()].into());
     insta::assert_debug_snapshot!(migrations.validate());
 }
 
 #[test]
 fn invalid_down_fk_check_test() {
-    let migrations = Migrations::new(vec![m_invalid_down_fk()]);
+    let migrations = Migrations::new(vec![m_invalid_down_fk()].into());
 
     let mut conn = Connection::open_in_memory().unwrap();
     migrations.to_latest(&mut conn).unwrap();
@@ -312,12 +315,12 @@ fn current_version_gt_max_schema_version_test() {
 
     // Set migrations to a higher number
     {
-        let migrations = Migrations::new(vec![m_valid0(), m_valid10()]);
+        let migrations = Migrations::new(vec![m_valid0(), m_valid10()].into());
         migrations.to_latest(&mut conn).unwrap();
     }
 
     // We now have less migrations
-    let migrations = Migrations::new(vec![m_valid0()]);
+    let migrations = Migrations::new(vec![m_valid0()].into());
 
     // We should get an error
     assert_eq!(
@@ -335,41 +338,44 @@ fn hook_test() {
     let text = "Lorem ipsum dolor sit amet, consectetur adipisici elit …".to_string();
     let cloned = text.clone();
 
-    let migrations = Migrations::new(vec![
-        M::up_with_hook(
-            "CREATE TABLE novels (text TEXT);",
-            move |tx: &Transaction| {
-                tx.execute("INSERT INTO novels (text) VALUES (?1)", (&cloned,))?;
-                Ok(())
-            },
-        ),
-        M::up_with_hook(
-            "ALTER TABLE novels ADD compressed TEXT;",
-            |tx: &Transaction| {
-                let mut stmt = tx.prepare("SELECT rowid, text FROM novels").unwrap();
-                let rows = stmt.query_map([], |row| {
-                    Ok((row.get_unwrap::<_, i64>(0), row.get_unwrap::<_, String>(1)))
-                })?;
+    let migrations = Migrations::new(
+        vec![
+            M::up_with_hook(
+                "CREATE TABLE novels (text TEXT);",
+                move |tx: &Transaction| {
+                    tx.execute("INSERT INTO novels (text) VALUES (?1)", (&cloned,))?;
+                    Ok(())
+                },
+            ),
+            M::up_with_hook(
+                "ALTER TABLE novels ADD compressed TEXT;",
+                |tx: &Transaction| {
+                    let mut stmt = tx.prepare("SELECT rowid, text FROM novels").unwrap();
+                    let rows = stmt.query_map([], |row| {
+                        Ok((row.get_unwrap::<_, i64>(0), row.get_unwrap::<_, String>(1)))
+                    })?;
 
-                for row in rows {
-                    let row = row.unwrap();
-                    let rowid = row.0;
-                    let text = row.1;
-                    let compressed = &text[..text.len() / 2];
-                    tx.execute(
-                        "UPDATE novels SET compressed = ?1 WHERE rowid = ?2;",
-                        rusqlite::params![compressed, rowid],
-                    )?;
-                }
+                    for row in rows {
+                        let row = row.unwrap();
+                        let rowid = row.0;
+                        let text = row.1;
+                        let compressed = &text[..text.len() / 2];
+                        tx.execute(
+                            "UPDATE novels SET compressed = ?1 WHERE rowid = ?2;",
+                            rusqlite::params![compressed, rowid],
+                        )?;
+                    }
 
-                Ok(())
-            },
-        )
-        .down_with_hook(
-            "ALTER TABLE novels DROP COLUMN compressed",
-            |_: &Transaction| Ok(()),
-        ),
-    ]);
+                    Ok(())
+                },
+            )
+            .down_with_hook(
+                "ALTER TABLE novels DROP COLUMN compressed",
+                |_: &Transaction| Ok(()),
+            ),
+        ]
+        .into(),
+    );
 
     assert_eq!(Ok(()), migrations.to_version(&mut conn, 2));
 
@@ -481,7 +487,7 @@ fn test_missing_down_migration() {
         M::up("CREATE TABLE t5(a)"),
     ];
 
-    let m = Migrations::new(ms);
+    let m = Migrations::new(ms.into());
     m.to_version(&mut conn, 4).unwrap();
 
     m.to_version(&mut conn, 3).unwrap();

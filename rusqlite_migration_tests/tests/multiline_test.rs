@@ -33,7 +33,7 @@ fn main_test() {
     {
         let mut conn = Connection::open(&db_file).unwrap();
 
-        let migrations = Migrations::new(ms.clone());
+        let migrations = Migrations::new(ms.clone().into());
         migrations.to_latest(&mut conn).unwrap();
 
         conn.pragma_update_and_check(None, "journal_mode", "WAL", |r| {
@@ -93,7 +93,7 @@ fn main_test() {
     {
         let mut conn = Connection::open(&db_file).unwrap();
 
-        let migrations = Migrations::new(ms.clone());
+        let migrations = Migrations::new(ms.clone().into());
         migrations.to_latest(&mut conn).unwrap();
 
         assert_eq!(

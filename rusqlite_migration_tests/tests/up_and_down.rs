@@ -40,7 +40,7 @@ fn main_test() {
     {
         let mut conn = Connection::open_in_memory().unwrap();
 
-        let migrations = Migrations::new(ms.clone());
+        let migrations = Migrations::new(ms.clone().into());
 
         assert_eq!(
             Ok(SchemaVersion::NoneSet),
@@ -75,7 +75,7 @@ fn main_test() {
     {
         let mut conn = Connection::open_in_memory().unwrap();
 
-        let migrations = Migrations::new(ms.clone());
+        let migrations = Migrations::new(ms.clone().into());
 
         assert_eq!(
             Ok(SchemaVersion::NoneSet),
@@ -147,7 +147,7 @@ fn test_errors() {
     {
         let mut conn = Connection::open_in_memory().unwrap();
 
-        let migrations = Migrations::new(ms.clone());
+        let migrations = Migrations::new(ms.clone().into());
 
         migrations.to_latest(&mut conn).unwrap();
         // Successful even on the second run (the most common case once migrations have been

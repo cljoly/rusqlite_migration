@@ -29,7 +29,7 @@ fn main_test() {
     ];
 
     {
-        let migrations = Migrations::new(ms.clone());
+        let migrations = Migrations::new(ms.clone().into());
         migrations.to_latest(&mut conn).unwrap();
 
         assert_eq!(
@@ -49,7 +49,7 @@ fn main_test() {
     ms.push(M::up("ALTER TABLE friend RENAME COLUMN birthday TO birth;"));
 
     {
-        let migrations = Migrations::new(ms.clone());
+        let migrations = Migrations::new(ms.clone().into());
         migrations.to_latest(&mut conn).unwrap();
 
         assert_eq!(
@@ -68,7 +68,7 @@ fn main_test() {
     ms.push(M::up("DROP INDEX UX_friend_email;"));
 
     {
-        let migrations = Migrations::new(ms.clone());
+        let migrations = Migrations::new(ms.clone().into());
         migrations.to_latest(&mut conn).unwrap();
 
         assert_eq!(

@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::sync::LazyLock;
+use std::borrow::Cow;
 
 use anyhow::Result;
 use rusqlite::params;
@@ -40,24 +40,23 @@ mod tests {
 }
 
 // Define migrations. These are applied atomically.
-static MIGRATIONS: LazyLock<Migrations> = LazyLock::new(|| {
-    Migrations::new(vec![
-        M::up(include_str!("../../friend_car.sql")),
-        // PRAGMA are better applied outside of migrations, see below for details.
-        M::up(
-            r#"
-                  ALTER TABLE friend ADD COLUMN birthday TEXT;
-                  ALTER TABLE friend ADD COLUMN comment TEXT;
-                  "#,
-        ),
-        // This migration can be reverted
-        M::up("CREATE TABLE animal(name TEXT);").down("DROP TABLE animal;"),
-        // In the future, if the need to change the schema arises, put
-        // migrations here, like so:
-        // M::up("CREATE INDEX UX_friend_email ON friend(email);"),
-        // M::up("CREATE INDEX UX_friend_name ON friend(name);"),
-    ])
-});
+const MIGRATION_ARRAY: &[M] = &[
+    M::up(include_str!("../../friend_car.sql")),
+    // PRAGMA are better applied outside of migrations, see below for details.
+    M::up(
+        r#"
+        ALTER TABLE friend ADD COLUMN birthday TEXT;
+        ALTER TABLE friend ADD COLUMN comment TEXT;
+        "#,
+    ),
+    // This migration can be reverted
+    M::up("CREATE TABLE animal(name TEXT);").down("DROP TABLE animal;"),
+    // In the future, if the need to change the schema arises, put
+    // migrations here, like so:
+    // M::up("CREATE INDEX UX_friend_email ON friend(email);"),
+    // M::up("CREATE INDEX UX_friend_name ON friend(name);"),
+];
+const MIGRATIONS: Migrations = Migrations::new(Cow::Borrowed(MIGRATION_ARRAY));
 
 pub async fn init_db() -> Result<Connection> {
     let async_conn = Connection::open("./my_db.db3").await?;
