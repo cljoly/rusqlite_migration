@@ -17,6 +17,8 @@
 // The doc is extracted from the README.md file at build time
 #![doc = include_str!(concat!(env!("OUT_DIR"), "/readme_for_rustdoc.md"))]
 
+use std::borrow::Cow;
+
 use log::{debug, info, trace, warn};
 use rusqlite::{Connection, Transaction};
 
@@ -354,11 +356,12 @@ impl cmp::PartialOrd for SchemaVersion {
 /// Set of migrations
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Migrations<'m> {
-    ms: Vec<M<'m>>,
+    ms: Cow<'m, [M<'m>]>,
 }
 
 impl<'m> Migrations<'m> {
-    /// Create a set of migrations.
+    /// Create a set of migrations. See also [`Migrations::from_slice`], in particular to hold
+    /// migrations into a constant.
     ///
     /// # Example
     ///
@@ -372,7 +375,26 @@ impl<'m> Migrations<'m> {
     /// ```
     #[must_use]
     pub const fn new(ms: Vec<M<'m>>) -> Self {
-        Self { ms }
+        Self { ms: Cow::Owned(ms) }
+    }
+
+    /// Similar to [`Migrations::new`], but can be used in a `const` context.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use rusqlite_migration::{Migrations, M};
+    ///
+    /// let migrations = Migrations::from_slice(&[
+    ///     M::up("CREATE TABLE animals (name TEXT);"),
+    ///     M::up("CREATE TABLE food (name TEXT);"),
+    /// ]);
+    /// ```
+    #[must_use]
+    pub const fn from_slice(ms: &'m [M<'m>]) -> Self {
+        Self {
+            ms: Cow::Borrowed(ms),
+        }
     }
 
     /// Creates a set of migrations from a given directory by scanning subdirectories with a specified name pattern.
@@ -418,7 +440,7 @@ impl<'m> Migrations<'m> {
     pub fn from_directory(dir: &'static Dir<'static>) -> Result<Self> {
         let migrations = from_directory(dir)?
             .into_iter()
-            .collect::<Option<Vec<_>>>()
+            .collect::<Option<Cow<_>>>()
             .ok_or(Error::FileLoad("Could not load migrations".to_string()))?;
 
         Ok(Self { ms: migrations })
@@ -845,7 +867,7 @@ fn validate_foreign_keys(conn: &Connection) -> Result<()> {
 impl<'u> FromIterator<M<'u>> for Migrations<'u> {
     fn from_iter<T: IntoIterator<Item = M<'u>>>(iter: T) -> Self {
         Self {
-            ms: Vec::from_iter(iter),
+            ms: Cow::Owned(Vec::from_iter(iter)),
         }
     }
 }

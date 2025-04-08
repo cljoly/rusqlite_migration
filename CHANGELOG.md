@@ -17,6 +17,11 @@ end_insert -->
 Release notes for the [rusqlite_migration library](https://cj.rs/rusqlite_migration).
 end_insert -->
 
+## Version 2.0.0 Beta 1
+
+### Features
+
+- Add the new `Migrations::from_slice` constructor, which is `const` and takes a slice, so that it can be constructed in global constant, without using `LazyLock` or similar.
 
 ## Version 2.0.0 Alpha 1
 
