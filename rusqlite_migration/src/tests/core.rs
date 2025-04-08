@@ -492,3 +492,11 @@ fn test_missing_down_migration() {
         m.to_version(&mut conn, 2)
     );
 }
+
+// We can build from a Cow type easily enough
+#[test]
+fn test_build_from_cow() {
+    use std::borrow::Cow;
+
+    let _ = Migrations::from_slice(&Cow::from(vec![m_valid0()]));
+}
