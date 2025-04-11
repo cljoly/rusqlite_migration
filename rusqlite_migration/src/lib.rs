@@ -378,17 +378,19 @@ impl<'m> Migrations<'m> {
         Self { ms: Cow::Owned(ms) }
     }
 
-    /// Similar to [`Migrations::new`], but can be used in a `const` context.
+    /// Similar to [`Migrations::new`], but accepts a slice instead. Especially useful in `const`
+    /// contexts, when the migrations are known at compile time.
     ///
     /// # Example
     ///
     /// ```
     /// use rusqlite_migration::{Migrations, M};
     ///
-    /// let migrations = Migrations::from_slice(&[
+    /// const MIGRATION_ARRAY: &[M] = &[
     ///     M::up("CREATE TABLE animals (name TEXT);"),
     ///     M::up("CREATE TABLE food (name TEXT);"),
-    /// ]);
+    /// ];
+    /// const MIGRATIONS: Migrations = Migrations::from_slice(MIGRATION_ARRAY);
     /// ```
     #[must_use]
     pub const fn from_slice(ms: &'m [M<'m>]) -> Self {
