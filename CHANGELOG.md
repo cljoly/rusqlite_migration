@@ -17,6 +17,57 @@ end_insert -->
 Release notes for the [rusqlite_migration library](https://cj.rs/rusqlite_migration).
 end_insert -->
 
+## Version 2.0.0
+
+### Breaking changes
+
+#### Remove the `alpha-async-tokio-rusqlite` Feature
+
+As the name of the feature suggest, we have had experimental support for async using tokio for a while now. Supporting that feature has been quite a big burden, introducing some duplicated code in the `AsyncMigrations` struct in particular, as well as a whole set of very similar tests. Plus the benefit of async is limited here, because everything gets executed in a blocking fashion in sqlite anyway.
+
+It turns out that we don’t need the async support in rusqlite_migration for folks to use async libraries. For instance, with tokio-rusqlite, you can define migrations like in the sync context and run:
+```rust
+    async_conn
+        .call_unwrap(|conn| MIGRATIONS.to_latest(conn))
+        .await?;
+```
+
+See [the updated async example](https://github.com/cljoly/rusqlite_migration/blob/master/examples/async/src/main.rs) for details, in particular why it’s fine to call [a method](https://docs.rs/tokio-rusqlite/0.6.0/tokio_rusqlite/struct.Connection.html#method.call_unwrap) with unwrap in its name.
+
+#### Make the Builder `Finalizer` Method Not Generic
+
+On a related note, now that we have removed the `AsyncMigrations` (see the section right above) struct, we only have `Migrations` so there is no need for the `MigrationsBuilder.finalize` method to be generic. Thus we removed the generic argument. To update your code, you can just do this:
+```diff
+-        .finalize::<Migrations>());
++        .finalize());
+```
+#### Remove `Migrations::new_iter`
+
+This function has been deprecated for a while now, remove it as a part of the major version bump. You can use the standard `FromIter` trait implementation instead.
+
+### Behavior Change
+
+* When the [user version field](https://www.sqlite.org/fileformat.html#user_version_number) is altered by other code in your application, we are now returning an explicit error (`Error::InvalidUserVersion`) when this can be detected. Previously, the library would silently misbehave.
+
+### Features
+
+- Add the new [`Migrations::from_slice`](https://docs.rs/rusqlite_migration/2.0.0-beta.1/rusqlite_migration/struct.Migrations.html#method.from_slice) constructor, which is `const` and takes a slice, so that it can be constructed in global constant, without using `LazyLock` or similar. Internally, this is possible because we now use a [`Cow`](https://doc.rust-lang.org/std/borrow/enum.Cow.html) structure to hold migrations.
+- Add [`Migrations::pending_migrations`](https://docs.rs/rusqlite_migration/2.0.0-beta.1/rusqlite_migration/struct.Migrations.html#method.pending_migrations) which returns the number of migrations that would be applied. This is mostly useful to take a backup of the database prior to applying migrations (and do nothing if no migrations will be applied).
+
+
+### Dependencies
+
+Rusqlite was updated from 0.32.1 to 0.34.0.
+Please see [the release notes for 0.34.0](https://github.com/rusqlite/rusqlite/releases/tag/v0.34.0) and
+[the release notes for 0.33.0](https://github.com/rusqlite/rusqlite/releases/tag/v0.33.0).
+Tokio Rusqlite was removed as a dependency.
+
+### Minimum Rust Version
+
+Rust 1.84.
+
+Moving forward, we expect to keep this aligned with rusqlite itself, now that it has a [policy](https://github.com/rusqlite/rusqlite?tab=readme-ov-file#minimum-supported-rust-version-msrv) (introduced in [october 2024](https://github.com/rusqlite/rusqlite/pull/1576)).
+
 ## Version 2.0.0 Beta 1
 
 ### Features
