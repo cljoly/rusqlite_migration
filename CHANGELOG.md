@@ -21,8 +21,8 @@ end_insert -->
 
 ### Features
 
-- Add the new `Migrations::from_slice` constructor, which is `const` and takes a slice, so that it can be constructed in global constant, without using `LazyLock` or similar. Internally, this is possible because we now use a [`Cow`](https://doc.rust-lang.org/std/borrow/enum.Cow.html) structure to hold migrations.
-- Add `Migrations::pending_migrations` which returns the number of migrations that would be applied. This is mostly useful to take a backup of the database prior to applying migrations (and do nothing if no migrations will be applied).
+- Add the new [`Migrations::from_slice`](https://docs.rs/rusqlite_migration/2.0.0-beta.1/rusqlite_migration/struct.Migrations.html#method.from_slice) constructor, which is `const` and takes a slice, so that it can be constructed in global constant, without using `LazyLock` or similar. Internally, this is possible because we now use a [`Cow`](https://doc.rust-lang.org/std/borrow/enum.Cow.html) structure to hold migrations.
+- Add [`Migrations::pending_migrations`](https://docs.rs/rusqlite_migration/2.0.0-beta.1/rusqlite_migration/struct.Migrations.html#method.pending_migrations) which returns the number of migrations that would be applied. This is mostly useful to take a backup of the database prior to applying migrations (and do nothing if no migrations will be applied).
 
 ## Version 2.0.0 Alpha 1
 
