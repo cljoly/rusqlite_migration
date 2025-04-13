@@ -18,6 +18,8 @@ end_insert -->
 # Rusqlite Migration
 <!-- end_remove -->
 
+<!-- rustdoc start -->
+
 <!-- insert
 {{< github_badge >}}
 
@@ -30,7 +32,7 @@ end_insert -->
 [![Crates.io](https://img.shields.io/crates/v/rusqlite_migration)][cio]
 [![Changelog](https://img.shields.io/badge/-Changelog-purple)][changelog]
 [![unsafe forbidden](https://img.shields.io/badge/unsafe-forbidden-success.svg)][safety-dance]
-[![dependency status](https://deps.rs/crate/rusqlite_migration/latest/status.svg)][deps]
+[![dependency status](https://deps.rs/crate/rusqlite_migration/2.0.0-beta.1/status.svg)][deps]
 [![Coveralls](https://img.shields.io/coverallsCoverage/github/cljoly/rusqlite_migration)][coveralls]
 
 <!-- insert
@@ -40,8 +42,6 @@ end_insert -->
 <!-- insert
 {{< /rawhtml >}}
 end_insert -->
-
-<!-- rustdoc start -->
 
 Rusqlite Migration is a performant and simple schema migration library for [rusqlite](https://crates.io/crates/rusqlite).
 
