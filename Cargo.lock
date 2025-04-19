@@ -846,7 +846,7 @@ dependencies = [
 
 [[package]]
 name = "rusqlite_migration"
-version = "2.0.0"
+version = "2.0.1"
 dependencies = [
  "anyhow",
  "criterion",
@@ -863,7 +863,7 @@ dependencies = [
 
 [[package]]
 name = "rusqlite_migration_tests"
-version = "2.0.0"
+version = "2.0.1"
 dependencies = [
  "anyhow",
  "env_logger",
