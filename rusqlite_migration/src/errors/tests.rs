@@ -334,3 +334,41 @@ fn error_test_source() {
     let err = Error::FileLoad(String::new());
     assert!(std::error::Error::source(&err).is_none());
 }
+
+#[test]
+// Test cases where enum comparison is not enouh for error equality
+fn test_migration_enum_eq_not_enough() {
+    let mde1 = MigrationDefinitionError::DownNotDefined { migration_index: 3 };
+    let mde2 = MigrationDefinitionError::DownNotDefined { migration_index: 5 };
+    assert_ne!(
+        Error::MigrationDefinition(mde1),
+        Error::MigrationDefinition(mde2),
+    );
+
+    let fce = ForeignKeyCheckError {
+        table: String::from("t1"),
+        rowid: 23,
+        parent: String::from("t2"),
+        fkid: 42,
+    };
+    assert_eq!(
+        Error::ForeignKeyCheck(vec![fce.clone()]),
+        Error::ForeignKeyCheck(vec![fce.clone()])
+    );
+    assert_ne!(
+        Error::ForeignKeyCheck(vec![fce.clone()]),
+        Error::ForeignKeyCheck(vec![ForeignKeyCheckError {
+            fkid: 32,
+            ..fce.clone()
+        }])
+    );
+    assert_ne!(
+        Error::ForeignKeyCheck(vec![fce.clone()]),
+        Error::ForeignKeyCheck(vec![])
+    );
+
+    assert_ne!(
+        Error::Hook(String::from("auie")),
+        Error::Hook(String::default())
+    )
+}
