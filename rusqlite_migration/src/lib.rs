@@ -37,6 +37,7 @@ mod builder;
 pub use builder::MigrationsBuilder;
 
 mod errors;
+pub mod validations;
 
 #[cfg(test)]
 mod tests;
@@ -896,6 +897,9 @@ impl<'m> Migrations<'m> {
 
     /// Run upward migrations on a temporary in-memory database from first to last, one by one.
     /// Convenience method for testing.
+    ///
+    /// See the [`validations`] module if you want to validate other things as well, like downward
+    /// migrations.
     ///
     /// # Example
     ///
