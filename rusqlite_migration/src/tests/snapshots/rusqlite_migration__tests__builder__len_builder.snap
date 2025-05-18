@@ -1,6 +1,7 @@
 ---
 source: rusqlite_migration/src/tests/builder.rs
 expression: migrations
+snapshot_kind: text
 ---
 Migrations {
     ms: [

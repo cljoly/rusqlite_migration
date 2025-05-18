@@ -1,6 +1,7 @@
 ---
-source: rusqlite_migration/src/tests/synch.rs
+source: rusqlite_migration/src/tests/core.rs
 expression: migrations.validate()
+snapshot_kind: text
 ---
 Err(
     ForeignKeyCheck(
