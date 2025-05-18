@@ -1,6 +1,7 @@
 ---
-source: rusqlite_migration/src/tests/synch.rs
+source: rusqlite_migration/src/tests/core.rs
 expression: m
+snapshot_kind: text
 ---
 M {
     up: "",
