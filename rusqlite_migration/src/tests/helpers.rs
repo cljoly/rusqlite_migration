@@ -100,6 +100,41 @@ pub fn all_valid_down() -> Vec<M<'static>> {
     ]
 }
 
+#[test]
+fn all_valid_consistent() {
+    let all_up = all_valid_up();
+    let all_down = all_valid_down();
+
+    assert_eq!(all_up.len(), all_down.len());
+    assert_ne!(all_up.len(), 0);
+
+    for i in 0..all_up.len() {
+        let M {
+            up: left_up,
+            up_hook: _,
+            down: left_down,
+            down_hook: _,
+            foreign_key_check: left_foreign_key_check,
+            comment: left_comment,
+        } = all_up[i];
+        let M {
+            up: right_up,
+            up_hook: _,
+            down: right_down,
+            down_hook: _,
+            foreign_key_check: right_foreign_key_check,
+            comment: right_comment,
+        } = all_down[i];
+
+        assert_eq!(left_up, right_up);
+        assert_eq!(left_foreign_key_check, right_foreign_key_check);
+        assert_eq!(left_comment, right_comment);
+
+        assert!(left_down.is_none());
+        assert!(right_down.is_some());
+    }
+}
+
 pub fn m_invalid0() -> M<'static> {
     M::up("CREATE TABLE table3()")
 }
