@@ -23,23 +23,41 @@ pub fn raw_set_user_version(conn: &mut Connection, version: isize) {
     conn.pragma_update(None, "user_version", version).unwrap()
 }
 
-pub fn m_valid0() -> M<'static> {
+pub fn m_valid0_up() -> M<'static> {
     M::up("CREATE TABLE m1(a, b); CREATE TABLE m2(a, b, c);")
 }
-pub fn m_valid10() -> M<'static> {
+pub fn m_valid0_down() -> M<'static> {
+    m_valid0_up().down("DROP TABLE m1; DROP TABLE m2;")
+}
+pub fn m_valid10_up() -> M<'static> {
     M::up("CREATE TABLE t1(a, b);")
 }
-pub fn m_valid11() -> M<'static> {
+pub fn m_valid10_down() -> M<'static> {
+    m_valid10_up().down("DROP TABLE t1;")
+}
+
+pub fn m_valid11_down() -> M<'static> {
+    m_valid11_up().down("ALTER TABLE t1 RENAME COLUMN c TO b;")
+}
+
+pub fn m_valid20_down() -> M<'static> {
+    m_valid20_up().down("DROP TABLE t2;")
+}
+
+pub fn m_valid21_down() -> M<'static> {
+    m_valid21_up().down("ALTER TABLE t2 DROP COLUMN a;")
+}
+pub fn m_valid11_up() -> M<'static> {
     M::up("ALTER TABLE t1 RENAME COLUMN b TO c;")
 }
-pub fn m_valid20() -> M<'static> {
+pub fn m_valid20_up() -> M<'static> {
     M::up("CREATE TABLE t2(b);")
 }
-pub fn m_valid21() -> M<'static> {
+pub fn m_valid21_up() -> M<'static> {
     M::up("ALTER TABLE t2 ADD COLUMN a;")
 }
 
-pub fn m_valid_fk() -> M<'static> {
+pub fn m_valid_fk_up() -> M<'static> {
     M::up(
         r#"
         CREATE TABLE fk1(a PRIMARY KEY);
@@ -54,31 +72,31 @@ pub fn m_valid_fk() -> M<'static> {
     .foreign_key_check()
 }
 
-pub fn m_invalid_down_fk() -> M<'static> {
-    M::up(
-        r#"
-        CREATE TABLE fk1(a PRIMARY KEY);
-        CREATE TABLE fk2(
-            a,
-            FOREIGN KEY(a) REFERENCES fk1(a)
-        );
-        INSERT INTO fk1 (a) VALUES ('foo');
-        INSERT INTO fk2 (a) VALUES ('foo');
-    "#,
-    )
-    .foreign_key_check()
-    .down("DROP TABLE fk1;")
+pub fn m_valid_fk_down() -> M<'static> {
+    m_valid_fk_up().down("DELETE FROM fk2; DELETE FROM fk1; DROP TABLE fk2; DROP TABLE fk1;")
+}
+
+// All valid upward Ms in the right order
+pub fn all_valid_up() -> Vec<M<'static>> {
+    vec![
+        m_valid0_up(),
+        m_valid10_up(),
+        m_valid11_up(),
+        m_valid20_up(),
+        m_valid21_up(),
+        m_valid_fk_up(),
+    ]
 }
 
 // All valid Ms in the right order
-pub fn all_valid() -> Vec<M<'static>> {
+pub fn all_valid_down() -> Vec<M<'static>> {
     vec![
-        m_valid0(),
-        m_valid10(),
-        m_valid11(),
-        m_valid20(),
-        m_valid21(),
-        m_valid_fk(),
+        m_valid0_down(),
+        m_valid10_down(),
+        m_valid11_down(),
+        m_valid20_down(),
+        m_valid21_down(),
+        m_valid_fk_down(),
     ]
 }
 
@@ -102,4 +120,20 @@ pub fn m_invalid_fk() -> M<'static> {
     "#,
     )
     .foreign_key_check()
+}
+
+pub fn m_invalid_fk_down() -> M<'static> {
+    M::up(
+        r#"
+        CREATE TABLE fk1(a PRIMARY KEY);
+        CREATE TABLE fk2(
+            a,
+            FOREIGN KEY(a) REFERENCES fk1(a)
+        );
+        INSERT INTO fk1 (a) VALUES ('foo');
+        INSERT INTO fk2 (a) VALUES ('foo');
+    "#,
+    )
+    .foreign_key_check()
+    .down("DROP TABLE fk1;")
 }

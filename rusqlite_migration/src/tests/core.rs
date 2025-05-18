@@ -17,15 +17,17 @@ use std::{iter::FromIterator, num::NonZeroUsize};
 
 use rusqlite::{Connection, OpenFlags, Transaction};
 
+use crate::tests::helpers::all_valid_down;
 use crate::{
     tests::helpers::{
-        all_valid, m_invalid_down_fk, m_invalid_fk, m_valid0, m_valid10, m_valid11, m_valid_fk,
+        all_valid_up, m_invalid_fk, m_invalid_fk_down, m_valid0_up, m_valid10_up, m_valid11_up,
+        m_valid_fk_up,
     },
     user_version, Error, MigrationDefinitionError, Migrations, SchemaVersion, SchemaVersionError,
     M,
 };
 
-use super::helpers::{m_invalid0, m_invalid1, m_valid20, m_valid21, raw_set_user_version};
+use super::helpers::{m_invalid0, m_invalid1, m_valid20_up, m_valid21_up, raw_set_user_version};
 
 #[test]
 fn max_migration_test() {
@@ -129,7 +131,7 @@ fn test_db_version_to_schema_empty() {
 
 #[test]
 fn test_db_version_to_schema_two() {
-    let m = Migrations::new(vec![m_valid10(), m_valid11()]);
+    let m = Migrations::new(vec![m_valid10_up(), m_valid11_up()]);
 
     assert_eq!(m.db_version_to_schema(0), SchemaVersion::NoneSet);
     assert_eq!(
@@ -186,7 +188,7 @@ fn test_migration_hook_debug() {
 #[test]
 fn user_version_convert_test() {
     let mut conn = Connection::open_in_memory().unwrap();
-    let migrations = Migrations::new(vec![m_valid10()]);
+    let migrations = Migrations::new(vec![m_valid10_up()]);
     assert_eq!(Ok(()), migrations.to_latest(&mut conn));
     assert_eq!(Ok(1), user_version(&conn));
     assert_eq!(
@@ -199,7 +201,7 @@ fn user_version_convert_test() {
 #[test]
 fn user_version_migrate_test() {
     let mut conn = Connection::open_in_memory().unwrap();
-    let migrations = Migrations::new(vec![m_valid10()]);
+    let migrations = Migrations::new(vec![m_valid10_up()]);
 
     assert_eq!(Ok(0), user_version(&conn));
 
@@ -210,7 +212,7 @@ fn user_version_migrate_test() {
         migrations.current_version(&conn)
     );
 
-    let migrations = Migrations::new(vec![m_valid10(), m_valid11()]);
+    let migrations = Migrations::new(vec![m_valid10_up(), m_valid11_up()]);
     assert_eq!(Ok(()), migrations.to_latest(&mut conn));
     assert_eq!(Ok(2), user_version(&conn));
     assert_eq!(
@@ -237,7 +239,7 @@ fn user_version_start_0_test() {
 
 #[test]
 fn invalid_migration_statement_test() {
-    for m in &[m_invalid0(), m_invalid1(), m_valid11(), m_valid21()] {
+    for m in &[m_invalid0(), m_invalid1(), m_valid11_up(), m_valid21_up()] {
         let migrations = Migrations::new(vec![m.clone()]);
         assert_ne!(Ok(()), migrations.validate())
     }
@@ -245,7 +247,7 @@ fn invalid_migration_statement_test() {
 
 #[test]
 fn invalid_migration_multiple_statement_test() {
-    let migrations = Migrations::new(vec![m_valid0(), m_invalid1()]);
+    let migrations = Migrations::new(vec![m_valid0_up(), m_invalid1()]);
     assert!(matches!(
         dbg!(migrations.validate()),
         Err(Error::RusqliteError { query: _, err: _ })
@@ -254,7 +256,7 @@ fn invalid_migration_multiple_statement_test() {
 
 #[test]
 fn valid_migration_multiple_statement_test() {
-    for m in &[m_valid0(), m_valid10(), m_valid20()] {
+    for m in &[m_valid0_up(), m_valid10_up(), m_valid20_up()] {
         let migrations = Migrations::new(vec![m.clone()]);
         assert_eq!(Ok(()), migrations.validate())
     }
@@ -262,7 +264,7 @@ fn valid_migration_multiple_statement_test() {
 
 #[test]
 fn valid_fk_check_test() {
-    assert_eq!(Ok(()), Migrations::new(vec![m_valid_fk()]).validate())
+    assert_eq!(Ok(()), Migrations::new(vec![m_valid_fk_up()]).validate())
 }
 
 #[test]
@@ -273,7 +275,7 @@ fn invalid_fk_check_test() {
 
 #[test]
 fn invalid_down_fk_check_test() {
-    let migrations = Migrations::new(vec![m_invalid_down_fk()]);
+    let migrations = Migrations::new(vec![m_invalid_fk_down()]);
 
     let mut conn = Connection::open_in_memory().unwrap();
     migrations.to_latest(&mut conn).unwrap();
@@ -285,8 +287,15 @@ fn invalid_down_fk_check_test() {
 }
 
 #[test]
-fn all_valid_test() {
-    let migrations = Migrations::new(all_valid());
+fn all_valid_up_test() {
+    let migrations = Migrations::new(all_valid_up());
+    assert_eq!(Ok(()), migrations.validate());
+    insta::assert_debug_snapshot!(migrations)
+}
+
+#[test]
+fn all_valid_down_test() {
+    let migrations = Migrations::new(all_valid_down());
     assert_eq!(Ok(()), migrations.validate());
     insta::assert_debug_snapshot!(migrations)
 }
@@ -295,7 +304,7 @@ fn all_valid_test() {
 #[test]
 fn test_read_only_db_all_valid() {
     let mut conn = Connection::open_in_memory_with_flags(OpenFlags::SQLITE_OPEN_READ_ONLY).unwrap();
-    let migrations = Migrations::new(all_valid());
+    let migrations = Migrations::new(all_valid_up());
 
     let e = migrations.to_latest(&mut conn);
 
@@ -312,12 +321,12 @@ fn current_version_gt_max_schema_version_test() {
 
     // Set migrations to a higher number
     {
-        let migrations = Migrations::new(vec![m_valid0(), m_valid10()]);
+        let migrations = Migrations::new(vec![m_valid0_up(), m_valid10_up()]);
         migrations.to_latest(&mut conn).unwrap();
     }
 
     // We now have fewer migrations
-    let migrations = Migrations::new(vec![m_valid0()]);
+    let migrations = Migrations::new(vec![m_valid0_up()]);
 
     // We should get an error
     assert_eq!(
@@ -456,7 +465,7 @@ fn eq_hook_test() {
 
 #[test]
 fn test_from_iter() {
-    let migrations = Migrations::from_iter(vec![m_valid0(), m_valid10()]);
+    let migrations = Migrations::from_iter(vec![m_valid0_up(), m_valid10_up()]);
     assert_eq!(Ok(()), migrations.validate());
 }
 
@@ -498,18 +507,18 @@ fn test_missing_down_migration() {
 fn test_build_from_cow() {
     use std::borrow::Cow;
 
-    let _ = Migrations::from_slice(&Cow::from(vec![m_valid0()]));
+    let _ = Migrations::from_slice(&Cow::from(vec![m_valid0_up()]));
 }
 
 #[test]
 fn test_pending_migrations() -> Result<(), Box<dyn std::error::Error>> {
     let ms = vec![
-        m_valid0(),
-        m_valid10(),
-        m_valid11(),
-        m_valid20(),
-        m_valid21(),
-        m_valid_fk(),
+        m_valid0_up(),
+        m_valid10_up(),
+        m_valid11_up(),
+        m_valid20_up(),
+        m_valid21_up(),
+        m_valid_fk_up(),
     ];
     let migrations_0 = Migrations::from_slice(&[]);
     let migrations_1 = Migrations::from_slice(&ms[..1]);
@@ -553,7 +562,7 @@ fn test_pending_migrations() -> Result<(), Box<dyn std::error::Error>> {
 fn test_pending_migrations_errors() -> Result<(), Box<dyn std::error::Error>> {
     let mut conn = Connection::open_in_memory()?;
 
-    let migrations = Migrations::new(vec![m_valid0(), m_valid10()]);
+    let migrations = Migrations::new(vec![m_valid0_up(), m_valid10_up()]);
 
     // If the database is somehow corrupted, this returns an error
     raw_set_user_version(&mut conn, -325);

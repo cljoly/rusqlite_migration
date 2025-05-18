@@ -1,0 +1,57 @@
+---
+source: rusqlite_migration/src/tests/core.rs
+expression: migrations
+snapshot_kind: text
+---
+Migrations {
+    ms: [
+        M {
+            up: "CREATE TABLE m1(a, b); CREATE TABLE m2(a, b, c);",
+            up_hook: None,
+            down: None,
+            down_hook: None,
+            foreign_key_check: false,
+            comment: None,
+        },
+        M {
+            up: "CREATE TABLE t1(a, b);",
+            up_hook: None,
+            down: None,
+            down_hook: None,
+            foreign_key_check: false,
+            comment: None,
+        },
+        M {
+            up: "ALTER TABLE t1 RENAME COLUMN b TO c;",
+            up_hook: None,
+            down: None,
+            down_hook: None,
+            foreign_key_check: false,
+            comment: None,
+        },
+        M {
+            up: "CREATE TABLE t2(b);",
+            up_hook: None,
+            down: None,
+            down_hook: None,
+            foreign_key_check: false,
+            comment: None,
+        },
+        M {
+            up: "ALTER TABLE t2 ADD COLUMN a;",
+            up_hook: None,
+            down: None,
+            down_hook: None,
+            foreign_key_check: false,
+            comment: None,
+        },
+        M {
+            up: "\n        CREATE TABLE fk1(a PRIMARY KEY);\n        CREATE TABLE fk2(\n            a,\n            FOREIGN KEY(a) REFERENCES fk1(a)\n        );\n        INSERT INTO fk1 (a) VALUES ('foo');\n        INSERT INTO fk2 (a) VALUES ('foo');\n    ",
+            up_hook: None,
+            down: None,
+            down_hook: None,
+            foreign_key_check: true,
+            comment: None,
+        },
+    ],
+}
