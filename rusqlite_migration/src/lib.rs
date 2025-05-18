@@ -103,15 +103,17 @@ pub struct M<'u> {
 
 impl PartialEq for M<'_> {
     fn eq(&self, other: &Self) -> bool {
+        use std::ptr;
+
         let equal_up_hooks = match (self.up_hook.as_ref(), other.up_hook.as_ref()) {
             (None, None) => true,
-            (Some(a), Some(b)) => addr_of!(*a) as usize == addr_of!(*b) as usize,
+            (Some(a), Some(b)) => ptr::eq(addr_of!(*a), addr_of!(*b)),
             _ => false,
         };
 
         let equal_down_hooks = match (self.down_hook.as_ref(), other.down_hook.as_ref()) {
             (None, None) => true,
-            (Some(a), Some(b)) => addr_of!(*a) as usize == addr_of!(*b) as usize,
+            (Some(a), Some(b)) => ptr::eq(addr_of!(*a), addr_of!(*b)),
             _ => false,
         };
 
