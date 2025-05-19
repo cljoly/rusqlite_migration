@@ -86,9 +86,19 @@ impl Error {
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Error::SpecifiedSchemaVersion(e) => write!(f, "rusqlite_migrate error: {e}"),
-            // TODO Format the error with fmt instead of debug
-            _ => write!(f, "rusqlite_migrate error: {self:?}"),
+            Error::RusqliteError { query, err: e } => write!(
+                f,
+                "rusqlite_migration error while executing query '{query}': {e}"
+            ),
+            Error::SpecifiedSchemaVersion(e) => {
+                write!(f, "error with the specified schema version: {e}")
+            }
+            Error::MigrationDefinition(e) => {
+                todo!()
+            }
+            Error::ForeignKeyCheck(vec) => todo!(),
+            Error::Unrecognized(ref e) => todo!(),
+            Error::Hook(_) | Error::FileLoad(_) | Error::InvalidUserVersion => todo!(),
         }
     }
 }
