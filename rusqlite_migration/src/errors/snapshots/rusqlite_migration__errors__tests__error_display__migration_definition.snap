@@ -3,4 +3,4 @@ source: rusqlite_migration/src/errors/tests.rs
 expression: e
 snapshot_kind: text
 ---
-rusqlite_migrate error: MigrationDefinition(NoMigrationsDefined)
+rusqlite_migration error in migrations definition: Attempt to migrate with no migrations defined
