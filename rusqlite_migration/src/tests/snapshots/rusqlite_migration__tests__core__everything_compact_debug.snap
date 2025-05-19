@@ -1,0 +1,6 @@
+---
+source: rusqlite_migration/src/tests/core.rs
+expression: everything
+snapshot_kind: text
+---
+M { up: "UP", up_hook: Some(MigrationHook(<closure>)), down: Some("DOWN"), down_hook: Some(MigrationHook(<closure>)), foreign_key_check: true, comment: Some("Comment, likely a filename in practice!") }

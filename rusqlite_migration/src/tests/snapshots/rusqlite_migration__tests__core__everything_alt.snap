@@ -1,0 +1,13 @@
+---
+source: rusqlite_migration/src/tests/core.rs
+expression: "format!(\"{everything:#}\")"
+snapshot_kind: text
+---
+M(
+    up: "UP", 
+    up hook, 
+    down: "DOWN", 
+    down hook, 
+    foreign key check, 
+    comment: "Comment, likely a filename in practice!"
+)
