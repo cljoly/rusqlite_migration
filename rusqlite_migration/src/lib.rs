@@ -18,6 +18,7 @@
 #![doc = include_str!(concat!(env!("OUT_DIR"), "/readme_for_rustdoc.md"))]
 
 use std::borrow::Cow;
+use std::fmt::Display;
 
 use log::{debug, info, trace, warn};
 use rusqlite::{Connection, Transaction};
@@ -99,6 +100,38 @@ pub struct M<'u> {
     down_hook: Option<Box<dyn MigrationHook>>,
     foreign_key_check: bool,
     comment: Option<&'u str>,
+}
+
+impl Display for M<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let M {
+            up,
+            up_hook,
+            down,
+            down_hook,
+            foreign_key_check,
+            comment,
+        } = self;
+        let nl = if f.alternate() { "\n" } else { "" };
+        let ind = if f.alternate() { "\n    " } else { "" };
+        write!(f, r#"M({ind}up: "{up}""#)?;
+        if up_hook.is_some() {
+            write!(f, ", {ind}up hook")?;
+        }
+        if let Some(down) = down {
+            write!(f, r#", {ind}down: "{down}""#)?;
+        }
+        if down_hook.is_some() {
+            write!(f, ", {ind}down hook")?;
+        }
+        if *foreign_key_check {
+            write!(f, ", {ind}foreign key check")?;
+        }
+        if let Some(comment) = comment {
+            write!(f, r#", {ind}comment: "{comment}""#)?;
+        }
+        write!(f, "{nl})")
+    }
 }
 
 impl PartialEq for M<'_> {

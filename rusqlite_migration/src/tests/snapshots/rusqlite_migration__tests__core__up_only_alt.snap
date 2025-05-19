@@ -1,0 +1,8 @@
+---
+source: rusqlite_migration/src/tests/core.rs
+expression: "format!(\"{:#}\", m_valid0_up())"
+snapshot_kind: text
+---
+M(
+    up: "CREATE TABLE m1(a, b); CREATE TABLE m2(a, b, c);"
+)
