@@ -48,7 +48,7 @@ mutants = "0.0.3"
 simple-logging = "2.0.2"
 
 [dev-dependencies.criterion]
-version = "0.5.1"
+version = "0.6.0"
 features = ["html_reports", "cargo_bench_support"]
 
 [[bench]]
