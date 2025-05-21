@@ -98,7 +98,7 @@ jobs:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        shard: [0, 1, 2, 3]
+        shard: [0, 1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v3
       - name: Install libsqlite
@@ -113,7 +113,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: mutants
-          args: -p rusqlite_migration --colors=always --no-shuffle -vV --shard ${{ matrix.shard }}/4
+          args: -p rusqlite_migration --colors=always --no-shuffle -vV --shard ${{ matrix.shard }}/5
       - name: Archive results
         uses: actions/upload-artifact@v4
         if: failure()
