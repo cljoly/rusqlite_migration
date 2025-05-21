@@ -168,13 +168,13 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
-      - uses: Swatinem/rust-cache@v2
       - run: cargo install --locked cargo-tarpaulin
       - name: Generate code coverage
         uses: actions-rs/cargo@v1
         with:
           command: tarpaulin
           args: --locked --all-features --run-types AllTargets --workspace --timeout 120 --out Lcov --exclude-files '**/benches/*'
+      - uses: Swatinem/rust-cache@v2
       - name: Upload coverage to Coveralls
         uses: coverallsapp/github-action@v1
         with:
