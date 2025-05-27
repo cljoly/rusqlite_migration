@@ -1,0 +1,15 @@
+---
+source: rusqlite_migration/src/validations/tests.rs
+expression: "Validations::everything().validate(&migrations)"
+snapshot_kind: text
+---
+Err(
+    MissingDownwardMigrations(
+        [
+            (
+                6,
+                "M { up: \"\\n        CREATE TABLE fk1(a PRIMARY KEY);\\n        CREATE TABLE fk2(\\n            a,\\n            FOREIGN KEY(a) REFERENCES fk1(a)\\n        );\\n        INSERT INTO fk1 (a) VALUES ('foo');\\n        INSERT INTO fk2 (a) VALUES ('foo');\\n    \", up_hook: None, down: None, down_hook: None, foreign_key_check: true, comment: None }",
+            ),
+        ],
+    ),
+)
