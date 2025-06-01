@@ -10,13 +10,13 @@ simple-logging = "2.0.2"
 env_logger = "0.11"
 anyhow = "1"
 mktemp = "0.5"
-tokio-rusqlite-new = "=0.9.0"
+tokio-rusqlite-new = "=0.10.0"
 tokio = { version = "1.45.1", features = ["full"] }
 
 [dependencies.rusqlite_migration]
 path = "../../rusqlite_migration"
 
 [dependencies.rusqlite]
-version = "0.35.0"
+version = "0.36.0"
 default-features = false
 features = []

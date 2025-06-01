@@ -8,7 +8,7 @@ license = "Apache-2.0"
 repository = "https://github.com/cljoly/rusqlite_migration"
 documentation = "https://docs.rs/rusqlite_migration/"
 rust-version = "1.84"
-version = "2.1.0"
+version = "2.2.0-beta.1"
 
 [workspace]
 members = [
