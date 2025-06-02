@@ -62,12 +62,12 @@ use rusqlite::{params, Connection};
 use rusqlite_migration::{Migrations, M};
 
 // 1️⃣ Define migrations
-const MIGRATION_SLICE: &[M<'_>] = &[
+const MIGRATIONS_SLICE: &[M<'_>] = &[
     M::up("CREATE TABLE friend(name TEXT NOT NULL);"),
     // In the future, add more migrations here:
     //M::up("ALTER TABLE friend ADD COLUMN email TEXT;"),
 ];
-const MIGRATIONS: Migrations<'_> = Migrations::from_slice(MIGRATION_SLICE);
+const MIGRATIONS: Migrations<'_> = Migrations::from_slice(MIGRATIONS_SLICE);
 
 fn main() {
     let mut conn = Connection::open_in_memory().unwrap();
