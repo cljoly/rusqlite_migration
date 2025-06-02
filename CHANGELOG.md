@@ -17,6 +17,27 @@ end_insert -->
 Release notes for the [rusqlite_migration library](https://cj.rs/rusqlite_migration).
 end_insert -->
 
+## Version 2.2.0
+
+> [!NOTE]
+> The code of this version is identical to [Version 2.2.0 Beta 1](#version-220-beta-1)
+
+### Features
+
+- Implement the `Display` trait for `M`. This makes it easier to print errors pertaining to a particular migration (this feature is planned for the future, in the context of more extensive migration checks)
+
+### Dependencies
+
+Rusqlite was updated from 0.35.0 to 0.36.0.
+Please see [the release notes for 0.36.0](https://github.com/rusqlite/rusqlite/releases/tag/v0.36.0).
+
+### Other
+
+- Update development dependencies
+- Improve tests to cover more cases, in particular around downward migrations
+- Add docs.rs link to Cargo metadata
+- Fix clippy warning in rust 1.87.0
+
 ## Version 2.2.0 Beta 1
 
 ### Features
@@ -155,7 +176,8 @@ The only change is a fix to the deps.rs badge in the documentation.
 
 ## Version 1.3.0
 
-The code of this version is identical to [Version 1.3.0 Beta 1](#version-130-beta-1)
+> [!NOTE]
+> The code of this version is identical to [Version 1.3.0 Beta 1](#version-130-beta-1)
 
 Rusqlite was updated from 0.31.0 to 0.32.1.
 Please see [the release notes for 0.32.0](https://github.com/rusqlite/rusqlite/releases/tag/v0.32.0) and
