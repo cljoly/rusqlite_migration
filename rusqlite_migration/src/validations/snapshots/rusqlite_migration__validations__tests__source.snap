@@ -1,0 +1,19 @@
+---
+source: rusqlite_migration/src/validations/tests.rs
+expression: v.unwrap_err().source()
+snapshot_kind: text
+---
+Some(
+    RusqliteError {
+        query: "Invalid sql",
+        err: SqliteFailure(
+            Error {
+                code: Unknown,
+                extended_code: 1,
+            },
+            Some(
+                "near \"Invalid\": syntax error",
+            ),
+        ),
+    },
+)

@@ -1,0 +1,6 @@
+---
+source: rusqlite_migration/src/validations/tests.rs
+expression: "Validations::everything().validate(&migrations).unwrap_err()"
+snapshot_kind: text
+---
+the following migrations do not have a corresponding downward migration: 1: M { up: "CREATE TABLE m1(a, b); CREATE TABLE m2(a, b, c);", up_hook: None, down: None, down_hook: None, foreign_key_check: false, comment: None },
