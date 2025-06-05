@@ -3,4 +3,4 @@ source: rusqlite_migration/src/errors/tests.rs
 expression: e
 snapshot_kind: text
 ---
-rusqlite_migrate error: Attempt to use a schema version higher than supported.
+error with the specified schema version: Attempt to use a schema version higher than supported.
