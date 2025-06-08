@@ -104,6 +104,16 @@ pub struct M<'u> {
 
 impl Display for M<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let write_multiline = |f: &mut fmt::Formatter<'_>, sql: &str| -> fmt::Result {
+            // if f.alternate() {
+            write!(f, r#""{sql}""#)
+            // } else {
+            //     let trimmed = sql.trim();
+            //     let one_line = trimmed.replace("\r\n", " ");
+            //     write!(f, r#""{}""#, one_line)
+            // }
+        };
+
         let M {
             up,
             up_hook,
@@ -114,12 +124,14 @@ impl Display for M<'_> {
         } = self;
         let nl = if f.alternate() { "\n" } else { "" };
         let ind = if f.alternate() { "\n    " } else { "" };
-        write!(f, r#"M({ind}up: "{up}""#)?;
+        write!(f, "M({ind}up: ")?;
+        write_multiline(f, up)?;
         if up_hook.is_some() {
             write!(f, ", {ind}up hook")?;
         }
         if let Some(down) = down {
-            write!(f, r#", {ind}down: "{down}""#)?;
+            write!(f, ", {ind}down: ")?;
+            write_multiline(f, down)?;
         }
         if down_hook.is_some() {
             write!(f, ", {ind}down hook")?;
@@ -128,7 +140,8 @@ impl Display for M<'_> {
             write!(f, ", {ind}foreign key check")?;
         }
         if let Some(comment) = comment {
-            write!(f, r#", {ind}comment: "{comment}""#)?;
+            write!(f, ", {ind}comment: ")?;
+            write_multiline(f, comment);
         }
         write!(f, "{nl})")
     }
@@ -392,6 +405,19 @@ impl cmp::PartialOrd for SchemaVersion {
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Migrations<'m> {
     ms: Cow<'m, [M<'m>]>,
+}
+
+impl Display for Migrations<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let nl = if f.alternate() { "\n" } else { "" };
+        let ind = if f.alternate() { "\n    " } else { "" };
+        write!(f, r#"Migrations: {nl}"#)?;
+        for migration in self.ms.iter() {
+            // TODO Pass the flags
+            write!(f, "{migration}{nl}");
+        }
+        write!(f, "{nl})")
+    }
 }
 
 impl<'m> Migrations<'m> {

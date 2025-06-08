@@ -42,3 +42,13 @@ fn test_m_display() {
     insta::assert_compact_debug_snapshot!("everything_compact_debug", everything);
     insta::assert_snapshot!("everything_alt", format!("{everything:#}"));
 }
+
+#[test]
+fn display_simple() {
+    assert_snapshot!(Migrations::new(all_valid_down()));
+}
+
+#[test]
+fn display_alternate() {
+    assert_snapshot!(format!("{:#}", Migrations::new(all_valid_down())));
+}
