@@ -666,7 +666,7 @@ impl<'m> Migrations<'m> {
             .take(current_version - target_version)
             .find(|(_, m)| m.down.is_none())
         {
-            warn!("Cannot revert: {:?}", bad_m);
+            warn!("Cannot revert: {bad_m:?}");
             return Err(Error::MigrationDefinition(
                 MigrationDefinitionError::DownNotDefined { migration_index: i },
             ));
@@ -711,8 +711,7 @@ impl<'m> Migrations<'m> {
                     ));
                 }
                 debug!(
-                    "rollback to older version requested, target_db_version: {}, current_version: {}",
-                    target_db_version, current_version
+                    "rollback to older version requested, target_db_version: {target_db_version}, current_version: {current_version}",
                 );
                 self.goto_down(conn, current_version, target_db_version)
             }
@@ -729,7 +728,7 @@ impl<'m> Migrations<'m> {
         };
 
         if res.is_ok() {
-            info!("Database migrated to version {}", target_db_version);
+            info!("Database migrated to version {target_db_version}");
         }
         res
     }
@@ -940,7 +939,7 @@ fn user_version(conn: &Connection) -> Result<usize> {
 
 // Set user version field from the SQLite db
 fn set_user_version(conn: &Connection, v: usize) -> Result<()> {
-    trace!("set user version to: {}", v);
+    trace!("set user version to: {v}");
     let v = if v > MIGRATIONS_MAX {
         Err(Error::SpecifiedSchemaVersion(SchemaVersionError::TooHigh))
     } else {
