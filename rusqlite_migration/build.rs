@@ -37,7 +37,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         .skip(1) // Discard the pattern line
         .filter(|line| *line != "</div>") // Known unclosed div because we don’t start from the top
         .try_fold(0, |lines_written, line| -> Result<usize, io::Error> {
-            writeln!(out, "{}", line)?;
+            writeln!(out, "{line}")?;
             Ok(lines_written + 1)
         })
         .map(|lines_written| {
