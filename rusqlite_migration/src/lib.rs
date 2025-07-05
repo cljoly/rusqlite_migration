@@ -486,7 +486,7 @@ impl<'m> Migrations<'m> {
     fn db_version_to_schema(&self, db_version: usize) -> SchemaVersion {
         match db_version {
             0 => SchemaVersion::NoneSet,
-            v if v > 0 && v <= self.ms.len() => SchemaVersion::Inside(
+            v if v <= self.ms.len() => SchemaVersion::Inside(
                 NonZeroUsize::new(v).expect("schema version should not be equal to 0"),
             ),
             v => SchemaVersion::Outside(
