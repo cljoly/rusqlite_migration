@@ -40,24 +40,10 @@ features = []
 
 [dev-dependencies]
 anyhow = "1"
-iai = "0.1"
 insta = "1.43.1"
-mktemp = "0.5"
 mutants = "0.0.3"
-
-[dev-dependencies.criterion]
-version = "0.6.0"
-# features = ["html_reports", "cargo_bench_support"]
-default-features = false
 
 [dev-dependencies.env_logger]
 version = "0.11"
 default-features = false
 
-[[bench]]
-name = "criterion"
-harness = false
-
-[[bench]]
-name = "iai"
-harness = false

@@ -17,14 +17,6 @@
 
 use criterion::criterion_main;
 
-#[cfg(feature = "from-directory")]
 mod from_directory;
-
-#[cfg(not(feature = "from-directory"))]
-mod from_directory {
-    pub fn create() {
-        ()
-    }
-}
 
 criterion_main!(from_directory::create);

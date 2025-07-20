@@ -14,6 +14,7 @@ version = "2.3.0"
 members = [
   "rusqlite_migration",
   "rusqlite_migration_tests",
+  "rusqlite_migration_benches",
   "examples/*",
 ]
 # https://doc.rust-lang.org/cargo/reference/resolver.html#feature-resolver-version-2

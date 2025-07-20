@@ -1,0 +1,40 @@
+[package]
+edition = "2021"
+name = "rusqlite_migration_benches"
+
+authors.workspace = true
+categories.workspace = true
+description.workspace = true
+homepage.workspace = true
+keywords.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+version.workspace = true
+
+[dependencies]
+include_dir = { version = "0.7.4" }
+
+[dependencies.rusqlite]
+version = "0.37.0"
+default-features = false
+features = []
+
+[dependencies.rusqlite_migration]
+path = "../rusqlite_migration"
+features = ["from-directory"]
+
+[dev-dependencies]
+iai = "0.1"
+
+[dev-dependencies.criterion]
+version = "0.6.0"
+features = ["html_reports", "cargo_bench_support"]
+
+[[bench]]
+name = "criterion"
+harness = false
+
+[[bench]]
+name = "iai"
+harness = false
