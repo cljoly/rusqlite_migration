@@ -26,11 +26,13 @@ version = "0.37.0"
 features = ["extra_check"]
 
 [dev-dependencies]
-simple-logging = "2.0.2"
-env_logger = "0.11"
 anyhow = "1"
 mktemp = "0.5"
 include_dir = "0.7.4"
+
+[dev-dependencies.env_logger]
+version = "0.11"
+default-features = false
 
 [[test]]
 name = "integration_tests"

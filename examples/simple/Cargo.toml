@@ -7,11 +7,13 @@ publish = false
 [dependencies]
 rusqlite_migration = { path = "../../rusqlite_migration" }
 log = "0.4"
-simple-logging = "2.0.2"
-env_logger = "0.11"
 anyhow = "1"
 mktemp = "0.5"
 
 [dependencies.rusqlite]
 version = "0.37.0"
 features = ["extra_check"] # A realistic use case
+
+[dependencies.env_logger]
+version = "0.11"
+default-features = false
