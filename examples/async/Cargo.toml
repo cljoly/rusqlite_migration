@@ -6,8 +6,6 @@ publish = false
 
 [dependencies]
 log = "0.4"
-simple-logging = "2.0.2"
-env_logger = "0.11"
 anyhow = "1"
 mktemp = "0.5"
 tokio-rusqlite-new = "=0.11.0"
@@ -20,3 +18,7 @@ path = "../../rusqlite_migration"
 version = "0.37.0"
 default-features = false
 features = []
+
+[dependencies.env_logger]
+version = "0.11"
+default-features = false

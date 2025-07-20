@@ -6,8 +6,6 @@ publish = false
 
 [dependencies]
 log = "0.4"
-simple-logging = "2.0.2"
-env_logger = "0.11"
 anyhow = "1"
 mktemp = "0.5"
 include_dir = "0.7.4"
@@ -20,3 +18,7 @@ features = ["from-directory"]
 version = "0.37.0"
 default-features = false
 features = []
+
+[dependencies.env_logger]
+version = "0.11"
+default-features = false
