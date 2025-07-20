@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// For feature "from-directory"
+#[cfg(feature = "from-directory")]
 mod builder;
 
 mod core;

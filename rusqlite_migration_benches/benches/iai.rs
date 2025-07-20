@@ -54,27 +54,14 @@ fn upward_migration_long() {
     upward(black_box(100))
 }
 
-#[cfg(feature = "from-directory")]
 mod from_directory;
 
-#[cfg(feature = "from-directory")]
 fn from_directory_small() {
     from_directory::small()
 }
 
-#[cfg(not(feature = "from-directory"))]
-fn from_directory_small() {
-    ()
-}
-
-#[cfg(feature = "from-directory")]
 fn from_directory_big() {
     from_directory::big()
-}
-
-#[cfg(not(feature = "from-directory"))]
-fn from_directory_big() {
-    ()
 }
 
 iai::main!(
