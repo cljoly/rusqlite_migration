@@ -1,0 +1,1 @@
+CREATE TABLE t12 (a);
