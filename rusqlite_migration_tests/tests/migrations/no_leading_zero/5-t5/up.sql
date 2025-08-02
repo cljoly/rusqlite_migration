@@ -1,0 +1,1 @@
+CREATE TABLE t5 (a);

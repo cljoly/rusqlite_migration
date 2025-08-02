@@ -22,6 +22,7 @@ use rusqlite_migration::{Error, Migrations, SchemaVersion};
 
 static MIGRATIONS_DIR: Dir =
     include_dir!("$CARGO_MANIFEST_DIR/../examples/from-directory/migrations");
+static NO_LEADING_ZERO: Dir = include_dir!("$CARGO_MANIFEST_DIR/tests/migrations/no_leading_zero");
 static JUST_DOWN: Dir = include_dir!("$CARGO_MANIFEST_DIR/tests/migrations/just_down");
 static EMPTY_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/tests/migrations/empty_dir");
 static NON_CONSECUTIVE: Dir = include_dir!("$CARGO_MANIFEST_DIR/tests/migrations/non_consecutive");
@@ -54,6 +55,40 @@ fn main_test() {
         )
         .unwrap();
     }
+}
+
+// Check that migrations are applied in the right order, even without a leading 0
+#[test]
+fn test_no_leading_zero() {
+    let migrations = Migrations::from_directory(&NO_LEADING_ZERO).unwrap();
+    let nbr_migrations = 12;
+    for i in 1..=nbr_migrations {
+        let mut conn = Connection::open_in_memory().unwrap();
+        migrations.to_version(&mut conn, i).unwrap();
+
+        assert_eq!(
+            Ok(SchemaVersion::Inside(NonZeroUsize::new(i).unwrap())),
+            migrations.current_version(&conn)
+        );
+
+        // We have all the tables we expect
+        for j in 1..=i {
+            conn.execute(
+                &format!("INSERT INTO t{j} (a) VALUES (?1)"),
+                params!["John"],
+            )
+            .unwrap();
+        }
+    }
+
+    let mut conn = Connection::open_in_memory().unwrap();
+    migrations.to_latest(&mut conn).unwrap();
+    assert_eq!(
+        Ok(SchemaVersion::Inside(
+            NonZeroUsize::new(nbr_migrations).unwrap()
+        )),
+        migrations.current_version(&conn)
+    );
 }
 
 #[test]
