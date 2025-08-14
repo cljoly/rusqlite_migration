@@ -120,7 +120,7 @@ fn migrations_insta_snapshot() {
 
 ## Optional Features
 
-Rusqlite_migration provides several [Cargo features][cargo_features]. They are:
+Rusqlite migration provides several [Cargo features][cargo_features]. They are:
 
 * `from-directory`: enable loading migrations from *.sql files in a given directory
 
