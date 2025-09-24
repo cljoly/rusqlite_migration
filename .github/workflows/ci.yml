@@ -4,6 +4,8 @@ on:
 
 name: Continuous integration
 
+permissions: {}
+
 env:
   MSRV: 1.84.0
   CARGO_TERM_COLOR: always
@@ -159,6 +161,9 @@ jobs:
   coverage:
     name: Code coverage
     runs-on: ubuntu-24.04
+    permissions:
+      - checks: write
+      - contents: read
     steps:
       - uses: actions/checkout@v3
       - name: Install libsqlite
