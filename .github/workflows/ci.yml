@@ -4,8 +4,6 @@ on:
 
 name: Continuous integration
 
-permissions: {}
-
 env:
   MSRV: 1.84.0
   CARGO_TERM_COLOR: always
