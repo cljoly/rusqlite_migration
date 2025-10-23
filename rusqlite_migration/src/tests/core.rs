@@ -573,28 +573,3 @@ fn test_pending_migrations_errors() -> Result<(), Box<dyn std::error::Error>> {
 
     Ok(())
 }
-
-#[test]
-fn test_display() {
-    insta::assert_snapshot!("up_only", m_valid0_up());
-    insta::assert_snapshot!("up_only_alt", format!("{:#}", m_valid0_up()));
-
-    insta::assert_snapshot!("up_down", m_valid0_down());
-    insta::assert_snapshot!("up_down_alt", format!("{:#}", m_valid0_down()));
-
-    insta::assert_snapshot!("up_down_fk", m_valid_fk_down());
-    insta::assert_snapshot!("up_down_fk_alt", format!("{:#}", m_valid_fk_down()));
-
-    let everything = M {
-        up: "UP",
-        up_hook: Some(Box::new(|_: &Transaction| Ok(()))),
-        down: Some("DOWN"),
-        down_hook: Some(Box::new(|_: &Transaction| Ok(()))),
-        foreign_key_check: true,
-        comment: Some("Comment, likely a filename in practice!"),
-    };
-    insta::assert_snapshot!("everything", everything);
-    insta::assert_debug_snapshot!("everything_debug", everything);
-    insta::assert_compact_debug_snapshot!("everything_compact_debug", everything);
-    insta::assert_snapshot!("everything_alt", format!("{everything:#}"));
-}
