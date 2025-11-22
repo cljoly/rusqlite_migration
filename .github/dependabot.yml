@@ -8,6 +8,6 @@ updates:
   # https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference?versionId=free-pro-team%40latest&productId=code-security&restPage=dependabot#cooldown-
   cooldown:
     default-days: 15
-    exclude::
+    exclude:
     - rusqlite
   open-pull-requests-limit: 10
