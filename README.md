@@ -32,7 +32,6 @@ end_insert -->
 [![Crates.io](https://img.shields.io/crates/v/rusqlite_migration)][cio]
 [![Changelog](https://img.shields.io/badge/-Changelog-purple)][changelog]
 [![unsafe forbidden](https://img.shields.io/badge/unsafe-forbidden-success.svg)][safety-dance]
-[![dependency status](https://deps.rs/crate/rusqlite_migration/latest/status.svg)][deps]
 [![Coveralls](https://img.shields.io/coverallsCoverage/github/cljoly/rusqlite_migration)][coveralls]
 
 <!-- insert
