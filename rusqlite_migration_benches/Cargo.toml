@@ -16,7 +16,7 @@ version.workspace = true
 include_dir = { version = "0.7.4" }
 
 [dependencies.rusqlite]
-version = "0.37.0"
+version = "0.38.0"
 default-features = false
 features = []
 
