@@ -17,6 +17,21 @@ end_insert -->
 Release notes for the [rusqlite_migration library](https://cj.rs/rusqlite_migration).
 end_insert -->
 
+## Version 2.4.0
+
+### Dependencies
+
+Rusqlite was updated from 0.37.0 to 0.38.0.
+Please see [the release notes for 0.38.0](https://github.com/rusqlite/rusqlite/releases/tag/v0.38.0), there are a few breaking changes in this one.
+
+Update other deps dependencies, see git history for details.
+
+### Other
+
+- Use scoped GitHub tokens in actions, with as little privileges as possible.
+- Improve test build time by removing some unused optional deps.
+- Update most dependencies after a cooldown (this does not apply to security updates).
+
 ## Version 2.3.0
 
 ### Dependencies
