@@ -3,4 +3,4 @@ source: rusqlite_migration/src/errors/tests.rs
 expression: e
 snapshot_kind: text
 ---
-rusqlite_migrate error: FileLoad("file causing problem")
+rusqlite error while loading migrations from directory: file causing problem

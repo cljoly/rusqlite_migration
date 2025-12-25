@@ -17,6 +17,8 @@ end_insert -->
 Release notes for the [rusqlite_migration library](https://cj.rs/rusqlite_migration).
 end_insert -->
 
+- Errors are don’t use debug output anymore, they should be more friendly to humans
+
 ## Version 2.3.0
 
 ### Dependencies

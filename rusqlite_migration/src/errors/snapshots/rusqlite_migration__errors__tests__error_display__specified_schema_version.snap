@@ -3,4 +3,4 @@ source: rusqlite_migration/src/errors/tests.rs
 expression: e
 snapshot_kind: text
 ---
-rusqlite_migrate error: Attempt to migrate to version 0 (no version set), which is higher than the highest version currently supported, 0 (no version set).
+error with the specified schema version: Attempt to migrate to version 0 (no version set), which is higher than the highest version currently supported, 0 (no version set).

@@ -3,4 +3,4 @@ source: rusqlite_migration/src/errors/tests.rs
 expression: e
 snapshot_kind: text
 ---
-rusqlite_migrate error: RusqliteError { query: "SELECT * FROM table42;", err: InvalidQuery }
+rusqlite_migration error while executing query 'SELECT * FROM table42;': Query is not read-only
