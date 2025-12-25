@@ -62,8 +62,7 @@ impl PartialEq for Error {
             (Self::SpecifiedSchemaVersion(a), Self::SpecifiedSchemaVersion(b)) => a == b,
             (Self::MigrationDefinition(a), Self::MigrationDefinition(b)) => a == b,
             (Self::ForeignKeyCheck(e1), Self::ForeignKeyCheck(e2)) => e1 == e2,
-            (Self::Hook(a), Self::Hook(b)) => a == b,
-            (Self::FileLoad(a), Self::FileLoad(b)) => a == b,
+            (Self::Hook(a), Self::Hook(b)) | (Self::FileLoad(a), Self::FileLoad(b)) => a == b,
             // This makes Unrecognized errors behave like NaN (where NaN != NaN)
             (Self::Unrecognized(_), Self::Unrecognized(_)) => false,
             // Fallback to comparing enum variants

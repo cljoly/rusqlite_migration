@@ -45,7 +45,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             assert!(
                 lines_written > 70,
                 "the size of the documentation produced from the README.md file is suspiciously small"
-            )
+            );
         })
         ?;
 

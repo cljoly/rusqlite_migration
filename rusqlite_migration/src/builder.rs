@@ -59,9 +59,7 @@ impl<'u> MigrationsBuilder<'u> {
     /// Panics if no migration with the `id` provided exists.
     #[must_use]
     pub fn edit(mut self, id: usize, f: impl Fn(M) -> M) -> Self {
-        if id < 1 {
-            panic!("id cannot be equal to 0");
-        }
+        assert!(id >= 1, "id cannot be equal to 0");
         self.migrations[id - 1] = take(&mut self.migrations[id - 1]).map(f);
         self
     }
@@ -75,7 +73,7 @@ impl<'u> MigrationsBuilder<'u> {
 impl<'u> FromIterator<M<'u>> for MigrationsBuilder<'u> {
     fn from_iter<T: IntoIterator<Item = M<'u>>>(iter: T) -> Self {
         Self {
-            migrations: Vec::from_iter(iter.into_iter().map(Some)),
+            migrations: iter.into_iter().map(Some).collect(),
         }
     }
 }
