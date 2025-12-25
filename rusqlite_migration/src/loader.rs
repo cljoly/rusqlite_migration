@@ -131,13 +131,13 @@ pub(crate) fn from_directory(dir: &'static Dir<'static>) -> Result<Vec<Option<M<
         migrations[id] = Some((&migration_file).into());
     }
 
-    if migrations.iter().all(|m| m.is_none()) {
+    if migrations.iter().all(Option::is_none) {
         return Err(Error::FileLoad(
             "Directory does not contain any migration files".to_string(),
         ));
     }
 
-    if migrations.iter().any(|m| m.is_none()) {
+    if migrations.iter().any(Option::is_none) {
         return Err(Error::FileLoad(
             "Migration ids must be consecutive numbers".to_string(),
         ));

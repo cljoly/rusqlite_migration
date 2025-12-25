@@ -976,10 +976,10 @@ fn validate_foreign_keys(conn: &Connection) -> Result<()> {
         })
         .map_err(|e| Error::with_sql(e, pragma_fk_check))?
         .collect::<Result<Vec<_>, _>>()?;
-    if !fk_errors.is_empty() {
-        Err(crate::Error::ForeignKeyCheck(fk_errors))
-    } else {
+    if fk_errors.is_empty() {
         Ok(())
+    } else {
+        Err(crate::Error::ForeignKeyCheck(fk_errors))
     }
 }
 

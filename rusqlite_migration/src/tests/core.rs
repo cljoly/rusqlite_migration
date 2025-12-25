@@ -512,7 +512,7 @@ fn test_build_from_cow() {
 
 #[test]
 fn test_pending_migrations() -> Result<(), Box<dyn std::error::Error>> {
-    let ms = vec![
+    let ms = &[
         m_valid0_up(),
         m_valid10_up(),
         m_valid11_up(),
