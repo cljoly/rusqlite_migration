@@ -1,5 +1,5 @@
 ---
-source: rusqlite_migration/src/tests/core.rs
+source: rusqlite_migration/src/tests/display.rs
 expression: "format!(\"{:#}\", m_valid0_up())"
 snapshot_kind: text
 ---
