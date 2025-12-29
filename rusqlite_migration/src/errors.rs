@@ -23,6 +23,12 @@ use crate::SchemaVersion;
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 
 /// Enum listing possible errors.
+///
+/// ## Note
+///
+/// Per standard practice in the Rust ecosystem, the way errors are `Display`ed can change between
+/// minor or patch versions. These messages are meant to be consumed only by humans, not used
+/// programmatically for flow control.
 #[derive(Debug)]
 #[allow(clippy::enum_variant_names)]
 #[non_exhaustive]
@@ -104,7 +110,7 @@ impl fmt::Display for Error {
                         parent,
                         fkid,
                     } = row;
-                    writeln!(f, "  - row with rowid {rowid} in table '{table}' references to non-existing row table '{parent}', using foreign key value {fkid}")?
+                    writeln!(f, "  - row with rowid {rowid} in table '{table}' references non-existing row table '{parent}', using foreign key value {fkid}")?
                 }
                 Ok(())
             }
