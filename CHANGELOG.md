@@ -31,6 +31,7 @@ Update other deps dependencies, see git history for details.
 - Use scoped GitHub tokens in actions, with as little privileges as possible.
 - Improve test build time by removing some unused optional deps.
 - Update most dependencies after a cooldown (this does not apply to security updates).
+- Errors don’t use debug output anymore, they should be more friendly to humans. This is not considered a breaking change because `Dislay` of errors is meant for human consuption and not for flow control in the program.
 
 ## Version 2.3.0
 
