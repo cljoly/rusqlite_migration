@@ -962,7 +962,7 @@ fn set_user_version(conn: &Connection, v: usize) -> Result<()> {
 fn validate_foreign_keys(conn: &Connection) -> Result<()> {
     let pragma_fk_check = "PRAGMA foreign_key_check";
     let mut stmt = conn
-        .prepare_cached(pragma_fk_check)
+        .prepare(pragma_fk_check)
         .map_err(|e| Error::with_sql(e, pragma_fk_check))?;
 
     let fk_errors = stmt
