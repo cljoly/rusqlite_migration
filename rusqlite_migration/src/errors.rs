@@ -28,7 +28,7 @@ pub type Result<T, E = Error> = std::result::Result<T, E>;
 ///
 /// Per standard practice in the Rust ecosystem, the way errors are `Display`ed can change between
 /// minor or patch versions. These messages are meant to be consumed only by humans, not used
-/// programmatically for flow control.
+/// for flow control in the program.
 #[derive(Debug)]
 #[allow(clippy::enum_variant_names)]
 #[non_exhaustive]
