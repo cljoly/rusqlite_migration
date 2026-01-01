@@ -65,7 +65,7 @@ fn all_errors() -> Vec<(&'static str, crate::Error)> {
                 },
             ]),
         ),
-        ("hook", Hook("in hook".to_owned())),
+        ("hook", Hook("error inside hook".to_owned())),
         ("file_load", FileLoad("file causing problem".to_owned())),
         (
             "unrecognized",

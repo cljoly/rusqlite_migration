@@ -23,6 +23,12 @@ use crate::SchemaVersion;
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 
 /// Enum listing possible errors.
+///
+/// ## Note
+///
+/// Per standard practice in the Rust ecosystem, the way errors are `Display`ed can change between
+/// minor or patch versions. These messages are meant to be consumed only by humans, not used
+/// for flow control in the program.
 #[derive(Debug)]
 #[allow(clippy::enum_variant_names)]
 #[non_exhaustive]
@@ -85,9 +91,41 @@ impl Error {
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Error::SpecifiedSchemaVersion(e) => write!(f, "rusqlite_migrate error: {e}"),
-            // TODO Format the error with fmt instead of debug
-            _ => write!(f, "rusqlite_migrate error: {self:?}"),
+            Error::RusqliteError { query, err: e } => write!(
+                f,
+                "rusqlite_migration error while executing query '{query}': {e}"
+            ),
+            Error::SpecifiedSchemaVersion(e) => {
+                write!(f, "error with the specified schema version: {e}")
+            }
+            Error::MigrationDefinition(e) => {
+                write!(f, "rusqlite_migration error in migrations definition: {e}")
+            }
+            Error::ForeignKeyCheck(vec) => {
+                writeln!(f, "rusqlite_migration error on foreign key check:")?;
+                for row in vec {
+                    let ForeignKeyCheckError {
+                        table,
+                        rowid,
+                        parent,
+                        fkid,
+                    } = row;
+                    writeln!(f, "  - row with rowid {rowid} in table '{table}' references non-existing row table '{parent}', using foreign key value {fkid}")?
+                }
+                Ok(())
+            }
+            Error::Unrecognized(ref e) => write!(
+                f,
+                "rusqlite_migration unknown error (the library might be out of date): {e}"
+            ),
+            Error::Hook(e) => write!(f, "rusqlite_migration error in migration hook: {e}"),
+            Error::FileLoad(e) => write!(
+                f,
+                "rusqlite error while loading migrations from directory: {e}"
+            ),
+            Error::InvalidUserVersion => {
+                write!(f, "rusqlite_migration error: invalid user version received")
+            }
         }
     }
 }
