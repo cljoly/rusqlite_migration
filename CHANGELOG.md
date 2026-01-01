@@ -17,7 +17,6 @@ end_insert -->
 Release notes for the [rusqlite_migration library](https://cj.rs/rusqlite_migration).
 end_insert -->
 
-
 ## Version 2.3.0
 
 ### Dependencies
