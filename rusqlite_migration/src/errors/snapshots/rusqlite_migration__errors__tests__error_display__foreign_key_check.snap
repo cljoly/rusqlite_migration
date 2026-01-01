@@ -4,5 +4,5 @@ expression: e
 snapshot_kind: text
 ---
 rusqlite_migration error on foreign key check:
-  - row with rowid 1 in table 't1' references to non-existing row table 't2', using foreign key value 2
-  - row with rowid 2 in table 't3' references to non-existing row table 't4', using foreign key value 3
+  - row with rowid 1 in table 't1' references non-existing row table 't2', using foreign key value 2
+  - row with rowid 2 in table 't3' references non-existing row table 't4', using foreign key value 3
