@@ -1,0 +1,6 @@
+---
+source: rusqlite_migration/src/validations/tests.rs
+expression: e
+snapshot_kind: text
+---
+underlying rusqlite migration error: rusqlite_migrate error: RusqliteError { query: "", err: InvalidQuery }
