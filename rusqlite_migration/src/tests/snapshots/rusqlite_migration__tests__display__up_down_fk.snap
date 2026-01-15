@@ -1,10 +1,9 @@
 ---
-source: rusqlite_migration/src/tests/core.rs
-expression: "format!(\"{:#}\", m_valid_fk_down())"
+source: rusqlite_migration/src/tests/display.rs
+expression: m_valid_fk_down()
 snapshot_kind: text
 ---
-M(
-    up: "
+M(up: "
         CREATE TABLE fk1(a PRIMARY KEY);
         CREATE TABLE fk2(
             a,
@@ -12,7 +11,4 @@ M(
         );
         INSERT INTO fk1 (a) VALUES ('foo');
         INSERT INTO fk2 (a) VALUES ('foo');
-    ", 
-    down: "DELETE FROM fk2; DELETE FROM fk1; DROP TABLE fk2; DROP TABLE fk1;", 
-    foreign key check
-)
+    ", down: "DELETE FROM fk2; DELETE FROM fk1; DROP TABLE fk2; DROP TABLE fk1;", foreign key check)
