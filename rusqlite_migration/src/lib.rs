@@ -22,7 +22,7 @@ use std::borrow::Cow;
 use std::fmt::Display;
 
 use log::{debug, info, trace, warn};
-use rusqlite::{Connection, Statement, Transaction};
+use rusqlite::{Connection, Transaction};
 
 #[cfg(feature = "from-directory")]
 use include_dir::Dir;
@@ -38,6 +38,7 @@ mod builder;
 pub use builder::MigrationsBuilder;
 
 mod errors;
+mod fk_check;
 
 #[cfg(test)]
 mod tests;
@@ -53,6 +54,8 @@ use std::{
     num::NonZeroUsize,
     ptr::addr_of,
 };
+
+use self::fk_check::FKCheck;
 
 /// The number of migrations already applied is stored in a [4 bytes field][sqlite_doc], so the number of migrations is limited.
 ///
@@ -625,7 +628,7 @@ impl<'m> Migrations<'m> {
 
         let tx = conn.transaction()?;
         {
-            let mut fk_check_stmt = prepare_foreign_key_stmt(&tx)?;
+            let mut fk_check = FKCheck::new();
             for v in current_version..target_version {
                 let m = &self.ms[v];
                 debug!("Running: {}", m.up);
@@ -634,7 +637,7 @@ impl<'m> Migrations<'m> {
                     .map_err(|e| Error::with_sql(e, m.up))?;
 
                 if m.foreign_key_check {
-                    validate_foreign_keys(&mut fk_check_stmt)?;
+                    fk_check.validate(&tx)?
                 }
 
                 if let Some(hook) = &m.up_hook {
@@ -679,7 +682,7 @@ impl<'m> Migrations<'m> {
         trace!("start migration transaction");
         let tx = conn.transaction()?;
         {
-            let mut fk_check_stmt = prepare_foreign_key_stmt(&tx)?;
+            let mut fk_check = FKCheck::new();
             for v in (target_version..current_version).rev() {
                 let m = &self.ms[v];
                 if let Some(down) = m.down {
@@ -693,7 +696,7 @@ impl<'m> Migrations<'m> {
                         .map_err(|e| Error::with_sql(e, down))?;
 
                     if m.foreign_key_check {
-                        validate_foreign_keys(&mut fk_check_stmt)?;
+                        fk_check.validate(&tx)?
                     }
                 } else {
                     unreachable!();
@@ -962,34 +965,6 @@ fn set_user_version(conn: &Connection, v: usize) -> Result<()> {
             query: format!("PRAGMA user_version = {v}; -- Approximate query"),
             err: e,
         })
-}
-
-const PRAGMA_FK_CHECK: &str = "SELECT * FROM pragma_foreign_key_check;";
-
-fn prepare_foreign_key_stmt<'a>(conn: &'a Transaction) -> Result<Statement<'a>> {
-    Ok(conn
-        .prepare(PRAGMA_FK_CHECK)
-        .map_err(|e| Error::with_sql(e, PRAGMA_FK_CHECK))?)
-}
-
-// Validate that no foreign keys are violated
-fn validate_foreign_keys(stmt: &mut Statement) -> Result<()> {
-    let fk_errors = stmt
-        .query_map([], |row| {
-            Ok(ForeignKeyCheckError {
-                table: row.get(0)?,
-                rowid: row.get(1)?,
-                parent: row.get(2)?,
-                fkid: row.get(3)?,
-            })
-        })
-        .map_err(|e| Error::with_sql(e, PRAGMA_FK_CHECK))?
-        .collect::<Result<Vec<_>, _>>()?;
-    if fk_errors.is_empty() {
-        Ok(())
-    } else {
-        Err(crate::Error::ForeignKeyCheck(fk_errors))
-    }
 }
 
 impl<'u> FromIterator<M<'u>> for Migrations<'u> {
