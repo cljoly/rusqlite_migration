@@ -15,8 +15,39 @@
 
 use rusqlite::Connection;
 
+use crate::fk_check::FKCheck;
 use crate::tests::helpers::{m_invalid_fk, m_invalid_fk_down, m_valid0_up, m_valid_fk_up};
 use crate::{Error, Migrations};
+
+// Make sure the statement results don’t persist
+#[test]
+fn fk_check_validate_test() -> Result<(), Box<dyn std::error::Error>> {
+    let mut conn = Connection::open_in_memory()?;
+    let tx = conn.transaction()?;
+    let mut fk_check = FKCheck::new();
+    tx.execute_batch(
+        r#"
+                CREATE TABLE fk1(a PRIMARY KEY);
+                CREATE TABLE fk2(
+                    a,
+                    FOREIGN KEY(a) REFERENCES fk1(a)
+                );
+            "#,
+    )?;
+    assert!(fk_check.validate(&tx).is_ok());
+
+    tx.execute("INSERT INTO fk2 (a) VALUES ('foo')", [])?;
+    assert!(fk_check.validate(&tx).is_err());
+
+    tx.execute("DELETE FROM fk2 WHERE a = 'foo'", [])?;
+    assert!(fk_check.validate(&tx).is_ok());
+
+    tx.execute("INSERT INTO fk1 (a) VALUES ('bar')", [])?;
+    tx.execute("INSERT INTO fk2 (a) VALUES ('bar')", [])?;
+    assert!(fk_check.validate(&tx).is_ok());
+
+    Ok(())
+}
 
 #[test]
 fn valid_fk_check_test() {
