@@ -17,4 +17,5 @@
 mod builder;
 
 mod core;
+mod fk_check;
 mod helpers;

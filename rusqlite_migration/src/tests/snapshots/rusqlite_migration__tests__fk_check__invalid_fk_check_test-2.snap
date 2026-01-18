@@ -1,5 +1,5 @@
 ---
-source: rusqlite_migration/src/tests/core.rs
+source: rusqlite_migration/src/tests/fk_check.rs
 expression: migrations.validate()
 snapshot_kind: text
 ---
