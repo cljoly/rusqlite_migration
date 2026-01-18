@@ -1,0 +1,23 @@
+---
+source: rusqlite_migration/src/tests/fk_check.rs
+expression: migrations.validate()
+snapshot_kind: text
+---
+Err(
+    ForeignKeyCheck(
+        [
+            ForeignKeyCheckError {
+                table: "fk2",
+                rowid: 1,
+                parent: "fk1",
+                fkid: 0,
+            },
+            ForeignKeyCheckError {
+                table: "fk2",
+                rowid: 2,
+                parent: "fk1",
+                fkid: 0,
+            },
+        ],
+    ),
+)

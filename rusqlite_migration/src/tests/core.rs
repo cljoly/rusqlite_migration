@@ -19,10 +19,7 @@ use rusqlite::{Connection, OpenFlags, Transaction};
 
 use crate::tests::helpers::{all_valid_down, m_valid0_down, m_valid_fk_down};
 use crate::{
-    tests::helpers::{
-        all_valid_up, m_invalid_fk, m_invalid_fk_down, m_valid0_up, m_valid10_up, m_valid11_up,
-        m_valid_fk_up,
-    },
+    tests::helpers::{all_valid_up, m_valid0_up, m_valid10_up, m_valid11_up, m_valid_fk_up},
     user_version, Error, MigrationDefinitionError, Migrations, SchemaVersion, SchemaVersionError,
     M,
 };
@@ -260,30 +257,6 @@ fn valid_migration_multiple_statement_test() {
         let migrations = Migrations::new(vec![m.clone()]);
         assert_eq!(Ok(()), migrations.validate())
     }
-}
-
-#[test]
-fn valid_fk_check_test() {
-    assert_eq!(Ok(()), Migrations::new(vec![m_valid_fk_up()]).validate())
-}
-
-#[test]
-fn invalid_fk_check_test() {
-    let migrations = Migrations::new(vec![m_invalid_fk()]);
-    insta::assert_debug_snapshot!(migrations.validate());
-}
-
-#[test]
-fn invalid_down_fk_check_test() {
-    let migrations = Migrations::new(vec![m_invalid_fk_down()]);
-
-    let mut conn = Connection::open_in_memory().unwrap();
-    migrations.to_latest(&mut conn).unwrap();
-
-    assert!(matches!(
-        dbg!(migrations.to_version(&mut conn, 0)),
-        Err(Error::ForeignKeyCheck(_))
-    ));
 }
 
 #[test]
