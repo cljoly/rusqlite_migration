@@ -22,7 +22,7 @@ use std::borrow::Cow;
 use std::fmt::Display;
 
 use log::{debug, info, trace, warn};
-use rusqlite::{Connection, Transaction};
+use rusqlite::{Connection, Statement, Transaction};
 
 #[cfg(feature = "from-directory")]
 use include_dir::Dir;
@@ -622,25 +622,28 @@ impl<'m> Migrations<'m> {
         debug_assert!(target_version <= self.ms.len());
 
         trace!("start migration transaction");
+
         let tx = conn.transaction()?;
+        {
+            let mut fk_check_stmt = prepare_foreign_key_stmt(&tx)?;
+            for v in current_version..target_version {
+                let m = &self.ms[v];
+                debug!("Running: {}", m.up);
 
-        for v in current_version..target_version {
-            let m = &self.ms[v];
-            debug!("Running: {}", m.up);
+                tx.execute_batch(m.up)
+                    .map_err(|e| Error::with_sql(e, m.up))?;
 
-            tx.execute_batch(m.up)
-                .map_err(|e| Error::with_sql(e, m.up))?;
+                if m.foreign_key_check {
+                    validate_foreign_keys(&mut fk_check_stmt)?;
+                }
 
-            if m.foreign_key_check {
-                validate_foreign_keys(&tx)?;
+                if let Some(hook) = &m.up_hook {
+                    hook(&tx)?;
+                }
             }
 
-            if let Some(hook) = &m.up_hook {
-                hook(&tx)?;
-            }
+            set_user_version(&tx, target_version)?;
         }
-
-        set_user_version(&tx, target_version)?;
         tx.commit()?;
         trace!("committed migration transaction");
 
@@ -675,26 +678,29 @@ impl<'m> Migrations<'m> {
 
         trace!("start migration transaction");
         let tx = conn.transaction()?;
-        for v in (target_version..current_version).rev() {
-            let m = &self.ms[v];
-            if let Some(down) = m.down {
-                debug!("Running: {}", &down);
+        {
+            let mut fk_check_stmt = prepare_foreign_key_stmt(&tx)?;
+            for v in (target_version..current_version).rev() {
+                let m = &self.ms[v];
+                if let Some(down) = m.down {
+                    debug!("Running: {}", &down);
 
-                if let Some(hook) = &m.down_hook {
-                    hook(&tx)?;
+                    if let Some(hook) = &m.down_hook {
+                        hook(&tx)?;
+                    }
+
+                    tx.execute_batch(down)
+                        .map_err(|e| Error::with_sql(e, down))?;
+
+                    if m.foreign_key_check {
+                        validate_foreign_keys(&mut fk_check_stmt)?;
+                    }
+                } else {
+                    unreachable!();
                 }
-
-                tx.execute_batch(down)
-                    .map_err(|e| Error::with_sql(e, down))?;
-
-                if m.foreign_key_check {
-                    validate_foreign_keys(&tx)?;
-                }
-            } else {
-                unreachable!();
             }
+            set_user_version(&tx, target_version)?;
         }
-        set_user_version(&tx, target_version)?;
         tx.commit()?;
         trace!("committed migration transaction");
         Ok(())
@@ -958,13 +964,16 @@ fn set_user_version(conn: &Connection, v: usize) -> Result<()> {
         })
 }
 
-// Validate that no foreign keys are violated
-fn validate_foreign_keys(conn: &Connection) -> Result<()> {
-    let pragma_fk_check = "PRAGMA foreign_key_check";
-    let mut stmt = conn
-        .prepare(pragma_fk_check)
-        .map_err(|e| Error::with_sql(e, pragma_fk_check))?;
+const PRAGMA_FK_CHECK: &str = "SELECT * FROM pragma_foreign_key_check;";
 
+fn prepare_foreign_key_stmt<'a>(conn: &'a Transaction) -> Result<Statement<'a>> {
+    Ok(conn
+        .prepare(PRAGMA_FK_CHECK)
+        .map_err(|e| Error::with_sql(e, PRAGMA_FK_CHECK))?)
+}
+
+// Validate that no foreign keys are violated
+fn validate_foreign_keys(stmt: &mut Statement) -> Result<()> {
     let fk_errors = stmt
         .query_map([], |row| {
             Ok(ForeignKeyCheckError {
@@ -974,7 +983,7 @@ fn validate_foreign_keys(conn: &Connection) -> Result<()> {
                 fkid: row.get(3)?,
             })
         })
-        .map_err(|e| Error::with_sql(e, pragma_fk_check))?
+        .map_err(|e| Error::with_sql(e, PRAGMA_FK_CHECK))?
         .collect::<Result<Vec<_>, _>>()?;
     if fk_errors.is_empty() {
         Ok(())
