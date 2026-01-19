@@ -26,6 +26,10 @@ Please see [the release notes for 0.38.0](https://github.com/rusqlite/rusqlite/r
 
 Update other deps dependencies, see git history for details.
 
+### Features
+
+Rusqlite 0.38 makes the cache statement optional. This feature was used for [foreign key checks](https://docs.rs/rusqlite_migration/2.3.0/rusqlite_migration/struct.M.html#method.foreign_key_check). The `rusqlite_migration` library does not enable any features from rusqlite, not even the default one. This way, downstream users can freely chose which feature to enable based on their needs. As a result, `rusqlite_migration` now handles statement caching for foreign key checks internally now. As side benefit, this also makes caching more efficient: the prepared statement is kept for the minimum time where it is needed and freed immediately, without taking space in the global cache used by rusqlite.
+
 ### Other
 
 - Use scoped GitHub tokens in actions, with as little privileges as possible.
