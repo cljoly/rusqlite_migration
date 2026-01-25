@@ -17,6 +17,16 @@ end_insert -->
 Release notes for the [rusqlite_migration library](https://cj.rs/rusqlite_migration).
 end_insert -->
 
+## Version 2.4.1
+
+### Documentation
+
+Attempt to fix the docs.rs build which started failing in 2.4.0.
+
+### Dependencies
+
+Update some dev dependencies, see git history for details.
+
 ## Version 2.4.0
 
 ### Dependencies
@@ -24,7 +34,7 @@ end_insert -->
 Rusqlite was updated from 0.37.0 to 0.38.0.
 Please see [the release notes for 0.38.0](https://github.com/rusqlite/rusqlite/releases/tag/v0.38.0), there are a few breaking changes in this one.
 
-Update other deps dependencies, see git history for details.
+Update other dev dependencies, see git history for details.
 
 ### Features
 
