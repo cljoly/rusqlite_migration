@@ -41,7 +41,7 @@ features = []
 [dev-dependencies]
 anyhow = "1"
 insta = "1.46.1"
-mutants = "0.0.3"
+mutants = "0.0.4"
 
 [dev-dependencies.env_logger]
 version = "0.11"
