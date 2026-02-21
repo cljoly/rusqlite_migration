@@ -40,7 +40,7 @@ features = []
 
 [dev-dependencies]
 anyhow = "1"
-insta = "1.46.1"
+insta = "1.46.3"
 mutants = "0.0.4"
 
 [dev-dependencies.env_logger]
