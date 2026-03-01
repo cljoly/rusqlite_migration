@@ -13,9 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use insta::assert_snapshot;
-
-use crate::tests::helpers::{all_valid_down, m_valid0_down, m_valid0_up, m_valid_fk_down};
+use crate::tests::helpers::{m_valid0_down, m_valid0_up, m_valid_fk_down};
 use crate::*;
 
 #[test]

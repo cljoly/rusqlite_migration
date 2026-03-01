@@ -17,7 +17,7 @@ use std::{iter::FromIterator, num::NonZeroUsize};
 
 use rusqlite::{Connection, OpenFlags, Transaction};
 
-use crate::tests::helpers::{all_valid_down, m_valid0_down, m_valid_fk_down};
+use crate::tests::helpers::all_valid_down;
 use crate::{
     tests::helpers::{all_valid_up, m_valid0_up, m_valid10_up, m_valid11_up, m_valid_fk_up},
     user_version, Error, MigrationDefinitionError, Migrations, SchemaVersion, SchemaVersionError,
