@@ -7,7 +7,7 @@ keywords = ["rusqlite", "sqlite", "user_version", "database", "migration"]
 license = "Apache-2.0"
 repository = "https://github.com/cljoly/rusqlite_migration"
 documentation = "https://docs.rs/rusqlite_migration/"
-rust-version = "1.84"
+rust-version = "1.94"
 version = "2.5.0"
 
 [workspace]
