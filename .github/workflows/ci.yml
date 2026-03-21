@@ -7,7 +7,7 @@ name: Continuous integration
 permissions: {}
 
 env:
-  MSRV: 1.84.0
+  MSRV: 1.94.0
   CARGO_TERM_COLOR: always
   # Useful for cargo insta
   CI: true
