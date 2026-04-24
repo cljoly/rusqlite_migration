@@ -8,16 +8,12 @@ publish = false
 log = "0.4"
 anyhow = "1"
 mktemp = "0.5"
+rusqlite = { workspace = true }
 tokio-rusqlite-new = "=0.13.0"
 tokio = { version = "1.49.0", features = ["full"] }
 
 [dependencies.rusqlite_migration]
 path = "../../rusqlite_migration"
-
-[dependencies.rusqlite]
-version = "0.39.0"
-default-features = false
-features = []
 
 [dependencies.env_logger]
 version = "0.11"
