@@ -23,3 +23,8 @@ resolver = "2"
 [workspace.lints.rust]
 unsafe_code = "forbid"
 missing_docs = "warn"
+
+[workspace.dependencies.rusqlite]
+version = "0.39.0"
+default-features = false
+features = []

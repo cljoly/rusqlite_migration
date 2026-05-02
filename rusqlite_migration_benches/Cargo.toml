@@ -14,11 +14,7 @@ version.workspace = true
 
 [dependencies]
 include_dir = { version = "0.7.4" }
-
-[dependencies.rusqlite]
-version = "0.39.0"
-default-features = false
-features = []
+rusqlite = { workspace = true }
 
 [dependencies.rusqlite_migration]
 path = "../rusqlite_migration"
