@@ -812,7 +812,7 @@ dependencies = [
 
 [[package]]
 name = "rusqlite_migration"
-version = "2.5.0"
+version = "2.6.0"
 dependencies = [
  "anyhow",
  "env_logger",
@@ -825,7 +825,7 @@ dependencies = [
 
 [[package]]
 name = "rusqlite_migration_benches"
-version = "2.5.0"
+version = "2.6.0"
 dependencies = [
  "criterion",
  "iai",
@@ -836,7 +836,7 @@ dependencies = [
 
 [[package]]
 name = "rusqlite_migration_tests"
-version = "2.5.0"
+version = "2.6.0"
 dependencies = [
  "anyhow",
  "env_logger",
