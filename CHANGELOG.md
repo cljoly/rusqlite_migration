@@ -17,6 +17,17 @@ end_insert -->
 Release notes for the [rusqlite_migration library](https://cj.rs/rusqlite_migration).
 end_insert -->
 
+## Version 2.6.0
+
+### Dependencies
+
+Rusqlite was updated from 0.39.0 to 0.40.0.
+Please see [the release notes for 0.40.0](https://github.com/rusqlite/rusqlite/releases/tag/v0.40.0).
+There are in paricular quite a few breaking changes around VTab APIs.
+
+Update other dev dependencies, see git history for details.
+Also factored out the rusqlite package dependency details into the workspace-level Cargo.toml.
+
 ## Version 2.5.0
 
 ### Dependencies
