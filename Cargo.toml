@@ -25,6 +25,6 @@ unsafe_code = "forbid"
 missing_docs = "warn"
 
 [workspace.dependencies.rusqlite]
-version = "0.40.0"
+version = "0.40.1"
 default-features = false
 features = []
