@@ -47,25 +47,18 @@ jobs:
       - uses: actions/checkout@v3
       - name: Install libsqlite
         run: sudo apt-get install -y libsqlite3-dev
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: ${{ env.MSRV }}
-          override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --locked
+      - name: Rustup (minimal)
+        run: rustup default ${{ env.MSRV }}
+      - name: Cargo test
+        run: cargo test --locked
 
   doc:
     name: Documentation
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
+      - name: Rustup (minimal)
+        run: rustup default stable
       - run: RUSTDOCFLAGS="-D warnings" cargo --locked doc --all-features --no-deps --lib
 
   fmt:
@@ -73,16 +66,11 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
+      - name: Rustup (minimal)
+        run: rustup default stable
       - run: rustup component add rustfmt
-      - uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all -- --check
+      - name: Cargo fmt
+        run: cargo fmt --all -- --check
 
   mutation-tests:
     name: Mutation tests
@@ -94,17 +82,12 @@ jobs:
       - uses: actions/checkout@v3
       - name: Install libsqlite
         run: sudo apt-get install -y libsqlite3-dev
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
+      - name: Rustup (minimal)
+        run: rustup default stable
       - uses: Swatinem/rust-cache@v2
       - run: cargo install --locked cargo-mutants
-      - uses: actions-rs/cargo@v1
-        with:
-          command: mutants
-          args: -p rusqlite_migration --colors=always --no-shuffle -vV --shard ${{ matrix.shard }}/4
+      - name: Cargo mutants
+        run: cargo mutants -p rusqlite_migration --colors=always --no-shuffle -vV --shard ${{ matrix.shard }}/4
       - name: Archive results
         uses: actions/upload-artifact@v4
         if: failure()
