@@ -128,12 +128,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - uses: Swatinem/rust-cache@v2
+      - name: Rustup (minimal)
+        run: rustup default stable
       - run: rustup component add clippy
       - name: Clippy
         run: cargo clippy --locked --all-features -- -D warnings
