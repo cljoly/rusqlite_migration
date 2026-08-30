@@ -18,15 +18,9 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          command: check
-          args: --locked
+      - name: Rustup (minimal)
+        run: rustup default stable
+      - run: cargo check --locked
 
   test_features_matrix:
     name: Cargo test
@@ -41,15 +35,10 @@ jobs:
       - uses: actions/checkout@v3
       - name: Install libsqlite
         run: sudo apt-get install -y libsqlite3-dev
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --locked ${{ matrix.args }}
+      - name: Rustup (minimal)
+        run: rustup default stable
+      - name: Cargo test
+        run: cargo test --locked ${{ matrix.args }}
 
   min_rust_version:
     name: Check with minimal Rust version
@@ -139,18 +128,12 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - uses: Swatinem/rust-cache@v2
+      - name: Rustup (minimal)
+        run: rustup default stable
       - run: rustup component add clippy
-      - uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          # More stringent requirements
-          args: --locked --all-features -p rusqlite_migration -- -D warnings -D clippy::missing_errors_doc -D clippy::missing_panics_doc -D clippy::doc_link_with_quotes -D clippy::doc_markdown
+      - name: Clippy
+        # More stringent requirements
+        run: clippy --locked --all-features -p rusqlite_migration -- -D warnings -D clippy::missing_errors_doc -D clippy::missing_panics_doc -D clippy::doc_link_with_quotes -D clippy::doc_markdown
 
   coverage:
     name: Code coverage
@@ -162,18 +145,12 @@ jobs:
       - uses: actions/checkout@v3
       - name: Install libsqlite
         run: sudo apt-get install -y libsqlite3-dev
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
+      - name: Rustup (minimal)
+        run: rustup default stable
       - uses: Swatinem/rust-cache@v2
       - run: cargo install --locked cargo-tarpaulin
       - name: Generate code coverage
-        uses: actions-rs/cargo@v1
-        with:
-          command: tarpaulin
-          args: --locked --all-features --run-types AllTargets --workspace -e rusqlite_migration_benches --timeout 120 --out Lcov
+        run: tarpaulin --locked --all-features --run-types AllTargets --workspace -e rusqlite_migration_benches --timeout 120 --out Lcov
       - name: Upload coverage to Coveralls
         uses: coverallsapp/github-action@v1
         with:
