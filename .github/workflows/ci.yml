@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
-      - name: Rustup (minimal)
+      - name: Rustup
         run: rustup default stable
       - run: cargo check --locked
 
@@ -35,7 +35,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: Install libsqlite
         run: sudo apt-get install -y libsqlite3-dev
-      - name: Rustup (minimal)
+      - name: Rustup
         run: rustup default stable
       - name: Cargo test
         run: cargo test --locked ${{ matrix.args }}
@@ -58,7 +58,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
-      - name: Rustup (minimal)
+      - name: Rustup
         run: rustup default stable
       - run: RUSTDOCFLAGS="-D warnings" cargo --locked doc --all-features --no-deps --lib
 
@@ -67,7 +67,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
-      - name: Rustup (minimal)
+      - name: Rustup
         run: rustup default stable
       - run: rustup component add rustfmt
       - name: Cargo fmt
@@ -83,7 +83,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: Install libsqlite
         run: sudo apt-get install -y libsqlite3-dev
-      - name: Rustup (minimal)
+      - name: Rustup
         run: rustup default stable
       - uses: Swatinem/rust-cache@v2
       - run: cargo install --locked cargo-mutants
@@ -101,7 +101,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
-      - name: Rustup (minimal)
+      - name: Rustup
         run: rustup default stable
       - run: rustup component add clippy
       - name: Clippy
@@ -112,7 +112,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
-      - name: Rustup (minimal)
+      - name: Rustup
         run: rustup default stable
       - run: rustup component add clippy
       - name: Clippy
@@ -129,7 +129,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: Install libsqlite
         run: sudo apt-get install -y libsqlite3-dev
-      - name: Rustup (minimal)
+      - name: Rustup
         run: rustup default stable
       - uses: Swatinem/rust-cache@v2
       - run: cargo install --locked cargo-tarpaulin
