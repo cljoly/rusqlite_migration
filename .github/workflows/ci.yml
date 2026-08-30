@@ -49,7 +49,7 @@ jobs:
         run: sudo apt-get install -y libsqlite3-dev
       - uses: Swatinem/rust-cache@v2
       - name: Rustup (minimal)
-        run: rustup default ${{ env.MSRV }} --profile minimal
+        run: rustup set profile minimal && rustup default ${{ env.MSRV }}
       - name: Cargo test
         run: cargo test --locked
 
