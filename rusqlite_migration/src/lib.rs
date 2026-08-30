@@ -686,7 +686,7 @@ impl<'m> Migrations<'m> {
             for v in (target_version..current_version).rev() {
                 let m = &self.ms[v];
                 if let Some(down) = m.down {
-                    debug!("Running: {}", &down);
+                    debug!("Running: {}", down);
 
                     if let Some(hook) = &m.down_hook {
                         hook(&tx)?;
