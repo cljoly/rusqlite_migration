@@ -135,10 +135,8 @@ jobs:
           override: true
       - uses: Swatinem/rust-cache@v2
       - run: rustup component add clippy
-      - uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: --locked --all-features -- -D warnings
+      - name: Clippy
+        run: cargo clippy --locked --all-features -- -D warnings
 
   clippy_main:
     name: Clippy (main package)
