@@ -15,6 +15,7 @@
 
 //! Insert the readme as documentation of the crate
 
+use std::path::PathBuf;
 use std::{
     env,
     error::Error,
@@ -26,14 +27,14 @@ fn main() -> Result<(), Box<dyn Error>> {
     let readme_path = env::var("CARGO_PKG_README")?;
     println!("cargo:rerun-if-changed={readme_path}");
 
-    let out_dir = env::var("OUT_DIR")?;
-    let readme_for_rustdoc = File::create(format!("{out_dir}/readme_for_rustdoc.md"))?;
-    let mut out = BufWriter::new(readme_for_rustdoc);
+    let out_dir = PathBuf::from(env::var("OUT_DIR")?);
+    let readme_for_rustdoc = out_dir.join("readme_for_rustdoc.md");
+    let mut out = BufWriter::new(File::create(readme_for_rustdoc)?);
 
     let readme = read_to_string(readme_path)?;
     readme
         .lines()
-        .skip_while(|line| line != &"<!-- rustdoc start -->")
+        .skip_while(|line| *line != "<!-- rustdoc start -->")
         .skip(1) // Discard the pattern line
         .filter(|line| *line != "</div>") // Known unclosed div because we don’t start from the top
         .try_fold(0, |lines_written, line| -> Result<usize, io::Error> {
