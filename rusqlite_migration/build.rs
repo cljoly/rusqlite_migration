@@ -50,5 +50,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         })
         ?;
 
+    out.flush()?;
+
     Ok(())
 }
