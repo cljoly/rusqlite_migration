@@ -5,16 +5,16 @@ edition = "2018"
 publish = false
 
 [dependencies]
-log = "0.4"
 anyhow = "1"
+log = "0.4"
 mktemp = "0.5"
 rusqlite = { workspace = true }
-tokio-rusqlite-new = "=0.14.0"
 tokio = { version = "1.52.3", features = ["full"] }
-
-[dependencies.rusqlite_migration]
-path = "../../rusqlite_migration"
+tokio-rusqlite-new = "=0.14.0"
 
 [dependencies.env_logger]
 version = "0.11"
 default-features = false
+
+[dependencies.rusqlite_migration]
+path = "../../rusqlite_migration"
