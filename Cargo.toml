@@ -1,30 +1,36 @@
 [workspace]
 # https://doc.rust-lang.org/cargo/reference/resolver.html#feature-resolver-version-2
 resolver = "2"
-members = [
+members  = [
   "examples/*",
   "rusqlite_migration",
   "rusqlite_migration_benches",
   "rusqlite_migration_tests",
 ]
 
-[workspace.package]
-version = "2.6.0"
-authors = ["Clément Joly <foss@131719.xyz>"]
-rust-version = "1.95"
-description = "Simple schema migration library for rusqlite using user_version instead of an SQL table to maintain the current schema version."
-documentation = "https://docs.rs/rusqlite_migration/"
-homepage = "https://cj.rs/rusqlite_migration"
-repository = "https://github.com/cljoly/rusqlite_migration"
-license = "Apache-2.0"
-keywords = ["database", "migration", "rusqlite", "sqlite", "user_version"]
-categories = ["database"]
+  [workspace.package]
+  version       = "2.6.0"
+  authors       = ["Clément Joly <foss@131719.xyz>"]
+  rust-version  = "1.95"
+  description   = "Simple schema migration library for rusqlite using user_version instead of an SQL table to maintain the current schema version."
+  documentation = "https://docs.rs/rusqlite_migration/"
+  homepage      = "https://cj.rs/rusqlite_migration"
+  repository    = "https://github.com/cljoly/rusqlite_migration"
+  license       = "Apache-2.0"
+  keywords      = [
+    "database",
+    "migration",
+    "rusqlite",
+    "sqlite",
+    "user_version"
+  ]
+  categories    = ["database"]
 
-[workspace.dependencies.rusqlite]
-version = "0.40.0"
-default-features = false
-features = []
+  [workspace.dependencies.rusqlite]
+  version          = "0.40.0"
+  default-features = false
+  features         = []
 
-[workspace.lints.rust]
-missing_docs = "warn"
-unsafe_code = "forbid"
+  [workspace.lints.rust]
+  missing_docs = "warn"
+  unsafe_code  = "forbid"

@@ -1,34 +1,34 @@
 [package]
-name = "rusqlite_migration_tests"
+name    = "rusqlite_migration_tests"
 edition = "2018"
-readme = "README.md"
+readme  = "README.md"
 publish = false
 
-version.workspace = true
-authors.workspace = true
+version.workspace      = true
+authors.workspace      = true
 rust-version.workspace = true
-description.workspace = true
-homepage.workspace = true
-repository.workspace = true
-license.workspace = true
-keywords.workspace = true
-categories.workspace = true
+description.workspace  = true
+homepage.workspace     = true
+repository.workspace   = true
+license.workspace      = true
+keywords.workspace     = true
+categories.workspace   = true
 
 [[test]]
 harness = true
-name = "integration_tests"
-path = "tests/lib.rs"
+name    = "integration_tests"
+path    = "tests/lib.rs"
 
 [dependencies]
-log = "0.4"
+log      = "0.4"
 rusqlite = { workspace = true, features = ["extra_check"] }
 
-[dependencies.rusqlite_migration]
-path = "../rusqlite_migration"
-features = ["from-directory"]
+  [dependencies.rusqlite_migration]
+  path     = "../rusqlite_migration"
+  features = ["from-directory"]
 
 [dev-dependencies]
-anyhow = "1"
-env_logger = { version = "0.11", default-features = false }
+anyhow      = "1"
+env_logger  = { version = "0.11", default-features = false }
 include_dir = "0.7.4"
 mktemp      = "0.5"

@@ -13,5 +13,9 @@ max_line_length           =  off
 trim_trailing_whitespace  =  false
 
 [*.rs]
-indent_style             = space
-indent_size              = 4
+indent_style              = space
+indent_size               = 4
+
+[*.toml]
+indent_style              = space
+indent_size               = 2

@@ -1,3 +1,10 @@
 # It is safe to use toml 1.1.0, but with Rust 1.94.0+:
 # https://blog.rust-lang.org/inside-rust/2026/02/18/this-development-cycle-in-cargo-1.94/#toml-1-1
 toml-version = "v1.0.0"
+
+[format]
+  [format.rules]
+  date-time-delimiter             = "space"
+  indent-sub-tables               = true
+  key-value-equals-sign-alignment = true
+  line-width                      = 80
