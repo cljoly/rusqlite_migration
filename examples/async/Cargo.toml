@@ -1,17 +1,17 @@
 [package]
-name = "example-async"
+name    = "example-async"
 version = "0.1.0"
 edition = "2018"
 publish = false
 
 [dependencies]
-anyhow = "1"
-env_logger = { version = "0.11", default-features = false }
-log = "0.4"
-mktemp = "0.5"
-rusqlite = { workspace = true }
-tokio = { version = "1.52.3", features = ["full"] }
+anyhow             = "1"
+env_logger         = { version = "0.11", default-features = false }
+log                = "0.4"
+mktemp             = "0.5"
+rusqlite           = { workspace = true }
+tokio              = { version = "1.52.3", features = ["full"] }
 tokio-rusqlite-new = "=0.14.0"
 
-[dependencies.rusqlite_migration]
-path = "../../rusqlite_migration"
+  [dependencies.rusqlite_migration]
+  path = "../../rusqlite_migration"
