@@ -11,7 +11,7 @@ log                = "0.4"
 mktemp             = "0.5"
 rusqlite           = { workspace = true }
 tokio              = { version = "1.52.3", features = ["full"] }
-tokio-rusqlite-new = "=0.14.0"
+tokio-rusqlite-new = "=0.15.0"
 
   [dependencies.rusqlite_migration]
   path = "../../rusqlite_migration"
