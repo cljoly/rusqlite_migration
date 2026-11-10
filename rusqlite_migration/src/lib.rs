@@ -795,7 +795,7 @@ impl<'m> Migrations<'m> {
     ///     migrations.to_latest(&mut conn),
     ///     Err(rusqlite_migration::Error::RusqliteError {
     ///         query: _,
-    ///         err: rusqlite::Error::SqliteFailure(_, _),
+    ///         err: rusqlite::Error::SqlInputError { error: _, msg: _, sql: _, offset: _ },
     ///     })
     /// ));
     /// ```
