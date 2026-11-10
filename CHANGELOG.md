@@ -28,7 +28,9 @@ Updated other dev dependencies, see git history for details.
 
 ### Minimum Rust Version
 
-rusqlite lowered the MSRV to 1.88.0 (from 1.95.0), this crate follows suit.
+rusqlite lowered the MSRV to 1.89.0[^188-189] (from 1.95.0), this crate follows suit.
+
+[^188-189]: The changelog mentions 1.88, but a [later commit](https://github.com/rusqlite/rusqlite/commit/92a7d4965b12d0bab61d0c0447d91931f1d48461) changed it further to 1.89.0.
 
 ## Version 2.6.0
 
