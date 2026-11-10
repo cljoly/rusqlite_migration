@@ -9,9 +9,9 @@ members  = [
 ]
 
   [workspace.package]
-  version       = "2.6.0"
+  version       = "2.7.0"
   authors       = ["Clément Joly <foss@131719.xyz>"]
-  rust-version  = "1.95"
+  rust-version  = "1.88"
   description   = "Simple schema migration library for rusqlite using user_version instead of an SQL table to maintain the current schema version."
   documentation = "https://docs.rs/rusqlite_migration/"
   homepage      = "https://cj.rs/rusqlite_migration"
