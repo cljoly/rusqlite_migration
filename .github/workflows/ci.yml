@@ -17,7 +17,7 @@ jobs:
     name: Check
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3.7.0
       - name: Rustup
         run: rustup default stable
       - run: cargo check --locked
@@ -32,7 +32,7 @@ jobs:
         - "--features from-directory"
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3.7.0
       - name: Install libsqlite
         run: sudo apt-get install -y libsqlite3-dev
       - name: Rustup
@@ -44,10 +44,10 @@ jobs:
     name: Check with minimal Rust version
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3.7.0
       - name: Install libsqlite
         run: sudo apt-get install -y libsqlite3-dev
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@v2.9.3
       - name: Rustup (minimal)
         run: rustup set profile minimal && rustup default ${{ env.MSRV }}
       - name: Cargo test
@@ -57,7 +57,7 @@ jobs:
     name: Documentation
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3.7.0
       - name: Rustup
         run: rustup default stable
       - run: RUSTDOCFLAGS="-D warnings" cargo --locked doc --all-features --no-deps --lib
@@ -66,7 +66,7 @@ jobs:
     name: Rustfmt
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3.7.0
       - name: Rustup
         run: rustup default stable
       - run: rustup component add rustfmt
@@ -80,17 +80,17 @@ jobs:
       matrix:
         shard: [0, 1, 2, 3]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3.7.0
       - name: Install libsqlite
         run: sudo apt-get install -y libsqlite3-dev
       - name: Rustup
         run: rustup default stable
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@v2.9.3
       - run: cargo install --locked cargo-mutants
       - name: Cargo mutants
         run: cargo mutants -p rusqlite_migration --colors=always --no-shuffle -vV --shard ${{ matrix.shard }}/4
       - name: Archive results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.6.2
         if: failure()
         with:
           name: mutation-report
@@ -100,7 +100,7 @@ jobs:
     name: Clippy (all code)
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3.7.0
       - name: Rustup
         run: rustup default stable
       - run: rustup component add clippy
@@ -111,7 +111,7 @@ jobs:
     name: Clippy (main package)
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3.7.0
       - name: Rustup
         run: rustup default stable
       - run: rustup component add clippy
@@ -126,17 +126,17 @@ jobs:
       checks: write
       contents: read
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3.7.0
       - name: Install libsqlite
         run: sudo apt-get install -y libsqlite3-dev
       - name: Rustup
         run: rustup default stable
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@v2.9.3
       - run: cargo install --locked cargo-tarpaulin
       - name: Generate code coverage
         run: cargo tarpaulin --locked --all-features --run-types AllTargets --workspace -e rusqlite_migration_benches --timeout 120 --out Lcov
       - name: Upload coverage to Coveralls
-        uses: coverallsapp/github-action@v1
+        uses: coverallsapp/github-action@v1.2.5
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: lcov.info
