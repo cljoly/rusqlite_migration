@@ -22,14 +22,34 @@ jobs:
         run: rustup default stable
       - run: cargo check --locked
 
+  # Covers the whole rusqlite range in Cargo.toml, independent of the version in Cargo.lock.
   test_features_matrix:
-    name: Cargo test
+    name: Cargo test (rusqlite ${{ matrix.rusqlite }}, args "${{ matrix.args }}")
     strategy:
       matrix:
         args:
         - ""
         - "--all-features"
         - "--features from-directory"
+        rusqlite:
+        - "0.41.0"
+        - "0.42.0"
+        - "0.43.0"
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v3.7.0
+      - name: Install libsqlite
+        run: sudo apt-get install -y libsqlite3-dev
+      - name: Rustup
+        run: rustup default stable
+      - name: Select rusqlite version
+        run: cargo update -p rusqlite --precise ${{ matrix.rusqlite }}
+      - name: Cargo test
+        run: cargo test ${{ matrix.args }}
+
+  # Excluded from the workspace, so it has its own lockfile.
+  example_async:
+    name: Cargo test (async example)
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3.7.0
@@ -38,7 +58,7 @@ jobs:
       - name: Rustup
         run: rustup default stable
       - name: Cargo test
-        run: cargo test --locked ${{ matrix.args }}
+        run: cargo test --locked --manifest-path examples/async/Cargo.toml
 
   min_rust_version:
     name: Check with minimal Rust version

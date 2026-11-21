@@ -7,6 +7,8 @@ members  = [
   "rusqlite_migration_benches",
   "rusqlite_migration_tests",
 ]
+# tokio-rusqlite-new pins one rusqlite minor; keeping it out lets the workspace test the whole rusqlite range.
+exclude = ["examples/async"]
 
   [workspace.package]
   version       = "2.7.0"
@@ -27,7 +29,7 @@ members  = [
   categories    = ["database"]
 
   [workspace.dependencies.rusqlite]
-  version          = "0.41.0"
+  version          = ">=0.41.0, <0.44.0"
   default-features = false
   features         = []
 
